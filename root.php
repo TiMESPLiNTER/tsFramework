@@ -5,7 +5,8 @@ define('fwDir', 'tsFramework/');
 
 // Initialize autoloader
 require siteRoot . 'tsFramework/classes/core/Autoloader.class.php';
-Autoloader::init();
+$autoloader = new Autoloader();
+$autoloader->register();
 
 
 $requestHandler = RequestHandler::getInstance();
