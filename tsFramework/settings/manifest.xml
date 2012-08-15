@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<sites>
+		<site name="home" controller="HomePageController" />
+		<site name="about.html" controller="AboutPageController" />
+	</sites>
+</configuration>

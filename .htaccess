@@ -1,0 +1,52 @@
+# set default charset
+AddDefaultCharset utf-8
+
+# PHP as fastCGI
+AddHandler php5-fastcgi .php .php5
+
+# use modRewrite if active
+<IfModule mod_rewrite.c>
+	# activate rewrite engine
+	RewriteEngine On
+
+	# set rewrite base
+	RewriteBase /
+
+	# deny direct access to metanet directory
+	RewriteRule tsFramework/ - [NC,F,L]
+
+	# deliver directories and files if they exist
+	RewriteCond %{REQUEST_FILENAME} -f [OR]
+	RewriteCond %{REQUEST_FILENAME} -d
+	RewriteRule ^(.+) - [PT,L]
+
+	# handle other requests by /root.php
+	RewriteRule ^(.*) root.php
+
+	# HTTP Authentication with PHP running as CGI/SuExec
+	RewriteCond %{HTTP:Authorization} !^$
+	RewriteRule .* - [E=REMOTE_USER:%{HTTP:Authorization}]
+</IfModule>
+
+# common optimizations
+<ifModule mod_security.c>
+	SecFilterEngine Off
+	SecFilterScanPOST Off
+</IfModule>
+
+<ifModule mod_setenvif.c>
+  <ifModule mod_headers.c>
+		BrowserMatch MSIE ie
+		Header set X-UA-Compatible "IE=Edge,chrome=1" env=ie
+  </ifModule>
+</ifModule>
+
+<IfModule mod_deflate.c>
+	# html, xml, css, and js:
+	AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/x-javascript text/javascript application/javascript application/json
+
+	# webfonts and svg:
+	<FilesMatch "\.(ttf|otf|eot|svg)$" >
+		SetOutputFilter DEFLATE
+	</FilesMatch>
+</IfModule>
