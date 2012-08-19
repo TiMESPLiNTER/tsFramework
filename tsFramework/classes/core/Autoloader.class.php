@@ -8,21 +8,6 @@
  * @version	1.0
  */
 class Autoloader {
-
-	private static $instance;
-
-	public static function init() {
-		if(self::$instance === null) {
-			$c = __CLASS__;
-			self::$instance = new $c;
-		}
-		return self::$instance;
-	}
-
-	private function __clone() {
-		
-	}
-
 	const CACHING_FILE = 'cache.autoload';
 	const SOURCE_DIR = 'classes/';
 
@@ -30,13 +15,12 @@ class Autoloader {
 	private $cachedClassesChanged;
 	private $cacheFile;
 
-	private function __construct() {
+	public function __construct() {
 		$this->cachedClasses = array();
 		$this->cachedClassesChanged = false;
 		$this->cacheFile = siteRoot . fwDir . 'cache/' . self::CACHING_FILE;
 
 		$this->loadCache();
-		$this->initAutoload();
 	}
 
 	/**
@@ -57,7 +41,7 @@ class Autoloader {
 	/**
 	 * Registers the autoload function
 	 */
-	private function initAutoload() {
+	public function register() {
 		spl_autoload_register(array($this, 'doAutoload'));
 	}
 
