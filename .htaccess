@@ -13,7 +13,8 @@ AddHandler php5-fastcgi .php .php5
 	RewriteBase /
 
 	# deny direct access to metanet directory
-	RewriteRule tsFramework/ - [NC,F,L]
+	RewriteRule tsFramework/(.*) root.php
+	RewriteRule resources/(.*) root.php
 
 	# deliver directories and files if they exist
 	RewriteCond %{REQUEST_FILENAME} -f [OR]

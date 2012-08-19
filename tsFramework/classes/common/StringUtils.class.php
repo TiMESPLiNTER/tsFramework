@@ -26,7 +26,7 @@ class StringUtils {
         $posFrom = strrpos($str, $after);
         
         if($posFrom === false)
-            return $str;
+            return null;
         
         return substr($str, $posFrom+1);
     }

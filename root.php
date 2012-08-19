@@ -1,5 +1,7 @@
 <?php
 
+error_reporting(E_ALL);
+
 define('siteRoot', dirname(__FILE__) . '/', true);
 define('fwDir', 'tsFramework/');
 
@@ -7,6 +9,7 @@ define('fwDir', 'tsFramework/');
 require siteRoot . 'tsFramework/classes/core/Autoloader.class.php';
 Autoloader::init();
 
-$requestHandler = RequestHandler::getInstance();
+$requestHandler = new RequestHandler();
+$requestHandler->handleRequest();
 
 ?>
