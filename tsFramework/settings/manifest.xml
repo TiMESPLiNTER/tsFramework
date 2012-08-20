@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 	<domains>
-		<domain name="tsfw.localhost" locale="de_CH" environment="dev" startpage="start.html" />
+		<domain name="tsfw.localhost" locale="de_CH" environment="dev" template="default" startpage="start.html" />
 	</domains>
     <environments>
         <environment name="dev" debug="true">
@@ -10,7 +10,7 @@
     </environments>
     <sites>
 		<site path="start.html" controller="StaticPageController" sslrequired="false" />
-        <site path="home" controller="HomePageController" sslrequired="false" />
+        <site path="performance.html" controller="StaticPageController" sslrequired="false" />
         <site path="about.html" controller="AboutPageController" sslrequired="false" />
     </sites>
 </configuration>

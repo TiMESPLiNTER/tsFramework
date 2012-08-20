@@ -39,8 +39,9 @@ class ManifestParser {
 			$locale = SimpleXMLUtils::getString($dAttr['locale']);
 			$environment = SimpleXMLUtils::getString($dAttr['environment']);
 			$startPage = SimpleXMLUtils::getString($dAttr['startpage']);
+			$template = SimpleXMLUtils::getString($dAttr['template']);
 			
-			$domains[$name] = new Domain($name, $locale, $environment, $startPage);
+			$domains[$name] = new Domain($name, $locale, $environment, $startPage, $template);
 		}
 		
 		return $domains;

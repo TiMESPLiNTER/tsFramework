@@ -21,6 +21,11 @@ body {
 	border-bottom: 1px solid #111;
 }
 
+#content-center {
+	margin: 0 auto; 
+	width: 75%;
+}
+
 #content h1 {
 	display:inline;
 	padding:0;
@@ -86,6 +91,10 @@ body {
 	background-image: url('../images/icon_controll.png');
 }
 
+.infobox-tplengine div {
+	background-image: url('../images/icon_tag.png');
+}
+
 .infobox h3 {
 	display:block;
 	float:left;
@@ -110,7 +119,7 @@ body {
 	background-repeat:no-repeat; 
 	background-position:15px 21px; 
 	clear:both;
-	padding: 1px 0 0 0;
+	padding: 5px 0 0 0;
 }
 
 #content .infobox p {

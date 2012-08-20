@@ -3,9 +3,9 @@
 /**
  * TemplateEngine
  *
- * @author				entwicklung@metanet.ch
- * @copyright	Copyright (c) 2012, METANET AG, www.metanet.ch
- * @version			1
+ * @author Pascal Münst <pascal.muenst@metanet.ch>
+ * @copyright Copyright (c) 2012, METANET AG, www.metanet.ch
+ * @version	1.0
  */
 class TemplateEngine {
 
@@ -28,7 +28,7 @@ class TemplateEngine {
 	private $logger;
 
 	public function __construct(TemplateCache $tplCache, $tplFile, $tplNsPrefix) {
-		$this->logger = LoggerFactory::getEnvLogger($this);
+		$this->logger = LoggerFactory::getLoggerByName('dev', __CLASS__);
 
 		$this->templateCache = $tplCache;
 		$this->tplNsPrefix = $tplNsPrefix;
@@ -51,7 +51,7 @@ class TemplateEngine {
 		try {
 			self::copyNodes($nodeList);
 		} catch(DOMException $e) {
-			throw new TemplateEngineException('Ferror while processing the template file: ' . $e->getMessage());
+			throw new TemplateEngineException('Error while processing the template file: ' . $e->getMessage());
 		}
 	}
 
@@ -174,9 +174,9 @@ class TemplateEngine {
 			return null;
 
 		$changeTime = @filemtime($filePath);
-		$changeTime = ($changeTime !== false) ? $changeTime : @filectime($filePath);
+		$changeTimeClean = ($changeTime !== false) ? $changeTime : @filectime($filePath);
 
-		if($tplCacheEntry->getSize() !== @filesize($filePath) || $tplCacheEntry->getChangeTime() !== $changeTime)
+		if($tplCacheEntry->getSize() !== @filesize($filePath) || $tplCacheEntry->getChangeTime() !== $changeTimeClean)
 			return null;
 
 		return $tplCacheEntry->getId();
@@ -196,7 +196,7 @@ class TemplateEngine {
 			self::cache();
 		}
 
-		require_once $cacheFileName;
+		require $cacheFileName;
 	}
 
 	private function cache() {
@@ -207,21 +207,19 @@ class TemplateEngine {
 		$fileSize = @filesize($this->tplFile);
 
 		$changeTime = @filemtime($this->tplFile);
-		$changeTime = ($changeTime !== false) ? $changeTime : @filectime($this->tplFile);
+		$changeTimeClean = ($changeTime !== false) ? $changeTime : @filectime($this->tplFile);
 		$cacheId = null;
 
 		if($cacheEntry === null) {
 			$cacheId = uniqid();
-			$this->templateCache->addCachedTplFile($this->tplFile, $cacheId, $fileSize, $changeTime);
+			$this->templateCache->addCachedTplFile($this->tplFile, $cacheId, $fileSize, $changeTimeClean);
 		} else {
 			$cacheId = $cacheEntry->getId();
-			$this->templateCache->addCachedTplFile($cacheEntry->getFileName(), $cacheId, $fileSize, $changeTime);
+			$this->templateCache->addCachedTplFile($cacheEntry->getFileName(), $cacheId, $fileSize, $changeTimeClean);
 		}
 
 		$cacheFileName = $this->templateCache->getCachePath() . $cacheId . self::CACHE_SUBFIX;
-		$htmlToReturn = '';
 
-//				if($fileSize	!==	0 && $fileSize !== false)	{
 		// Render tpl
 		$content = file_exists($this->tplFile) ? file_get_contents($this->tplFile) : '<tst:loadSubTpl tplfile="{this}">';
 		$this->htmlDoc = new HtmlDoc($content, $this->tplNsPrefix);
@@ -231,18 +229,22 @@ class TemplateEngine {
 		self::load();
 
 		$htmlToReturn = $this->htmlDoc->getHtml();
-		$htmlToReturn = $this->doReplacements($htmlToReturn);
-//				}
+		$htmlToReturnRepl = $this->doReplacements($htmlToReturn);
+		
 
 		$this->templateCache->setSaveOnDestruct(false);
-
+		
+		// Create cache dir if it not exists
+		if(is_dir($this->templateCache->getCachePath()) === false)
+			mkdir($this->templateCache->getCachePath(), 0, true);
+		
 		if(file_exists($cacheFileName) === true && is_writable($cacheFileName) === false)
 			throw new TemplateEngineException('Cache file is not writeable: ' . $cacheFileName);
 
 		$fp = @fopen($cacheFileName, 'w');
 
 		if($fp !== false) {
-			fwrite($fp, $htmlToReturn);
+			fwrite($fp, $htmlToReturnRepl);
 			fclose($fp);
 
 			$this->templateCache->setSaveOnDestruct(true);
