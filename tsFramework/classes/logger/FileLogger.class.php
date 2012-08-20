@@ -25,6 +25,13 @@ class FileLogger extends Logger {
 				rename($this->logfilePath, $this->logfilePath . '.' . date('YmdHis'));
 		}
 
+		$filePathParts = explode('/', $this->logfilePath);
+		array_pop($filePathParts);
+		$filePath = implode('/', $filePathParts);
+		
+		if(is_dir($filePath) === false)
+			mkdir($filePath, 0, true);
+		
 		$this->fp = fopen($this->logfilePath, 'a');
 		$this->dtFormat = 'Y-m-d H:i:s';
 	}

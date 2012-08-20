@@ -16,7 +16,7 @@ class LoggerFactory {
 			//$settings = Settings::getInstance();
 			self::$settings = array('dev' => array(
 			'type' => Logger::TYPE_FILE,
-			'logfilepath' => siteRoot . fwDir . '/logs/dev-log.log',
+			'logfilepath' => siteRoot . rscDir . '/logs/dev-log.log',
 			'pattern' => '[%LEVEL%] %TIMESTAMP%@%CLASS% - %MESSAGE%',
 			'log_level' => 'debug,info,warn,error,fatal',
 			'email_level' => 'error,fatal',
