@@ -14,26 +14,10 @@ class StaticPageController extends PageController {
 
 
 	public function generate() {
-		$domains = $this->core->getSettings()->getValue('tsfw_domains');
-		/** @var Domain */
-		$currentDomain = $domains[$this->core->getRequestHandler()->getRequestDomain()];
-		$reqArr = $this->core->getRequestHandler()->getRequestArray();
+		$pagesDir = SITE_ROOT .  'resources/templates/' . $this->requestedTemplate . '/pages/';
 		
-		$tplDir = siteRoot .  'resources/templates/' . $currentDomain->getTemplate() . '/';
-		$pagesDir = $tplDir . 'pages/';
-		$templateFile = $tplDir . 'template.html';
-		
-		
-		$cacheDir = siteRoot . fwDir . 'cache/pages/' . $currentDomain->getTemplate() . '/';
-		$tplCache = new TemplateCache($cacheDir, 'cache.template');
-		$this->tplEngine = new TemplateEngine($tplCache, $templateFile, 'tst');
-		$this->tplEngine->addData('pagesDir', $this->getPageTplFile($pagesDir, $reqArr['fileName']));
+		$this->tplEngine->addData('pagesDir', $this->getPageTplFile($pagesDir, $this->requestedPage));
 		$this->tplEngine->addData('pageHandler', $this);
-	}
-	
-	public function show() {
-		$this->tplEngine->parse();
-		print $this->tplEngine->getResultAsHtml();
 	}
 	
 	private function getPageTplFile($pagesDir, $fileTitle) {

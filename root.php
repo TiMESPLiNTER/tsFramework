@@ -2,12 +2,13 @@
 
 error_reporting(E_ALL);
 
-define('siteRoot', dirname(__FILE__) . '/', true);
-define('fwDir', 'tsFramework/');
-define('rscDir', 'resources/');
+define('REQUEST_TIME', $_SERVER['REQUEST_TIME']+microtime());
+define('SITE_ROOT', dirname(__FILE__) . '/', true);
+define('FW_DIR', 'tsFramework/');
+define('RSC_DIR', 'resources/');
 
 // Initialize autoloader
-require siteRoot . 'tsFramework/classes/core/Autoloader.class.php';
+require SITE_ROOT . 'tsFramework/classes/core/Autoloader.class.php';
 $autoloader = new Autoloader();
 $autoloader->register();
 

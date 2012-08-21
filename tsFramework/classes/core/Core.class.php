@@ -22,7 +22,7 @@ class Core {
 	
 	//put your code here
 	public function loadManifest() {
-		$manifestParser = new ManifestParser(siteRoot . fwDir . 'settings/manifest.xml');
+		$manifestParser = new ManifestParser(SITE_ROOT . FW_DIR . 'settings/manifest.xml');
 		
 		$this->settings->setValue('tsfw_sites', $manifestParser->parseSites());
 		$this->settings->setValue('tsfw_domains', $manifestParser->parseDomains());
@@ -39,8 +39,8 @@ class Core {
 		
 		$c = $site->getController();
 		$controller = new $c;
-		$controller->setCore($this);
 		
+		$controller->prepare($this);
 		$controller->generate();
 		$controller->show();
 		

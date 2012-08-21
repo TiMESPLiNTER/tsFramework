@@ -23,19 +23,19 @@ class TurboCacheFactory {
 		switch($cacheType) {
 			case self::TYPE_MEMCACHED:
 				if($selfInclude === true)
-					require siteRoot . fwDir . 'classes/caching/TurboMemcached.class.php';
+					require SITE_ROOT . FW_DIR . 'classes/caching/TurboMemcached.class.php';
 				
 				$instance = new TurboMemcached();
 				break;
 			case self::TYPE_MEMCACHE:
 				if($selfInclude === true)
-					require siteRoot . fwDir . 'classes/caching/TurboMemcache.class.php';
+					require SITE_ROOT . FW_DIR . 'classes/caching/TurboMemcache.class.php';
 				
 				$instance = new TurboMemcache();
 				break;
 			default:
 				if($selfInclude === true)
-					require siteRoot . fwDir . 'classes/caching/TurboFileCache.class.php';
+					require SITE_ROOT . FW_DIR . 'classes/caching/TurboFileCache.class.php';
 
 				$instance = new TurboFileCache();
 				break;

@@ -1,6 +1,6 @@
 <?php
 
-class DateTag implements TagInline, TagNode {
+class DateTag extends TemplateTag implements TagInline, TagNode {
 
 	private $tagName = 'date';
 

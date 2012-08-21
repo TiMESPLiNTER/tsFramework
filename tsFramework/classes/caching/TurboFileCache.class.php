@@ -16,7 +16,7 @@ class TurboFileCache extends TurboCache {
 	public function init() {
 		$this->values = array();
 		$this->typeTable = array();
-		$this->cacheFile = siteRoot . fwDir . 'cache/cache.json';
+		$this->cacheFile = SITE_ROOT . FW_DIR . 'cache/cache.json';
 		
 		// load persistent cache from disk (JSON)
 		if(file_exists($this->cacheFile) === true) {

@@ -18,7 +18,7 @@ class Autoloader {
 	public function __construct() {
 		$this->cachedClasses = array();
 		$this->cachedClassesChanged = false;
-		$this->cacheFile = siteRoot . fwDir . 'cache/' . self::CACHING_FILE;
+		$this->cacheFile = SITE_ROOT . FW_DIR . 'cache/' . self::CACHING_FILE;
 
 		$this->loadCache();
 	}
@@ -56,7 +56,7 @@ class Autoloader {
 		}
 
 		if(isset($this->cachedClasses[$class_name]) === true && file_exists($this->cachedClasses[$class_name]) === true) {
-			require siteRoot . fwDir . $this->cachedClasses[$class_name];
+			require SITE_ROOT . FW_DIR . $this->cachedClasses[$class_name];
 			return;
 		}
 
@@ -65,7 +65,7 @@ class Autoloader {
 		if($classPath === null)
 			throw new AutoloaderException('Could not find class "' . $class_name . '"');
 		
-		require siteRoot . fwDir . $classPath;
+		require SITE_ROOT . FW_DIR . $classPath;
 		
 		$this->cachedClasses[$class_name] = $classPath;
 		$this->cachedClassesChanged = true;
@@ -78,7 +78,7 @@ class Autoloader {
 	 * @return String
 	 */
 	private function doClassSearch($dir, $class_name) {
-		$files = scandir(siteRoot . fwDir . $dir);
+		$files = scandir(SITE_ROOT . FW_DIR . $dir);
 
 		foreach($files AS $f) {
 			if(in_array($f, array('.', '..'))) {
@@ -86,7 +86,7 @@ class Autoloader {
 			}
 			if($f === $class_name . '.class.php' || $f === $class_name . '.interface.php') {
 				return $dir . $f;
-			} elseif(is_dir(siteRoot . fwDir . $dir . $f)) {
+			} elseif(is_dir(SITE_ROOT . FW_DIR . $dir . $f)) {
 				$res = $this->doClassSearch($dir . $f . '/', $class_name);
 				if($res !== null) {
 					return $res;

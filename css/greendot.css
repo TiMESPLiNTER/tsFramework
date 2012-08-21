@@ -15,8 +15,15 @@ body {
 }
 
 #header ul#nav {
-	float:right;
-	list-style:none;
+	float: right;
+	list-style: none;
+	padding: 0;
+	margin: 10px 0 0 0;
+}
+
+#header {
+	/*border-bottom:1px solid #444;
+	border-top:1px solid #444;*/
 }
 
 #header ul#nav li {
@@ -88,9 +95,9 @@ body {
 	padding:0;
 	/*box-shadow: inset 1px 1px 5px #000;*/
 	border-radius: 5px;
-	border:1px solid #110e0c;
-	margin:30px 30px 0 0;
-	float:left;
+	border: 1px solid #110e0c;
+	margin: 30px 30px 0 0;
+	float: left;
 }
 
 .icon {
@@ -165,4 +172,55 @@ body {
 #footer p {
 	font-size:0.6em;
 	color:#444;
+}
+
+form dl {
+	clear:both;
+}
+
+form dl dt {
+	color:#eee;
+	font-size: 1.0em;
+	font-family: Verdana, Arial;
+	float: left;
+	width:175px;
+}
+
+form dl dd {
+	
+}
+
+form .text, form textarea {
+	background-color:#ebe5d9;
+	box-shadow: inset 1px 1px 3px #110e0c;
+	border-radius: 5px;
+	padding:8px 10px;
+	border:none;
+	font-family: Arial, Verdana;
+	font-size: 1.0em;
+	color:#111;
+}
+
+form .text {
+	width:250px;
+}
+
+form textarea {
+	width:350px;
+	height:150px;
+}
+
+form div.submit {
+	margin-left:175px;
+}
+
+form div.submit input {
+	background-color: #a6c23e;
+	color:#fff;
+	text-shadow: 1px 1px 1px #000;
+	border: none;
+	border-radius: 5px;
+	padding:8px 10px;
+	font-weight: bold;
+	box-shadow: inset 2px 2px 1px #bdcc84;
 }

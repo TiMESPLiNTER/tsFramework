@@ -5,13 +5,36 @@ abstract class PageController {
 	protected $core;
 	/** @var TemplateEngine */
 	protected $tplEngine;
+	
+	protected $requestedPage;
+	protected $requestedTemplate;
 
+	public function prepare($core) {
+		$this->core = $core;
+		
+		$domains = $this->core->getSettings()->getValue('tsfw_domains');
+		/** @var Domain */
+		$currentDomain = $domains[$this->core->getRequestHandler()->getRequestDomain()];
+		$reqArr = $this->core->getRequestHandler()->getRequestArray();
+		
+		$this->requestedPage = $reqArr['fileName'];
+		$this->requestedTemplate =  $currentDomain->getTemplate();
+		
+		$tplDir = SITE_ROOT .  'resources/templates/' . $this->requestedTemplate . '/';
+		$templateFile = $tplDir . 'template.html';
+		
+		
+		$cacheDir = SITE_ROOT . FW_DIR . 'cache/pages/' . $this->requestedTemplate . '/';
+		$tplCache = new TemplateCache($cacheDir, 'cache.template');
+		$this->tplEngine = new TemplateEngine($tplCache, $templateFile, 'tst');
+	}
 
 	abstract public function generate();
-	abstract public function show();
 	
-	public function setCore($core) {
-		$this->core = $core;
+	public function show() {
+		$this->tplEngine->parse();
+		$this->tplEngine->addData('runtime', round(microtime(true)-REQUEST_TIME,3));
+		print $this->tplEngine->getResultAsHtml();
 	}
 }
 

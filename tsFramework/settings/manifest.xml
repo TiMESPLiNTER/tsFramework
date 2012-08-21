@@ -11,6 +11,6 @@
     <sites>
 		<site path="start.html" controller="StaticPageController" sslrequired="false" />
         <site path="performance.html" controller="StaticPageController" sslrequired="false" />
-        <site path="about.html" controller="AboutPageController" sslrequired="false" />
+        <site path="contact.html" controller="StaticPageController" sslrequired="true" />
     </sites>
 </configuration>
