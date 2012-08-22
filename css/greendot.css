@@ -223,4 +223,7 @@ form div.submit input {
 	padding:8px 10px;
 	font-weight: bold;
 	box-shadow: inset 2px 2px 1px #bdcc84;
+	text-transform: uppercase;
+	border:1px solid #111;
+	cursor: pointer;
 }

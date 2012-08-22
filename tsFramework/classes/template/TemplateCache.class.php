@@ -8,7 +8,9 @@
  * @version			1
  */
 class TemplateCache {
-
+	/** @var Logger */
+	private $logger;
+	
 	private $filePath;
 	private $cachePath;
 	private $registry;
@@ -16,7 +18,8 @@ class TemplateCache {
 	private $saveOnDestruct;
 
 	public function __construct($cachePath, $filePath) {
-
+		$this->logger = LoggerFactory::getLoggerByName('dev', $this);
+		
 		$this->registry = array();
 		$this->cachePath = $cachePath;
 		$this->filePath = $filePath;
@@ -26,30 +29,17 @@ class TemplateCache {
 		$this->cacheChanged = false;
 		$this->saveOnDestruct = true;
 	}
-
+	
 	private function loadCacheFile() {
-		$cache = array();
 		$cacheFilePath = $this->cachePath . $this->filePath;
 
 		if(file_exists($cacheFilePath) === false) {
-			return $cache;
+			return array();
 		}
 
-		$content = file($cacheFilePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-		foreach($content as $l) {
-			if($l === '')
-				continue;
-
-			$lParts = explode('=', $l);
-
-			if(!array_key_exists(3, $lParts))
-				$lParts[3] = -1;
-
-			$cache[$lParts[0]] = new TemplateCacheEntry($lParts[0], $lParts[2], (int) $lParts[1], (int) $lParts[3]);
-		}
-
-		return $cache;
+		$content = json_decode(file_get_contents($cacheFilePath), true);
+		
+		return $content;
 	}
 
 	private function saveCacheFile() {
@@ -59,19 +49,16 @@ class TemplateCache {
 
 		$cacheFilePath = $this->cachePath . $this->filePath;
 
-		$fp = fopen($cacheFilePath, 'w');
+		$savedFile = file_put_contents($cacheFilePath, json_encode($this->registry));
 
-		if($fp !== false) {
-			foreach($this->registry as $entry) {
-				$str = (string) $entry . "\n";
-				fwrite($fp, $str);
-			}
-
-			fclose($fp);
-		} else {
+		if($savedFile === false) {
 			$this->logger = LoggerFactory::getEnvLogger($this);
 			$this->logger->error('Could not write template cache-file: ' . $cacheFilePath);
+			
+			return;
 		}
+		
+		$this->logger->debug('tplcache-file rewritten');
 	}
 
 	public function getCachedTplFile($tplFile) {
@@ -88,7 +75,7 @@ class TemplateCache {
 	 * @param int $size
 	 */
 	public function addCachedTplFile($tplFile, $id, $size, $changeTime) {
-		$this->registry[$tplFile] = new TemplateCacheEntry($tplFile, $id, $size, $changeTime);
+		$this->registry[$tplFile] = array('filename' => $tplFile, 'id' => $id, 'size' => $size, 'changetime' => $changeTime);
 		$this->cacheChanged = true;
 	}
 

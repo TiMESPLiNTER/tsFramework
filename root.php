@@ -7,11 +7,15 @@ define('SITE_ROOT', dirname(__FILE__) . '/', true);
 define('FW_DIR', 'tsFramework/');
 define('RSC_DIR', 'resources/');
 
-// Initialize autoloader
+// Initalize ErrorHandler
+require SITE_ROOT . 'tsFramework/classes/core/ErrorHandler.class.php';
+$errorHandler = new ErrorHandler();
+$errorHandler->register();
+
+// Initialize Autoloader
 require SITE_ROOT . 'tsFramework/classes/core/Autoloader.class.php';
 $autoloader = new Autoloader();
 $autoloader->register();
-
 
 $requestHandler = new RequestHandler();
 $requestHandler->handleRequest();

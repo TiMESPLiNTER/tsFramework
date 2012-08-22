@@ -42,11 +42,6 @@ class RequestHandler {
 	
 	public function handleRequest() {
 		
-		/*echo'hello owrld';
-		
-		var_dump( self::output_send());
-		exit;*/
-		
 		if($this->gzipEnabled === true) {
 			ob_start('ob_gzhandler');
 		} else { 
@@ -70,16 +65,16 @@ class RequestHandler {
 			
 			header('Content-Type: text/html; charset=UTF-8');
 			header('Content-language: ' . substr($domains[$core->getRequestHandler()->getRequestDomain()]->getLocale(),0,2));
-			//echo'<pre>'; var_dump($this->requestArray, $this->requestProtocol, $this->requestMethod, $this->requestReferer, $this->requestDomain, $this->gzipEnabled); echo'</pre>';
+			
 			$core->processPage($pages[substr($this->requestUri,1)]);
 		} else {
-			$errorHandler = new ErrorHandler();
-			$errorHandler->displayHttpError(404);
+			ErrorHandler::displayHttpError(404);
 		}
 		
 		$contentHash = md5(ob_get_contents());
-		$requestHeaders = apache_request_headers ();
+		$requestHeaders = apache_request_headers();
 		
+		// ETag
 		if(array_key_exists('If-None-Match', $requestHeaders) === true && $requestHeaders['If-None-Match'] === $contentHash) {
 			header('HTTP/1.1 304 Not Modified');
 			exit;

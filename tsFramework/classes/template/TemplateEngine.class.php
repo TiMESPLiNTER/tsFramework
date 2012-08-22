@@ -173,13 +173,13 @@ class TemplateEngine {
 		if($tplCacheEntry === null)
 			return null;
 
-		$changeTime = @filemtime($filePath);
-		$changeTimeClean = ($changeTime !== false) ? $changeTime : @filectime($filePath);
+		$changeTime = filemtime($filePath);
+		$changeTimeClean = ($changeTime !== false) ? $changeTime : filectime($filePath);
 
-		if($tplCacheEntry->getSize() !== @filesize($filePath) || $tplCacheEntry->getChangeTime() !== $changeTimeClean)
+		if(intval($tplCacheEntry['size']) !== filesize($filePath) || intval($tplCacheEntry['changetime']) !== $changeTimeClean)
 			return null;
 
-		return $tplCacheEntry->getId();
+		return $tplCacheEntry['id'];
 	}
 
 	/**
@@ -190,7 +190,7 @@ class TemplateEngine {
 	public function getResultAsHtml() {
 		$entry = $this->templateCache->getCachedTplFile($this->tplFile);
 
-		$cacheFileName = $this->templateCache->getCachePath() . $entry->getId() . self::CACHE_SUBFIX;
+		$cacheFileName = $this->templateCache->getCachePath() . $entry['id'] . self::CACHE_SUBFIX;
 
 		if(file_exists($cacheFileName) === false) {
 			self::cache();
@@ -204,18 +204,18 @@ class TemplateEngine {
 
 		/** @var TemplateCacheEntry */
 		$cacheEntry = $this->templateCache->getCachedTplFile($this->tplFile);
-		$fileSize = @filesize($this->tplFile);
+		$fileSize = filesize($this->tplFile);
 
-		$changeTime = @filemtime($this->tplFile);
-		$changeTimeClean = ($changeTime !== false) ? $changeTime : @filectime($this->tplFile);
+		$changeTime = filemtime($this->tplFile);
+		$changeTimeClean = ($changeTime !== false) ? $changeTime : filectime($this->tplFile);
 		$cacheId = null;
 
 		if($cacheEntry === null) {
 			$cacheId = uniqid();
 			$this->templateCache->addCachedTplFile($this->tplFile, $cacheId, $fileSize, $changeTimeClean);
 		} else {
-			$cacheId = $cacheEntry->getId();
-			$this->templateCache->addCachedTplFile($cacheEntry->getFileName(), $cacheId, $fileSize, $changeTimeClean);
+			$cacheId = $cacheEntry['id'];
+			$this->templateCache->addCachedTplFile($cacheEntry['filename'], $cacheId, $fileSize, $changeTimeClean);
 		}
 
 		$cacheFileName = $this->templateCache->getCachePath() . $cacheId . self::CACHE_SUBFIX;
@@ -241,15 +241,13 @@ class TemplateEngine {
 		if(file_exists($cacheFileName) === true && is_writable($cacheFileName) === false)
 			throw new TemplateEngineException('Cache file is not writeable: ' . $cacheFileName);
 
-		$fp = @fopen($cacheFileName, 'w');
-
-		if($fp !== false) {
-			fwrite($fp, $htmlToReturnRepl);
-			fclose($fp);
-
-			$this->templateCache->setSaveOnDestruct(true);
-		} else {
+		$fp = file_put_contents($cacheFileName, $htmlToReturnRepl);
+		
+		if($fp === false) {
 			$this->logger->error('Could not cache template-file: ' . $cacheFileName);
+			$this->templateCache->setSaveOnDestruct(false);
+		} else {
+			$this->templateCache->setSaveOnDestruct(true);
 		}
 
 		$this->logger->debug('Tpl-File (re-)cached: ' . $this->tplFile);
