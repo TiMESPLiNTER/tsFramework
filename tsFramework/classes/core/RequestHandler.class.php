@@ -6,10 +6,11 @@
  * @author Pascal Münst
  */
 class RequestHandler {
-
     const PROTOCOL_HTTP = 'http';
     const PROTOCOL_HTTPS = 'https';
 
+	private $logger;
+	
     private $requestArray;
     private $requestUri;
     private $requestProtocol;
@@ -19,6 +20,8 @@ class RequestHandler {
 	private $gzipEnabled;
 
     public function __construct() {
+		$this->logger = LoggerFactory::getLoggerByName('dev', $this);
+		
 		$this->requestUri = $_SERVER['REQUEST_URI'];
 		$this->requestArray = self::parseRequestArray($this->requestUri);
 		$this->requestProtocol = (array_key_exists('HTTPS', $_SERVER) === true && $_SERVER['HTTPS'] === 'on') ? self::PROTOCOL_HTTPS : self::PROTOCOL_HTTP;
@@ -42,11 +45,12 @@ class RequestHandler {
 	
 	public function handleRequest() {
 		
-		if($this->gzipEnabled === true) {
+		/*if($this->gzipEnabled === true) {
 			ob_start('ob_gzhandler');
 		} else { 
 			ob_start();
-		}
+		}*/
+		ob_start();
 		ob_implicit_flush(false);
 		
 		$core = new Core($this);
@@ -71,15 +75,15 @@ class RequestHandler {
 			ErrorHandler::displayHttpError(404);
 		}
 		
-		$contentHash = md5(ob_get_contents());
-		$requestHeaders = apache_request_headers();
+		$content = ob_get_contents();
+		$contentHash = md5($content);
 		
 		// ETag
-		if(array_key_exists('If-None-Match', $requestHeaders) === true && $requestHeaders['If-None-Match'] === $contentHash) {
+		if(array_key_exists('HTTP_IF_NONE_MATCH', $_SERVER) === true && $_SERVER['HTTP_IF_NONE_MATCH'] === $contentHash) {
 			header('HTTP/1.1 304 Not Modified');
 			exit;
 		} else {
-			header('ETag: ' . $contentHash);
+			header('Etag: ' . $contentHash);
 		}
 		
 		ob_end_flush();

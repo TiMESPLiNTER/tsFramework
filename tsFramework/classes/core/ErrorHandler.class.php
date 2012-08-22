@@ -52,10 +52,24 @@ class ErrorHandler {
 	}
 	
 	public function handleException(Exception $e) {
-		echo 'an uncaught exception landed here: ';
+		ob_clean();
 		
-		echo '<pre>'; var_dump($e); echo'</pre>';		
+		header('HTTP/1.1 500 Server error');
 		
+		if($e instanceof FrameworkException) {
+			$e->handleException();
+		} else {
+			echo '<pre>'; 
+
+			echo 'Type: ' , get_class($e) , "\n";
+			echo 'Message: ' , $e->getMessage() , ' (Code: ' , $e->getCode() , ')' , "\n\n";
+
+			echo $e->getTraceAsString();
+			
+			echo'</pre>';
+		}
+		
+		ob_end_flush();
 		exit;
 	}
 }
