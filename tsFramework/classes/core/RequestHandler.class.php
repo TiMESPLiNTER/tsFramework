@@ -125,6 +125,14 @@ class RequestHandler {
 		header('Location: ' . $uri);
 		exit;
 	}
+	
+	public function provideSecureConnection() {
+		self::redirect(self::PROTOCOL_HTTPS . '://' . $this->requestDomain . $this->requestUri);
+	}
+	
+	public function provideInsecureConnection() {
+		self::redirect(self::PROTOCOL_HTTP . '://' . $this->requestDomain . $this->requestUri);
+	}
 
 	public function getRequestArray() {
 		return $this->requestArray;
@@ -145,6 +153,12 @@ class RequestHandler {
 		return $this->requestDomain;
 	}
 
+	public function isConnectionSSL() {
+		if($this->requestProtocol === self::PROTOCOL_HTTPS)
+			return true;
+		
+		return false;
+	}
 }
 
 ?>

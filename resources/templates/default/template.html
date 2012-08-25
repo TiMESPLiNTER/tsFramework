@@ -3,27 +3,28 @@
 	<head>
 		<meta charset="UTF-8" />
 		
-		<title>Start Page</title>
+		<title><tst:text value="siteTitle" /></title>
 		
 		<link href="favicon.ico" rel="icon" type="image/x-icon" />
 		
-		<link href="http://fonts.googleapis.com/css?family=Life+Savers" rel="stylesheet" type="text/css" />
+		<link href="//fonts.googleapis.com/css?family=Life+Savers" rel="stylesheet" type="text/css" />
 		<link rel="stylesheet" type="text/css" href="css/greendot.css" />
 	</head>
 	<body>
 		<div id="content">
+			<div id="header">
+				<ul id="nav">
+					<li><a href="about.html">About</a></li>
+					<li class="active"><a href="download.html">Get it!</a></li>
+					<li><a href="http://forums.tsfw.localhost/">Forums</a></li>
+					<li><a href="http://wiki.tsfw.localhost/">Wiki</a></li>
+					<li><a href="contact.html">Contact</a></li>
+				</ul>
+
+				<h1><a href="start.html"></a></h1>
+			</div>
 			<div id="content-center">
-				<div id="header">
-					<ul id="nav">
-						<li><a href="about.html">About</a></li>
-						<li><a href="download.html">Get it!</a></li>
-						<li><a href="http://forums.tsfw.localhost/">Forums</a></li>
-						<li><a href="http://wiki.tsfw.localhost/">Wiki</a></li>
-						<li><a href="contact.html">Contact</a></li>
-					</ul>
-					
-					<h1><a href="start.html"></a></h1>
-				</div>
+				
 				
 				<tst:loadSubTpl tplfile="{this}" />
 				

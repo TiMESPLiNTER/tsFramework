@@ -18,6 +18,8 @@ class StaticPageController extends PageController {
 		
 		$this->tplEngine->addData('pagesDir', $this->getPageTplFile($pagesDir, $this->requestedPage));
 		$this->tplEngine->addData('pageHandler', $this);
+		
+		$this->tplEngine->addData('siteTitle', 'Start Page');
 	}
 	
 	private function getPageTplFile($pagesDir, $fileTitle) {
@@ -28,7 +30,7 @@ class StaticPageController extends PageController {
 			$errorHandler = new ErrorHandler();
 			$errorHandler->displayHttpError(404);
 		}
-
+		
 		return $contentFile;
 	}
 }

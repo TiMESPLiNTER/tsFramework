@@ -23,6 +23,10 @@ class Site {
 	public function getController() {
 		return $this->controller;
 	}
+	
+	public function getSSLRequired() {
+		return $this->sslRequired;
+	}
 }
 
 ?>

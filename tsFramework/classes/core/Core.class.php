@@ -35,6 +35,11 @@ class Core {
 	 * @param Site $site
 	 */
 	public function processPage($site) {
+		if($site->getSSLRequired() === true && $this->requestHandler->isConnectionSSL() === false)
+			$this->requestHandler->provideSecureConnection();
+		elseif($site->getSSLRequired() === false && $this->requestHandler->isConnectionSSL() === true)
+			$this->requestHandler->provideInsecureConnection();
+		
 		$this->localeHandler->localize();
 		
 		$c = $site->getController();
