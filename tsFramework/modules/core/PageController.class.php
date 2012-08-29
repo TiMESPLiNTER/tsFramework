@@ -28,7 +28,7 @@ abstract class PageController {
 		$this->requestedPage = $reqArr['fileName'];
 		$this->requestedTemplate =  $currentDomain->getTemplate();
 		
-		$tplDir = SITE_ROOT .  'resources/templates/' . $this->requestedTemplate . '/';
+		$tplDir = SITE_ROOT .  FW_DIR . 'templates/' . $this->requestedTemplate . '/';
 		$templateFile = $tplDir . 'template.html';
 		
 		

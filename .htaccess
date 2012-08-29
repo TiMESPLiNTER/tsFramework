@@ -4,9 +4,8 @@
 	RewriteEngine On
 	RewriteBase /
 
-	# deny direct access to metanet directory
-	RewriteRule tsFramework/(.*) root.php
-	RewriteRule resources/(.*) root.php
+	# deny direct access to framework resources directory
+	RewriteRule tsFramework/(.*) framework.php
 
 	# deliver directories and files if they exist
 	RewriteCond %{REQUEST_FILENAME} -f [OR]
@@ -14,7 +13,7 @@
 	RewriteRule ^(.+) - [PT,L]
 
 	# handle other requests by /root.php
-	RewriteRule ^(.*) root.php
+	RewriteRule ^(.*) framework.php
 
 	# HTTP Authentication with PHP running as CGI/SuExec
 	RewriteCond %{HTTP:Authorization} !^$

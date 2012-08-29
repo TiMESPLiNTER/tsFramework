@@ -14,7 +14,7 @@ class StaticPageController extends PageController {
 
 
 	public function generate() {
-		$pagesDir = SITE_ROOT .  'resources/templates/' . $this->requestedTemplate . '/pages/';
+		$pagesDir = SITE_ROOT .  FW_DIR . 'templates/' . $this->requestedTemplate . '/pages/';
 		
 		$this->tplEngine->addData('pagesDir', $this->getPageTplFile($pagesDir, $this->requestedPage));
 		$this->tplEngine->addData('pageHandler', $this);

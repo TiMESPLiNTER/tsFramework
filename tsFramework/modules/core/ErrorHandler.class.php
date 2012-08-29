@@ -32,7 +32,7 @@ class ErrorHandler {
 		
 		// Cause of fucking buggy ob_gzhandler
 		ob_end_clean();
-		ob_start('ob_gzhandler');
+		ob_start();
 		
 		header('HTTP/1.1 ' . $errorStr);
 		header('Content-Type: text/html; charset=UTF-8');

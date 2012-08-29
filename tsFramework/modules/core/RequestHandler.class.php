@@ -17,7 +17,6 @@ class RequestHandler {
     private $requestMethod;
     private $requestReferer;
 	private $requestDomain;
-	private $gzipEnabled;
 
     public function __construct() {
 		$this->logger = LoggerFactory::getLoggerByName('dev', $this);
@@ -29,27 +28,9 @@ class RequestHandler {
 		$this->requestReferer = (isset($_SERVER['HTTP_REFERER'])) ? $_SERVER['HTTP_REFERER'] : null;
 
 		$this->requestDomain = $_SERVER['SERVER_NAME'];
-		$this->gzipEnabled = false;
-		
-		if(substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') > 0)
-			$this->gzipEnabled = true;
     }
 	
-	public function output_send(){
-		if (!headers_sent() && error_get_last()==NULL ) {
-			return false;
-
-		}
-		return true;
-	}
-	
 	public function handleRequest() {
-		
-		/*if($this->gzipEnabled === true) {
-			ob_start('ob_gzhandler');
-		} else { 
-			ob_start();
-		}*/
 		ob_start();
 		ob_implicit_flush(false);
 		

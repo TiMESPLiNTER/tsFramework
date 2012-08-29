@@ -13,4 +13,9 @@
         <site path="performance.html" controller="StaticPageController" sslrequired="false" />
         <site path="contact.html" controller="StaticPageController" sslrequired="true" />
     </sites>
+
+	<!-- module: db -->
+	<module name="db">
+		
+	</module>
 </configuration>
