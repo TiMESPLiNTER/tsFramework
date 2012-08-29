@@ -36,7 +36,7 @@ class ErrorHandler {
 		
 		header('HTTP/1.1 ' . $errorStr);
 		header('Content-Type: text/html; charset=UTF-8');
-		echo 'Error: ' , $errorStr;
+		echo 'Error: ' , $errorStr , ' <a href="/">zurück</a>';
 	}
 	
 	/**

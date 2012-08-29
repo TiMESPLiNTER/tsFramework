@@ -1,17 +1,19 @@
 /* 
-    Document   : greendot.css
-    Created on : 18.08.2012, 20:03:34
-    Author     : pascal91
-    Description:
-        Purpose of the stylesheet follows.
+	Document: main.css
+	Created on: 18.08.2012, 20:03:34
+	Author: pascal91
+	Description: Purpose of the stylesheet follows.
 */
-
 body {
 	background-color: #201a16;
 	background-image: url('../images/bg_body.gif');
 	font-size:100%;
 	padding:0;
 	margin:0;
+}
+
+a {
+	outline: 0;
 }
 
 #header ul#nav {
@@ -40,16 +42,20 @@ body {
 	font-family: Verdana,Arial;
 	color:#ccc;
 	margin-left:5px;
+	border-radius: 7px;
+	
+	transition: all .25s ease-in-out;
+	-moz-transition: all .25s ease-in-out;
+	-webkit-transition: all .25s ease-in-out;
 }
 
 #content #header ul#nav li.active a {
 	background-image: url('../images/bg_infobox.gif');
-	border-radius: 7px;
 }
 
 #content #header ul#nav li a:hover {
 	background-color: #111;
-	background-image: none;
+	/*background-image: none;*/
 	border-radius: 7px;
 	text-shadow: 0 0 3px #aaa;
 	color:#fff;
@@ -85,6 +91,15 @@ body {
 	height:60px;
 	background-image: url('../images/logo.png');
 	background-repeat: no-repeat;
+	opacity: 1.0;
+	
+	transition: all .25s ease-in-out;
+	-moz-transition: all .25s ease-in-out;
+	-webkit-transition: all .25s ease-in-out;
+}
+
+#content h1 a:hover {
+	opacity: 0.8;
 }
 
 #content h2 {
@@ -200,6 +215,19 @@ body {
 	color:#888;
 }
 
+#footer p.gotop {
+	float:right;
+}
+
+#footer p.gotop a {
+	display:block;
+	height:33px;
+	width:34px;
+	background-image: url('../images/icon-arrowup.png');
+	text-decoration: none;
+	border:none;
+}
+
 form {
 	margin-top: 35px;
 }
@@ -209,7 +237,7 @@ form dl {
 }
 
 form dl dt {
-	color:#eee;
+	color:#a1915b;
 	font-size: 1.0em;
 	font-family: Verdana, Arial;
 	float: left;
@@ -232,6 +260,10 @@ form .text, form textarea {
 	font-family: Arial, Verdana;
 	font-size: 1.0em;
 	color:#111;
+}
+
+form .text:focus, form textarea:focus {
+	background-color:#fff;
 }
 
 form .text {

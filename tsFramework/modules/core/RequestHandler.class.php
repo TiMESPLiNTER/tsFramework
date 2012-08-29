@@ -24,9 +24,9 @@ class RequestHandler {
 		
 		$this->requestUri = $_SERVER['REQUEST_URI'];
 		$this->requestArray = self::parseRequestArray($this->requestUri);
-		$this->requestProtocol = (array_key_exists('HTTPS', $_SERVER) === true && $_SERVER['HTTPS'] === 'on') ? self::PROTOCOL_HTTPS : self::PROTOCOL_HTTP;
+		$this->requestProtocol = (isset($_SERVER['HTTPS']) === true && $_SERVER['HTTPS'] === 'on') ? self::PROTOCOL_HTTPS : self::PROTOCOL_HTTP;
 		$this->requestMethod = $_SERVER['REQUEST_METHOD'];
-		$this->requestReferer = (array_key_exists('HTTP_REFERER', $_SERVER)) ? $_SERVER['HTTP_REFERER'] : null;
+		$this->requestReferer = (isset($_SERVER['HTTP_REFERER'])) ? $_SERVER['HTTP_REFERER'] : null;
 
 		$this->requestDomain = $_SERVER['SERVER_NAME'];
 		$this->gzipEnabled = false;
@@ -63,14 +63,15 @@ class RequestHandler {
 		}
 		
 		$pages = $core->getSettings()->getValue('tsfw_sites');
-		
-		if(array_key_exists(substr($this->requestUri,1), $pages) === true) {
+		$filePath = substr($this->requestArray['filePath'], 1);
+
+		if(isset($pages[$filePath]) === true) {
 			$domains = $core->getSettings()->getValue('tsfw_domains');
 			
 			header('Content-Type: text/html; charset=UTF-8');
 			header('Content-language: ' . substr($domains[$core->getRequestHandler()->getRequestDomain()]->getLocale(),0,2));
 			
-			$core->processPage($pages[substr($this->requestUri,1)]);
+			$core->processPage($pages[$filePath]);
 		} else {
 			ErrorHandler::displayHttpError(404);
 		}
@@ -79,7 +80,7 @@ class RequestHandler {
 		$contentHash = md5($content);
 		
 		// ETag
-		if(array_key_exists('HTTP_IF_NONE_MATCH', $_SERVER) === true && $_SERVER['HTTP_IF_NONE_MATCH'] === $contentHash) {
+		if(isset($_SERVER['HTTP_IF_NONE_MATCH']) === true && $_SERVER['HTTP_IF_NONE_MATCH'] === $contentHash) {
 			header('HTTP/1.1 304 Not Modified');
 			exit;
 		} else {
@@ -98,8 +99,9 @@ class RequestHandler {
 			,'params' => array()
 		);
 		
+		$reqUriParts = explode('?',$reqUri);
 		
-		$reqUriCleaned = substr($reqUri, 1);
+		$reqUriCleaned = substr($reqUriParts[0], 1);
 		
 		if($reqUriCleaned === false)
 			return $reqArray;
@@ -115,8 +117,10 @@ class RequestHandler {
 		$reqFileParamsArr = explode('-', $reqFileParams);
 		$reqArray['fileName'] = array_shift($reqFileParamsArr);
 		
-		$reqArray['params'] = $reqFileParamsArr;
-
+		$reqArray['filePath'] = implode('/',$pathArr) . (($reqArray['fileName'] !== null)?'/' . $reqArray['fileName']:'') . (($reqArray['fileExt'] !== null)?'.' . $reqArray['fileExt']:'');
+		
+		$reqArray['params'] = array_merge($reqFileParamsArr,$_GET);
+		
 		return $reqArray;
     }
 	
@@ -139,7 +143,7 @@ class RequestHandler {
 	}
 
     public function getRequestParam($index) {
-		if (array_key_exists($index, $this->requestArray['params']) === false)
+		if(array_key_exists($index, $this->requestArray['params']) === false)
 			return null;
 
 		return $this->requestArray['params'][$index];

@@ -9,7 +9,7 @@
  */
 class Autoloader {
 	const CACHING_FILE = 'cache.autoload';
-	const SOURCE_DIR = 'classes/';
+	const SOURCE_DIR = 'modules/';
 
 	private $cachedClasses;
 	private $cachedClassesChanged;

@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * The standard PageController loads the defined template for the current
+ * domain and print it out
+ * 
+ * @author Pascal Münst
+ * @copyright (c) 2012, Pascal Münst
+ * @version 1.0
+ */
 abstract class PageController {
 	/** @var Core */
 	protected $core;
