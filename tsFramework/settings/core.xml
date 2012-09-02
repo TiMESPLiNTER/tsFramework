@@ -20,11 +20,11 @@
 		<property type="boolean" name="sslRequired" value="false" />
 	</setting>
 	<setting name="performance.html" type="Page" group="pages">
-        <property type="string" name="controller" value="StaticPageController" />
+		<property type="string" name="controller" value="StaticPageController" />
 		<property type="boolean" name="sslRequired" value="false" />
 	</setting>
 	<setting name="contact.html" type="Page" group="pages">
-        <property type="string" name="controller" value="StaticPageController" />
+		<property type="string" name="controller" value="StaticPageController" />
 		<property type="boolean" name="sslRequired" value="true" />
 	</setting>
 </settings>
