@@ -20,13 +20,13 @@ abstract class PageController {
 	public function prepare($core) {
 		$this->core = $core;
 		
-		$domains = $this->core->getSettings()->getValue('tsfw_domains');
+		$domains = $this->core->getSettings()->getValue('domains','core');
 		/** @var Domain */
 		$currentDomain = $domains[$this->core->getRequestHandler()->getRequestDomain()];
 		$reqArr = $this->core->getRequestHandler()->getRequestArray();
 		
 		$this->requestedPage = $reqArr['fileName'];
-		$this->requestedTemplate =  $currentDomain->getTemplate();
+		$this->requestedTemplate =  $currentDomain->template;
 		
 		$tplDir = SITE_ROOT .  FW_DIR . 'templates/' . $this->requestedTemplate . '/';
 		$templateFile = $tplDir . 'template.html';

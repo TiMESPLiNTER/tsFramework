@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+	<!-- domains -->
+	<setting name="tsfw.localhost" type="Domain" group="domains">
+		<property type="string" name="locale" value="de_CH" />
+		<property type="string" name="timezone" value="Europe/Zurich" />
+		<property type="string" name="environment" value="dev" />
+		<property type="string" name="template" value="default" />
+		<property type="string" name="startPage" value="start.html" />
+	</setting>
+
+	<!-- environments -->
+	<setting name="dev" type="array" group="environments">
+		<property type="boolean" name="debug" value="true" />
+	</setting>
+
+	<!-- pages -->
+	<setting name="start.html" type="Page" group="pages">
+		<property type="string" name="controller" value="StaticPageController" />
+		<property type="boolean" name="sslRequired" value="false" />
+	</setting>
+	<setting name="performance.html" type="Page" group="pages">
+        <property type="string" name="controller" value="StaticPageController" />
+		<property type="boolean" name="sslRequired" value="false" />
+	</setting>
+	<setting name="contact.html" type="Page" group="pages">
+        <property type="string" name="controller" value="StaticPageController" />
+		<property type="boolean" name="sslRequired" value="true" />
+	</setting>
+</settings>

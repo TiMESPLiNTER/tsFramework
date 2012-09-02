@@ -7,7 +7,7 @@
  * @copyright Copyright (c) 2012, METANET AG
  * @version	1.0
  */
-class Autoloader {
+class Autoloader extends Observable {
 	const CACHING_FILE = 'cache.autoload';
 	const SOURCE_DIR = 'modules/';
 
@@ -66,6 +66,8 @@ class Autoloader {
 			throw new AutoloaderException('Could not find class "' . $class_name . '"');
 		
 		require SITE_ROOT . FW_DIR . $classPath;
+		self::setChanged();
+		self::notifyObservers(array('path' => $classPath, 'class' => $class_name));
 		
 		$this->cachedClasses[$class_name] = $classPath;
 		$this->cachedClassesChanged = true;

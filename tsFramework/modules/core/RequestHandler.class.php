@@ -30,48 +30,6 @@ class RequestHandler {
 		$this->requestDomain = $_SERVER['SERVER_NAME'];
     }
 	
-	public function handleRequest() {
-		ob_start();
-		ob_implicit_flush(false);
-		
-		$core = new Core($this);
-		$core->loadManifest();
-		
-		//@TODO: File oder nicht, forbidden oder nicht?
-		if($this->requestArray['fileName'] === null && count($this->requestArray['path']) === 0) {
-			$domains = $core->getSettings()->getValue('tsfw_domains');
-			self::redirect($domains[$this->requestDomain]->getStartPage());
-		}
-		
-		$pages = $core->getSettings()->getValue('tsfw_sites');
-		$filePath = substr($this->requestArray['filePath'], 1);
-
-		if(isset($pages[$filePath]) === true) {
-			$domains = $core->getSettings()->getValue('tsfw_domains');
-			
-			header('Content-Type: text/html; charset=UTF-8');
-			header('Content-language: ' . substr($domains[$core->getRequestHandler()->getRequestDomain()]->getLocale(),0,2));
-			
-			$core->processPage($pages[$filePath]);
-		} else {
-			ErrorHandler::displayHttpError(404);
-		}
-		
-		$content = ob_get_contents();
-		$contentHash = md5($content);
-		
-		// ETag
-		if(isset($_SERVER['HTTP_IF_NONE_MATCH']) === true && $_SERVER['HTTP_IF_NONE_MATCH'] === $contentHash) {
-			header('HTTP/1.1 304 Not Modified');
-			exit;
-		} else {
-			header('Etag: ' . $contentHash);
-		}
-		
-		ob_end_flush();
-		exit;
-	}
-	
     private static function parseRequestArray($reqUri) {
 		$reqArray = array(
 			 'path' => array()
@@ -92,8 +50,8 @@ class RequestHandler {
 		
 		$reqArray['path'] = $pathArr;
 
-		$reqFileParams = StringUtils::before($reqFile, '.');
-		$reqArray['fileExt'] = StringUtils::after($reqFile, '.');
+		$reqFileParams = StringUtils::beforeLast($reqFile, '.');
+		$reqArray['fileExt'] = StringUtils::afterLast($reqFile, '.');
 
 		$reqFileParamsArr = explode('-', $reqFileParams);
 		$reqArray['fileName'] = array_shift($reqFileParamsArr);
@@ -105,7 +63,7 @@ class RequestHandler {
 		return $reqArray;
     }
 	
-	public function redirect($uri) {
+	public static function redirect($uri) {
 		header('HTTP/1.1 302 Moved Temporarily'); 
 		header('Location: ' . $uri);
 		exit;

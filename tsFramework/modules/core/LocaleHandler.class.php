@@ -14,14 +14,13 @@ class LocaleHandler {
 	}
 	
 	public function localize() {
-		$domains = $this->core->getSettings()->getValue('tsfw_domains');
+		$domains = $this->core->getSettings()->getValue('domains','core');
 		/** @var Domain */
 		$currentDomain = $domains[$this->core->getRequestHandler()->getRequestDomain()];
 		
-		setlocale(LC_ALL, $currentDomain->getLocale());
-		date_default_timezone_set($currentDomain->getTimezone());
-		
-		//var_dump(setlocale(LC_ALL, 0), date_default_timezone_get());
+		setlocale(LC_ALL, $currentDomain->locale);
+		date_default_timezone_set($currentDomain->timezone);
+
 	}
 }
 
