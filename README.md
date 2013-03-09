@@ -16,7 +16,7 @@ Core modules
 Provides authentication methods for HTTP auth and authentication with users and rights stored in the a database (db module required)
 
 ### autloader
-Loads classes out of the filesystem. It supports also phar-packages.
+Loads classes out of the filesystem. It also supports phar-packages.
 
 ### db
 Extends the well known PDO class with some features and breaks it down for a more easy to use experience.
