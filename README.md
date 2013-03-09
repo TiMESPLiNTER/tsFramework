@@ -9,3 +9,23 @@ Changelog
 ---------
 ### 0.1.0-alpha 
 Release of the first version. The framework core is still in development and gets improvements but the "how the framework works" at the moment doesn't change anymore. But propably some features will be added in future releases.
+
+Core modules
+------------
+### auth
+Provides authentication methods for HTTP auth and authentication with users and rights stores in the a database (db module required)
+
+### db
+Extends the well known PDO class with some features and breaks it down for a more easy to use experience.
+
+### common
+Gives you a swiss pocket knife to work with data types (like strings, arrays, etc.) and relieves you in other work to do with the framework. 
+
+### htmlparser
+Needed for the template module it parses html and builds an easy to access and manipulate node tree.
+
+### logger
+Gives you the possibility to log to the screen, to a file or into the db. Manage different loggers which catch different log levels.
+
+### template
+A very powerful template engine which can be modular extended with customtags.
