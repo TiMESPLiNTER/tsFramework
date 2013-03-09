@@ -34,4 +34,4 @@ Needed for the template module it parses html and builds an easy to access and m
 Gives you the possibility to log your messages to the screen, to a file or into the db. Manage different loggers which can catch different log levels.
 
 ### template
-A very powerful template engine which can be modular extended with customtags.
+A very powerful template engine which can be modular extended with customtags. Developing your own custom tag is very easy and you can do it with minimal PHP skills.
