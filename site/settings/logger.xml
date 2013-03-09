@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+	<setting name="dev" type="array">
+		<property type="string" name="type" value="file" />
+		<property type="string" name="logfilepath" value="/rsc/logs/dev-log.log" />
+		<property type="string" name="pattern" value="[%LEVEL%] %TIMESTAMP%@%CLASS% - %MESSAGE%" />
+		<property type="string" name="log_level" value="debug,info,warn,error,fatal" />
+		<property type="string" name="email_level" value="error,fatal" />
+		<property type="int" name="maxfilesize" value="0" />
+	</setting>
+</settings>

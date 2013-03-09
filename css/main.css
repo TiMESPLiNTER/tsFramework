@@ -1,7 +1,7 @@
 /* 
 	Document: main.css
 	Created on: 18.08.2012, 20:03:34
-	Author: pascal91
+	Author: Pascal Münst
 	Description: Purpose of the stylesheet follows.
 */
 body {
@@ -10,6 +10,7 @@ body {
 	font-size:100%;
 	padding:0;
 	margin:0;
+	overflow-y: scroll;
 }
 
 a {
@@ -121,9 +122,8 @@ a {
 
 .infobox {
 	width:45%;
-	height:250px;
 	background-image: url('../images/bg_infobox.gif');
-	padding:0;
+	padding:0 0 20px 0;
 	/*box-shadow: inset 1px 1px 5px #000;*/
 	border-radius: 5px;
 	border: 1px solid #110e0c;
@@ -292,3 +292,11 @@ form div.submit input {
 	border:1px solid #111;
 	cursor: pointer;
 }
+
+/* clearfix */
+.clearfix:before, .clearfix:after {
+  content: "";
+  display: table;
+}
+.clearfix:after {clear: both;}
+.clearfix {zoom: 1;}

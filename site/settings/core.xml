@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+	<!-- domains -->
+	<domains>
+		<domain name="tsfw.localhost">
+			<locale>browser</locale>
+			<timezone>Europe/Zurich</timezone>
+			<environment>dev</environment>
+			<template>default</template>
+			<startroute>start</startroute>
+		</domain>
+	</domains>
+
+	<!-- environments -->
+	<environments>
+		<environment id="dev">
+			<debug>true</debug>
+		</environment>
+	</environments>
+
+	<!-- pages -->
+	<routes>
+		<!--<setting name="/start.html" type="ch\timesplinter\core\Page" group="pages">
+			<property type="string" name="controller" value="ch\timesplinter\core\StaticPageController" />
+			<property type="string" name="method" value="getPage" />
+			<property type="boolean" name="sslRequired" value="false" />
+			<property type="string" name="params" value="page=start" />
+		</setting>
+		<setting name="/performance.html" type="ch\timesplinter\core\Page" group="pages">
+			<property type="string" name="controller" value="ch\timesplinter\core\StaticPageController" />
+			<property type="string" name="method" value="getPage" />
+			<property type="boolean" name="sslRequired" value="false" />
+		</setting>
+		<setting name="/contact.html" type="ch\timesplinter\core\Page" group="pages">
+			<property type="string" name="controller" value="ch\timesplinter\core\StaticPageController" />
+			<property type="string" name="method" value="getPage" />
+			<property type="boolean" name="sslRequired" value="true" />
+		</setting>
+		<setting name="/phpcache.html" type="ch\timesplinter\core\Page" group="pages">
+			<property type="string" name="controller" value="ch\timesplinter\core\StaticPageController" />
+			<property type="string" name="method" value="testPHPCache" />
+			<property type="boolean" name="sslRequired" value="false" />
+		</setting>-->
+		<route id="start" pattern="/start.html">
+			<controller>ch\timesplinter\core\StaticPageController:getPage</controller>
+			<method>GET</method>
+			<sslrequired>false</sslrequired>
+			<params />
+		</route>
+		<route id="performance" pattern="/performance.html">
+			<controller>ch\timesplinter\core\StaticPageController:getPage</controller>
+			<method>GET</method>
+			<sslrequired>false</sslrequired>
+			<params />
+		</route>
+		<route id="contact" pattern="/contact.html">
+			<controller>ch\timesplinter\core\StaticPageController:getPage</controller>
+			<method>GET</method>
+			<sslrequired>false</sslrequired>
+			<params />
+		</route>
+		<route id="contact_send" pattern="/contact.html">
+			<controller>ch\timesplinter\core\StaticPageController:getPage</controller>
+			<method>POST</method>
+			<sslrequired>false</sslrequired>
+			<params />
+		</route>
+		<route id="phpcache" pattern="/phpcache.html">
+			<controller>ch\timesplinter\core\StaticPageController:getPage</controller>
+			<method>GET</method>
+			<sslrequired>false</sslrequired>
+			<params />
+		</route>
+	</routes>
+</settings>

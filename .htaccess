@@ -5,7 +5,8 @@
 	RewriteBase /
 
 	# deny direct access to framework resources directory
-	RewriteRule tsFramework/(.*) framework.php
+	RewriteRule tsfw_src/(.*) framework.php
+	RewriteRule site/(.*) framework.php
 
 	# deliver directories and files if they exist
 	RewriteCond %{REQUEST_FILENAME} -f [OR]
@@ -13,7 +14,7 @@
 	RewriteRule ^(.+) - [PT,L]
 
 	# handle other requests by /root.php
-	RewriteRule ^(.*) framework.php
+	RewriteRule ^(.*) tsfw_src/framework.php
 
 	# HTTP Authentication with PHP running as CGI/SuExec
 	RewriteCond %{HTTP:Authorization} !^$
@@ -150,4 +151,13 @@ AddCharset utf-8 .atom .css .js .json .rss .vtt .xml
 # Increase cookie security
 <IfModule php5_module>
 	php_value session.cookie_httponly true
+</IfModule>
+
+#E-Tags / Expire date for content delivered directly by the webserver
+FileETag MTime Size
+<IfModule mod_expires.c>
+  <FilesMatch "\.(jpg|gif|png|css|js|ico)$">
+       ExpiresActive on
+       ExpiresDefault "access plus 1 year"
+   </FilesMatch>
 </IfModule>
