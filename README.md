@@ -13,13 +13,19 @@ Release of the first version. The framework core is still in development and get
 Core modules
 ------------
 ### auth
-Provides authentication methods for HTTP auth and authentication with users and rights stores in the a database (db module required)
+Provides authentication methods for HTTP auth and authentication with users and rights stored in the a database (db module required)
+
+### autloader
+Loads classes out of the filesystem. It supports also phar-packages.
 
 ### db
 Extends the well known PDO class with some features and breaks it down for a more easy to use experience.
 
 ### common
 Gives you a swiss pocket knife to work with data types (like strings, arrays, etc.) and relieves you in other work to do with the framework. 
+
+### core
+The whole core functions which handles the requests, responses, settings management, etc.
 
 ### htmlparser
 Needed for the template module it parses html and builds an easy to access and manipulate node tree.
