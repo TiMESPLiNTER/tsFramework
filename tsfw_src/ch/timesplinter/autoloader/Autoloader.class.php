@@ -13,7 +13,6 @@ use ch\timesplinter\logger\LoggerFactory;
  */
 class Autoloader extends core\Observable {
 	const CACHING_FILE = 'cache.autoload';
-	const SOURCE_DIR = 'modules/';
 
 	private $logger;
 	private $cachedClasses;
@@ -71,7 +70,6 @@ class Autoloader extends core\Observable {
 			}
 		}
 
-		//$classPath = $this->doClassSearch(self::SOURCE_DIR, $class_name);
 		$filePath = str_replace(array('\\','/'), DIRECTORY_SEPARATOR, $class_name);
 		$classPath = $filePath . '.class.php';
 		$interfacePath = $filePath . '.interface.php';

@@ -88,25 +88,17 @@ class Core {
 	public function handleRequest() {
 		$this->sessionHandler->start();
 		
-		foreach($this->plugins as $plugin) {
-			if($plugin instanceof FrameworkPlugin) {
-				$plugin->beforeRequestBuilt();
-			}
-		}
+		$this->invokePluginHook('beforeRequestBuilt');
 		
 		$this->httpRequest = self::createHttpRequest();
 		
-		foreach($this->plugins as $plugin) {
-			if($plugin instanceof FrameworkPlugin) {
-				$plugin->afterRequestBuilt();
-			}
-		}
+		$this->invokePluginHook('afterRequestBuilt');
 		
 		$currentDomain = DomainUtils::getDomainInfo($this->settings->core->domains, $this->httpRequest->getHost());
 		
 		if($currentDomain === null) {
 			if(isset($this->settings->core->defaultDomain))
-				RequestHandler::redirect($this->settings->core->defaultDomain);
+				RequestHandler::redirect('http://' . $this->settings->core->defaultDomain);
 			
 			return $this->errorHandler->displayHttpError(500, $this->httpRequest);
 		}
@@ -128,33 +120,19 @@ class Core {
 		
 		$this->httpRequest->setParams($res);
 		
-		foreach($this->plugins as $plugin) {
-			if($plugin instanceof FrameworkPlugin) {
-				$plugin->beforeResponseBuilt();
-			}
-		}
+		$this->invokePluginHook('beforeResponseBuilt');
 		
-		$this->httpResponse = self::processPage($matchedRoute);
+		$this->httpResponse = $this->processPage($matchedRoute);
 		
-		foreach($this->plugins as $plugin) {
-			if($plugin instanceof FrameworkPlugin) {
-				$plugin->afterResponseBuilt();
-			}
-		}
-		
-		
-		
+		$this->invokePluginHook('afterResponseBuilt');
+				
 		return $this->httpResponse;
 	}
 	
 	public function sendResponse() {
-		$this->httpResponse = self::handleRequest();
+		$this->httpResponse = $this->handleRequest();
 		
-		foreach($this->plugins as $plugin) {
-			if($plugin instanceof FrameworkPlugin) {
-				$plugin->beforeResponseSent();
-			}
-		}
+		$this->invokePluginHook('beforeResponseSent');
 		
 		ob_start();
 		ob_implicit_flush(false);
@@ -163,11 +141,7 @@ class Core {
 		
 		ob_end_flush();
 		
-		foreach($this->plugins as $plugin) {
-			if($plugin instanceof FrameworkPlugin) {
-				$plugin->afterResponseSent();
-			}
-		}
+		$this->invokePluginHook('afterResponseSent');
 		
 		exit;
 	}
@@ -269,6 +243,18 @@ class Core {
 	public function getSessionHandler() {
 		return $this->sessionHandler;
 	}
+	
+	public function invokePluginHook($hookname) {
+		if(is_array($this->plugins) === false)
+			return;
+		
+		foreach($this->plugins as $plugin) {
+			if(method_exists($plugin, $hookname) === false)
+				continue;
+			
+			$plugin->$hookname();
+		}
+	}
 }
 
-?>
+/* EOF */

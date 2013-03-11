@@ -14,4 +14,4 @@ class Domain {
 	public $timezone;
 }
 
-?>
+/* EOF */

@@ -1,0 +1,10 @@
+{
+	"routes": {
+		"home": {
+			"pattern": "/home",
+			"controller": "ch:missioncontrol:controller:LoginController:getLogoutSite",
+			"method": "GET"/*,
+			"sslRequired": true*/
+		}
+	}
+}

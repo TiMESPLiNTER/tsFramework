@@ -1,4 +1,5 @@
 <?php
+
 namespace ch\timesplinter\core;
 
 /**
@@ -12,4 +13,4 @@ class DomainUtils {
 	}
 }
 
-?>
+/* EOF */

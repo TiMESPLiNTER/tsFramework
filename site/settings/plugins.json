@@ -1,0 +1,7 @@
+{
+	"plugins": [
+		"ch:timesplinter:plugins:robots:Robots",
+		"ch:timesplinter:plugins:browsercaching:BrowserCaching",
+		"ch:timesplinter:urilocator:URILocator"
+	]
+}

@@ -2,7 +2,6 @@
 
 error_reporting(E_ALL);
 
-//use ch\timesplinter\core\Settings;
 use ch\timesplinter\core\Core;
 use ch\timesplinter\core\ErrorHandler;
 use ch\timesplinter\autoloader\Autoloader;
@@ -31,11 +30,8 @@ require FW_DIR . 'ch/timesplinter/autoloader/AutoloaderException.class.php';
 $autoloader = new Autoloader();
 $autoloader->register();
 
-/*$settings = new Settings();
-$autoloader->addObserver($settings);*/
-//var_dump($_SERVER,SETTINGS_DIR); exit;
 $core = new Core();
-//$core->setSettings($settings);
+
 $errorHandler->setCore($core);
 $core->setErrorHandler($errorHandler);
 $core->sendResponse();

@@ -33,9 +33,7 @@ class ErrorHandler {
 				break;
 		}
 		
-		$pc = new StaticPageController();
-		$pc->setHttpRequest($httpRequest);
-		$pc->setCore($this->core);
+		$pc = new StaticPageController($this->core, $httpRequest, new Route());
 		
 		return $pc->getErrorPage($errorCode, $errorStr);
 	}
@@ -85,4 +83,4 @@ class ErrorHandler {
 	}
 }
 
-?>
+/* EOF */

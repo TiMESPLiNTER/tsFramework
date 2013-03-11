@@ -1,5 +1,5 @@
 <?php
-namespace ch\timesplinter\core;
+namespace ch\timesplinter\controller;
 
 use ch\timesplinter\template\TemplateEngine;
 use ch\timesplinter\template\TemplateCache;

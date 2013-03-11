@@ -15,4 +15,4 @@ abstract class FrameworkException extends \Exception {
 	abstract public function handleException();
 }
 
-?>
+/* EOF */
