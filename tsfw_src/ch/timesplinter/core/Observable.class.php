@@ -63,4 +63,4 @@ abstract class Observable {
 	}
 }
 
-?>
+/* EOF */
