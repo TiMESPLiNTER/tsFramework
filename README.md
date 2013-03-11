@@ -7,6 +7,9 @@ Give it a try. And let me know how you feel about it. (I know it's not well docu
 
 Changelog
 ---------
+### 0.1.1-alpha 
+Cleaned up and restructered a little bit
+
 ### 0.1.0-alpha 
 Release of the first version. The framework core is still in development and gets improvements but the "how the framework works" at the moment doesn't change anymore. But propably some features will be added in future releases.
 
