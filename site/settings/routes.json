@@ -2,7 +2,7 @@
 	"routes": {
 		"home": {
 			"pattern": "/home",
-			"controller": "ch:missioncontrol:controller:LoginController:getLogoutSite",
+			"controller": "ch:timesplinter:controller:StaticPageController:getPage",
 			"method": "GET"/*,
 			"sslRequired": true*/
 		}

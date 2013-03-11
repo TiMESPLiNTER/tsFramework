@@ -1,296 +1,166 @@
 /* 
 	Document: main.css
 	Created on: 18.08.2012, 20:03:34
-	Author: Pascal Münst
+	Author: Pascal Muenst
 	Description: Purpose of the stylesheet follows.
 */
+/* =webfont
+*******************************************************************************/
+@import url('http://fonts.googleapis.com/css?family=Open+Sans');
+@import url('http://fonts.googleapis.com/css?family=Roboto:400,300');
+
+/* =base
+*******************************************************************************/
+html {  
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  overflow-y: scroll;
+}
+
+html, button, input, select, textarea {font-family: sans-serif;}
+
 body {
-	background-color: #201a16;
-	background-image: url('../images/bg_body.gif');
-	font-size:100%;
-	padding:0;
-	margin:0;
-	overflow-y: scroll;
+  margin: 0;
+  padding: 0;
+  line-height: 1.4;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 100%;
+  color: #100a04;    
+  background: #ddd url('../images/bg-body2.gif') fixed;
+}
+.lt-ie9 body {font-family: Verdana, arial, sans-serif;}
+
+::-moz-selection {
+  background: #b3d4fc;
+  text-shadow: none;
+}
+::selection {
+  background: #b3d4fc;
+  text-shadow: none;
 }
 
-a {
-	outline: 0;
+a:active, a:hover {outline: 0;}
+
+p, h1, h2, h3, h4, h5, h6 {margin: 0 0 1em;}
+
+.wrapper-main {
+	margin: 0 auto;
+	width: 860px;
 }
 
-#header ul#nav {
-	float: right;
+.header {
+	float: left;
+	padding: 15px;
+}
+
+h1 {
+	font-family: Roboto, sans-serif;
+	font-weight: 300;
+	font-size: 34px;
+	text-shadow: 0 1px 0 #f4f4f4;
+}
+
+h1 a {
+	text-decoration: none;
+	color: #777;
+}
+
+h1 a:hover {
+	color: #555;
+}
+
+.nav ul {
+	margin: 0;
+	padding: 15px;
 	list-style: none;
+	float: right;
+}
+
+.nav ul li {
+	float: left;
+}
+
+.nav ul li a {
+	float: left;
+	padding: 0 10px;
+	text-decoration: none;
+	height: 34px;
+	line-height: 34px;
+}
+
+.content {
+	border-top: 2px solid #d0d0d0;
+}
+
+.content h2, .content h3 {
+	font-family: Roboto, sans-serif;
+	font-weight: 300;
+}
+
+.content h2 {
+	font-size: 30px;
+}
+
+.content h3 {
+	color: #cc3b75;
+	font-size: 22px;
+	margin: 34px 0 7px 0;
+}
+
+.content h3 span {
+	float: left;
+	
+	font-weight: 300;
+	font-size: 72px;
+	height: 72px;
+	margin: -5px 0 0 -100px;
+	width: 80px;
 	padding: 0;
-	margin: 10px -12px 0  0;
+	text-align: right;
+	line-height: 1;
+	color: #b8b8b8;
 }
 
-#header {
-	/*border-bottom:1px solid #444;*/
-	border-bottom:1px solid #111;
-	padding-bottom:21px;
+.content h2, .content h3, .content p {
+	text-shadow: 0 1px 0 #f4f4f4;
 }
 
-#header ul#nav li {
-	display:inline;
+.content {
+	margin: 0;
+	padding: 15px;
 }
 
-#header ul#nav li a {
-	display: block;
-	float:left;
-	text-decoration:none;
-	color:#fff;
-	padding:8px 14px;
-	font-family: Verdana,Arial;
-	color:#ccc;
-	margin-left:5px;
-	border-radius: 7px;
-	
-	transition: all .25s ease-in-out;
-	-moz-transition: all .25s ease-in-out;
-	-webkit-transition: all .25s ease-in-out;
+.content p {
+	color: #555;
+	line-height: 1.5;
 }
 
-#content #header ul#nav li.active a {
-	background-image: url('../images/bg_infobox.gif');
-}
-
-#content #header ul#nav li a:hover {
-	background-color: #111;
-	/*background-image: none;*/
-	border-radius: 7px;
-	text-shadow: 0 0 3px #aaa;
-	color:#fff;
-}
-
-#content {
-	background-image: url('../images/bg_content.gif');
-	clear: both;
-	padding: 25px 0 50px 0;
-	border-bottom: 1px solid #111;
-}
-
-#content-center, #header {
-	margin: 0 auto; 
-	width: 75%;
-	padding-left: 25px;
-	padding-right: 25px;
-}
-
-#content-center {
-	border-top:1px solid #362b23;
-}
-
-#content h1 {
-	display:inline;
-	padding:0;
-	margin:0;
-}
-
-#content h1 a {
-	display:block;
-	width:250px;
-	height:60px;
-	background-image: url('../images/logo.png');
-	background-repeat: no-repeat;
-	opacity: 1.0;
-	
-	transition: all .25s ease-in-out;
-	-moz-transition: all .25s ease-in-out;
-	-webkit-transition: all .25s ease-in-out;
-}
-
-#content h1 a:hover {
-	opacity: 0.8;
-}
-
-#content h2 {
-	font-family:'Life Savers', cursive;
-	font-size:2em;
-	color:#a1915b;
-	text-shadow: 2px 2px 2px #000;
-}
-
-#content p {
-	font-family: Verdana, Arial;
-	color:#eee;
-	text-shadow: 2px 2px 1px #000;
-}
-
-#content p a {
-	color: #a6c23e/*#B6DD27*/;
-}
-
-.infobox {
-	width:45%;
-	background-image: url('../images/bg_infobox.gif');
-	padding:0 0 20px 0;
-	/*box-shadow: inset 1px 1px 5px #000;*/
-	border-radius: 5px;
-	border: 1px solid #110e0c;
-	margin: 30px 30px 0 0;
-	float: left;
-}
-
-.icon {
-	float:right;
-	margin-top:5px;
-	margin-right:5px;
-}
-
-.infobox-speed div {
-	background-image: url('../images/icon_stopwatch.png');
-}
-
-.infobox-flexible div {
-	background-image: url('../images/icon_flexible.png');
-}
-
-.infobox-money div {
-	background-image: url('../images/icon_money.png');
-}
-
-.infobox-controll div {
-	background-image: url('../images/icon_controll.png');
-}
-
-.infobox-tplengine div {
-	background-image: url('../images/icon_tag.png');
-}
-
-.infobox h3 {
-	display:block;
-	float:left;
-	font-family:'Life Savers', cursive;
-	background-color:#a6c23e;
-	color:#222;
-	padding:5px 10px;
-	margin:0;
-	font-size:1.5em;
-	text-shadow: 1px 1px 1px #4e630c;
-	border-top-left-radius: 5px;
-	border-bottom-right-radius: 5px;
-	
-}
-
-.infobox h3 b {
-	color:#efe8dd;
-	padding-right:10px;
-}
-
-#content .infobox div {
-	background-repeat:no-repeat; 
-	background-position:15px 21px; 
-	clear:both;
-	padding: 5px 0 0 0;
-}
-
-#content .infobox p {
-	text-shadow: none;
-	font-size:0.8em;
-	line-height:1.5em;
-	color:#ccc;
-	margin: 10px 20px 10px 65px;
-}
-
-#footer {
-	width:75%;
-	margin:auto;
-	clear:both;
-	padding:25px;
-	font-family: Verdana,Arial;
-}
-
-#footer p {
-	font-size:0.6em;
-	color:#444;
-}
-
-#footer p a {
-	color: #666;
+.content p a {
+	color: #3ba1cc;
 	text-decoration: none;
-	border-bottom: 1px dotted #444;
+	/*font-weight: bold;*/
 }
 
-#footer p a:hover {
-	color:#888;
+.content p a:hover, .content p a:active, .content p a:focus {
+	/*color: #47c0f2;*/
+	text-shadow: 0 1px 0 #f4f4f4, 0 0 6px #47c0f2;
 }
 
-#footer p.gotop {
-	float:right;
+.footer {
+	border-top: 2px solid #ccc;
+	padding: 25px 15px;
+	font-size: 12px;
+	color: #949494;
+	text-shadow: 0 1px 0 #f4f4f4;
 }
 
-#footer p.gotop a {
-	display:block;
-	height:33px;
-	width:34px;
-	background-image: url('../images/icon-arrowup.png');
+.footer p a {
+	color: #757575;
 	text-decoration: none;
-	border:none;
 }
 
-form {
-	margin-top: 35px;
-}
-
-form dl {
-	clear:both;
-}
-
-form dl dt {
-	color:#a1915b;
-	font-size: 1.0em;
-	font-family: Verdana, Arial;
-	float: left;
-	width:175px;
-	height: 36px;
-	line-height: 36px;
-	text-shadow: 2px 2px 1px #000;
-}
-
-form dl dd {
-	
-}
-
-form .text, form textarea {
-	background-color:#ebe5d9;
-	box-shadow: inset 1px 1px 3px #110e0c;
-	border-radius: 5px;
-	padding:8px 10px;
-	border:none;
-	font-family: Arial, Verdana;
-	font-size: 1.0em;
-	color:#111;
-}
-
-form .text:focus, form textarea:focus {
-	background-color:#fff;
-}
-
-form .text {
-	width:250px;
-}
-
-form textarea {
-	width:350px;
-	height:150px;
-}
-
-form div.submit {
-	margin-left:175px;
-}
-
-form div.submit input {
-	background-color: #a6c23e;
-	color:#fff;
-	text-shadow: 1px 1px 1px #000;
-	border: none;
-	border-radius: 5px;
-	padding:8px 10px;
-	font-weight: bold;
-	box-shadow: inset 2px 2px 1px #bdcc84;
-	text-transform: uppercase;
-	border:1px solid #111;
-	cursor: pointer;
+.footer p a:hover {
+	color: #565656;
 }
 
 /* clearfix */

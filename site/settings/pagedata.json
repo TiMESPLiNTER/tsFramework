@@ -1,0 +1,61 @@
+{
+	"home": {
+		"title": "Willkommen",
+		"description": "This is the start page of this little site",
+		"active": ["jet", "home"]
+	},
+	
+	"ok": {
+		"title": "Organisationskomitee",
+		"description": "This is the start page of this little site",
+		"active": ["jet", "ok"]
+	},
+	
+	"anmeldung": {
+		"title": "Anmeldung",
+		"description": "This is the start page of this little site",
+		"active": ["wettkampf", "anmeldung"]
+	},
+	
+	"bestimmungen": {
+		"title": "Wettkampfbestimmungen",
+		"description": "This is the start page of this little site",
+		"active": ["wettkampf", "bestimmungen"]
+	},
+	
+	"rangliste": {
+		"title": "Rangliste",
+		"description": "This is the start page of this little site",
+		"active": ["wettkampf", "rangliste"]
+	},
+	
+	"lageplan": {
+		"title": "Lageplan",
+		"description": "This is the start page of this little site",
+		"active": ["wettkampf", "lageplan"]
+	},
+	
+	"bilder": {
+		"title": "Bilder",
+		"description": "This is the start page of this little site",
+		"active": ["bilder"]
+	},
+	
+	"sponsoren": {
+		"title": "Sponsoren",
+		"description": "This is the start page of this little site",
+		"active": ["sponsoren"]
+	},
+	
+	"fundbuero": {
+		"title": "Fundbüro",
+		"description": "This is the start page of this little site",
+		"active": ["kontakt", "fundbuero"]
+	},
+	
+	"kontakt": {
+		"title": "Kontakt",
+		"description": "This is the start page of this little site",
+		"active": ["kontakt", "form"]
+	}
+}

@@ -2,6 +2,10 @@
 namespace ch\timesplinter\controller;
 
 use ch\timesplinter\logger\LoggerFactory;
+use ch\timesplinter\core\Core;
+use ch\timesplinter\core\HttpRequest;
+use ch\timesplinter\core\HttpResponse;
+use ch\timesplinter\core\Route;
 
 /**
  * Description of StaticPageController
