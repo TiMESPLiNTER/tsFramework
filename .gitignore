@@ -1,7 +1,5 @@
 /.idea/*
 tsfw_src/cache/*
 tsfw_src/logs/*
-site/cache/*
-site/logs/*
 /site.bak
 /nbproject/*
