@@ -4,30 +4,11 @@
 	
 	/* include external resources */
 	"@resources": [
+		"domains.json", // all the routes for this site
 		"routes.json", // all the routes for this site
 		"locales.json", // the available locales for this site
 		"plugins.json" // the plugins to use for this site
 	],
-	
-	"defaultDomain": "tsfw.timesplinter.ch",
-	
-	"domains": {
-		"tsfw.timesplinter.ch": {
-			"localization": "browser",
-			"timezone": "Europe/Zurich",
-			"environment": "live",
-			"template": "default",
-			"startroute": "/home"
-		},
-		
-		"tsfw.localhost": {
-			"localization": "browser",
-			"timezone": "Europe/Zurich",
-			"environment": "dev",
-			"template": "default",
-			"startroute": "/home"
-		}
-	},
 	
 	"environments": {
 		"dev": {
