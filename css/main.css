@@ -92,7 +92,7 @@ h1 a:hover {
 	border-top: 2px solid #d0d0d0;
 }
 
-.content h2, .content h3 {
+.content h2, .content h3, .feature-list li:before {
 	font-family: Roboto, sans-serif;
 	font-weight: 300;
 }
@@ -107,21 +107,31 @@ h1 a:hover {
 	margin: 34px 0 7px 0;
 }
 
-.content h3 span {
-	float: left;
+.feature-list {
+	counter-reset: li; /* Initiate a counter */
+	list-style: none; /* Remove default numbering */
+	*list-style: decimal; /* Keep using default numbering for IE6/7 */
+	padding: 0 0 0 67px;
+	*padding: 0;
+}
+
+.feature-list li:before{
+	content: counter(li);
+	counter-increment: li;
+	position: absolute;	
 	
 	font-weight: 300;
 	font-size: 72px;
 	height: 72px;
-	margin: -5px 0 0 -100px;
-	width: 80px;
+	margin: -5px 0 0 -92px;
+	width: 72px;
 	padding: 0;
 	text-align: right;
 	line-height: 1;
 	color: #b8b8b8;
 }
 
-.content h2, .content h3, .content p {
+.content h2, .content h3, .content p, .feature-list li:before {
 	text-shadow: 0 1px 0 #f4f4f4;
 }
 
