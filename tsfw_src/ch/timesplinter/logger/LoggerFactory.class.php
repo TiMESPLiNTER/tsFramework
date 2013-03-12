@@ -23,7 +23,7 @@ class LoggerFactory {
 			//$settings = Settings::getInstance();
 			self::$settings = array('dev' => array(
 			'type' => Logger::TYPE_FILE,
-			'logfilepath' => FW_DIR . '/logs/dev-log.log',
+			'logfilepath' => SITE_ROOT . 'logs/dev-log.log',
 			'pattern' => '[%LEVEL%] %TIMESTAMP%@%CLASS% - %MESSAGE%',
 			'log_level' => 'debug,info,warn,error,fatal',
 			'email_level' => 'error,fatal',

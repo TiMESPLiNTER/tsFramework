@@ -1,6 +1,8 @@
 <?php
 namespace ch\timesplinter\core;
 
+use ch\timesplinter\controller\StaticPageController;
+
 /**
  * Description of ErrorHandler
  *

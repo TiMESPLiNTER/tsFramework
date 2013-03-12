@@ -47,7 +47,7 @@ class Autoloader extends core\Observable {
 	 */
 	public function register() {
 		spl_autoload_register(array($this, 'doAutoload'));
-		$this->logger = LoggerFactory::getLoggerByName('dev', $this);
+		//$this->logger = LoggerFactory::getLoggerByName('dev', $this);
 	}
 
 	/**
@@ -101,7 +101,7 @@ class Autoloader extends core\Observable {
 		}
 		
 		if($includePath === null) {
-			$this->logger->error('Could not find class \'' . $class_name . '\' expected at \'' . dirname (FW_DIR . $classPath) . '\' or \'' . dirname(FW_DIR . $internal . $classPath) . '\'');
+			//$this->logger->error('Could not find class \'' . $class_name . '\' expected at \'' . dirname (FW_DIR . $classPath) . '\' or \'' . dirname(FW_DIR . $internal . $classPath) . '\'');
 			throw new AutoloaderException('Could not find class \'' . $class_name . '\' expected at \'' . dirname (FW_DIR . $classPath) . '\' or \'' . dirname(FW_DIR . $internal . $classPath) . '\'');
 		}
 		

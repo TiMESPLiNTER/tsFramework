@@ -33,7 +33,8 @@ class StaticPageController extends PageController {
 			$this->activeHtmlIds = $pageData->$routeID->active;
 		
 		$html = self::render($routeID, array(
-			'siteTitle' => isset($pageData->$routeID->title)?$pageData->$routeID->title:null
+			'siteTitle' => isset($pageData->$routeID->title)?$pageData->$routeID->title:null,
+			'runtime' => round(microtime(true) - REQUEST_TIME,3)  
 		));
 		//var_dump($domains[$this->core->getRequestHandler()->getRequestDomain()]->locale);
 		$headers = array(
