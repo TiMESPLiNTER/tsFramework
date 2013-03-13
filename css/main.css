@@ -103,7 +103,7 @@ h1 a:hover {
     color: #666;
 
     padding: 0 9px;
-    border: 1px solid #a4a4a4;
+    border: 1px solid #a8a8a8;
 }
 
 .nav ul li.active a:hover {
@@ -234,7 +234,7 @@ code {
     line-height: 70px;
     border-right: 1px solid #ccc;
     margin: 0 0 10px 0;
-    padding: 10px 20px 15px 0;
+    padding: 10px 25px 15px 0;
     color: #aaa;
     text-shadow: 0 1px 0 #f4f4f4;
 }
@@ -249,7 +249,7 @@ code {
 .error-content {
     float: left;
     border-left: 1px solid #ccc;
-    padding: 10px 0 0 15px;
+    padding: 10px 0 0 25px;
     margin: 0 0 0 -1px;
 }
 

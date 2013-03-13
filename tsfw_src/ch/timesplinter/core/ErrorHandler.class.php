@@ -1,6 +1,7 @@
 <?php
 namespace ch\timesplinter\core;
 
+use ch\timesplinter\core\Core;
 use ch\timesplinter\controller\StaticPageController;
 
 /**
@@ -11,8 +12,8 @@ use ch\timesplinter\controller\StaticPageController;
 class ErrorHandler {
 	private $core;
 	
-	public function __construct() {
-		
+	public function __construct(Core $core) {
+		$this->core = $core;
 	}
 	
 	public function register() {
@@ -34,6 +35,14 @@ class ErrorHandler {
 				$errorStr = 'An unknown error occured. We\'re so sorry about that!';
 				break;
 		}
+
+        $language = $this->core->getLocaleHandler()->getLanguage();
+        $messages = $this->core->getSettings()->errorhandling->messages;
+
+        if($language === false)
+            $language = 'en';
+
+        $errorStr = isset($messages->$errorCode)?$messages->$errorCode->$language:$messages->default->$language;
 		
 		$pc = new StaticPageController($this->core, $httpRequest, new Route());
 		
@@ -78,10 +87,6 @@ class ErrorHandler {
 		
 		ob_end_flush();
 		exit;
-	}
-	
-	public function setCore(Core $core) {
-		$this->core = $core;
 	}
 }
 

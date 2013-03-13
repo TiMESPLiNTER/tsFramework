@@ -17,11 +17,11 @@ define('CACHE_DIR' , SITE_ROOT . 'cache' . DIRECTORY_SEPARATOR);
 define('SETTINGS_DIR' , SITE_ROOT . 'settings' . DIRECTORY_SEPARATOR);
 
 // Initalize ErrorHandler
-require FW_DIR . 'ch/timesplinter/core/FrameworkException.class.php';
+/*require FW_DIR . 'ch/timesplinter/core/FrameworkException.class.php';
 require FW_DIR . 'ch/timesplinter/core/PHPException.class.php';
 require FW_DIR . 'ch/timesplinter/core/ErrorHandler.class.php';
 $errorHandler = new ErrorHandler();
-$errorHandler->register();
+$errorHandler->register();*/
 
 // Initialize Autoloader
 require FW_DIR . 'ch/timesplinter/core/Observable.class.php';
@@ -32,8 +32,6 @@ $autoloader->register();
 
 $core = new Core();
 
-$errorHandler->setCore($core);
-$core->setErrorHandler($errorHandler);
 $core->sendResponse();
 
 /* EOF */

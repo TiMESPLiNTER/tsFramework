@@ -32,6 +32,9 @@ class Core {
 	private $httpResponse;
 	
 	public function __construct() {
+        $this->errorHandler = new ErrorHandler($this);
+        $this->errorHandler->register();
+
 		$this->settings = new Settings(SETTINGS_DIR);
 		$this->localeHandler = new LocaleHandler($this);
 		$this->sessionHandler = new SessionHandler($this);
@@ -90,8 +93,10 @@ class Core {
 		
 		$this->invokePluginHook('beforeRequestBuilt');
 		
-		$this->httpRequest = self::createHttpRequest();
-		
+		$this->httpRequest = $this->createHttpRequest();
+
+        $this->localeHandler->localize($this->httpRequest);
+
 		$this->invokePluginHook('afterRequestBuilt');
 		
 		$currentDomain = DomainUtils::getDomainInfo($this->settings->core->domains, $this->httpRequest->getHost());
@@ -149,14 +154,14 @@ class Core {
 	/**
 	 * 
 	 * @param array $routes
-	 * @param \HttpRequest $httpRequest
 	 * @return \HttpResponse The response of the controller method
+     * @throws CoreException
 	 */
 	public function processPage($routes) {
 		$requestSSLRequired = false;
 		$controllers = array();
 		
-		foreach($routes as $m => $r) {
+		foreach($routes as $r) {
 			if($r->sslRequired === true)
 				$requestSSLRequired = true;
 			
@@ -177,7 +182,7 @@ class Core {
 		elseif($requestSSLRequired === false && $this->httpRequest->getProtocol() !== HttpRequest::PROTOCOL_HTTP)
 			RequestHandler::redirect($this->httpRequest->getURL(HttpRequest::PROTOCOL_HTTP));
 		
-		$this->localeHandler->localize($this->httpRequest);
+		//$this->localeHandler->localize($this->httpRequest);
 		
 		
 		/** @var $c FrameworkController */
@@ -187,7 +192,7 @@ class Core {
 		$response = call_user_func(array($controllers[$route->controllerClass],$route->controllerMethod));
 		
 		if(($response instanceof HttpResponse) === false)
-			throw new FrameworkException('Return value of the controller method is not an object of type HttpResponse');
+			throw new CoreException('Return value of the controller method is not an object of type HttpResponse but of ' . get_class($response));
 		
 		return $response;
 	}
@@ -219,15 +224,7 @@ class Core {
 	public function getSettings() {
 		return $this->settings;
 	}
-	
-	public function setSettings(Settings $settings) {
-		$this->settings = $settings;
-	}
-	
-	public function setErrorHandler(ErrorHandler $errorHandler) {
-		$this->errorHandler = $errorHandler;
-	}
-	
+
 	/**
 	 * 
 	 * @return RequestHandler
@@ -235,8 +232,11 @@ class Core {
 	public function getRequestHandler() {
 		return $this->requestHandler;
 	}
-	
-	public function getLocaleHandler() {
+
+    /**
+     * @return LocaleHandler
+     */
+    public function getLocaleHandler() {
 		return $this->localeHandler;
 	}
 	

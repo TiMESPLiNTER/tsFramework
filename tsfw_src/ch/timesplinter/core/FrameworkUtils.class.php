@@ -30,6 +30,17 @@ class FrameworkUtils {
 		
 		return (is_array($os) === true)?in_array($currOS, $os):($currOS === $os);
 	}
+
+    public static function stringToClassName($str, $seperator = ':') {
+        $classParts = explode($seperator, $str);
+
+        $returnValue = new \stdClass();
+
+        $returnValue->methodName = array_pop($classParts);
+        $returnValue->className = implode('/', $classParts);
+
+        return $returnValue;
+    }
 	
 	public static function preparePath($pathStr) {
 		return str_replace(array('/','\\'), array(DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR), $pathStr);
