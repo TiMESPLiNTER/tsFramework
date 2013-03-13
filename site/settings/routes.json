@@ -3,8 +3,14 @@
 		"home": {
 			"pattern": "/home",
 			"controller": "ch:timesplinter:controller:StaticPageController:getPage",
-			"method": "GET"/*,
-			"sslRequired": true*/
-		}
+			"method": "GET"
+
+		},
+
+        "basic-usage": {
+            "pattern": "/basic-usage",
+            "controller": "ch:timesplinter:controller:StaticPageController:getPage",
+            "method": "GET"
+        }
 	}
 }

@@ -14,8 +14,8 @@ class LoggerFactory {
 
 	/**
 	 * 
-	 * @param type $loggerName
-	 * @param type $classContext
+	 * @param string $loggerName
+	 * @param string $classContext
 	 * @return \Logger
 	 */
 	public static function getLoggerByName($loggerName, $classContext) {

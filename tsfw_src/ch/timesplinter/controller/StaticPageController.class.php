@@ -1,4 +1,5 @@
 <?php
+
 namespace ch\timesplinter\controller;
 
 use ch\timesplinter\logger\LoggerFactory;
@@ -32,7 +33,7 @@ class StaticPageController extends PageController {
 		if(isset($pageData->$routeID->active))
 			$this->activeHtmlIds = $pageData->$routeID->active;
 		
-		$html = self::render($routeID, array(
+		$html = $this->render($routeID, array(
 			'siteTitle' => isset($pageData->$routeID->title)?$pageData->$routeID->title:null,
 			'runtime' => round(microtime(true) - REQUEST_TIME,3)  
 		));
@@ -46,16 +47,12 @@ class StaticPageController extends PageController {
 	}
 	
 	public function getErrorPage($errorCode, $errorMsg) {
-		/*$domains = $this->core->getSettings()->getValue('core')->domains;
-		$currentDomain = DomainUtils::getDomainInfo($domains,$this->httpRequest->getHost());
-		//echo $errorCode; exit;
-		if($currentDomain === null) {
-			$html = '<html><body><h1>Error ' . $errorCode . '</h1><p>' . $errorMsg . '</p></body></html>';
-		} else {		*/
-			$html = self::render('error', array('siteTitle' => 'Error ' . $errorCode, 'error_msg' => $errorMsg));
-		//}
-			
-		//var_dump($domains[$this->core->getRequestHandler()->getRequestDomain()]->locale);
+		$html = $this->render('error', array(
+			'siteTitle' => 'Error ' . $errorCode,
+			'error_code' => $errorCode,
+			'error_msg' => $errorMsg
+		));
+
 		$headers = array(
 			 'Content-Type' => 'text/html; charset=UTF-8'
 			,'Content-Language' => $this->core->getLocaleHandler()->getLanguage()
@@ -65,4 +62,4 @@ class StaticPageController extends PageController {
 	}
 }
 
-?>
+/* EOF */

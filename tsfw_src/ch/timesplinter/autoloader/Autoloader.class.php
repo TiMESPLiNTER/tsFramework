@@ -1,4 +1,5 @@
 <?php
+
 namespace ch\timesplinter\autoloader;
 
 use ch\timesplinter\core as core;
@@ -14,7 +15,7 @@ use ch\timesplinter\logger\LoggerFactory;
 class Autoloader extends core\Observable {
 	const CACHING_FILE = 'cache.autoload';
 
-	private $logger;
+	//private $logger;
 	private $cachedClasses;
 	private $cachedClassesChanged;
 	private $cacheFile;
@@ -29,7 +30,6 @@ class Autoloader extends core\Observable {
 
 	/**
 	 * Fills the cache array with the known classes
-	 * @return
 	 */
 	private function loadCache() {
 		$cacheFile = $this->cacheFile;
@@ -52,8 +52,8 @@ class Autoloader extends core\Observable {
 
 	/**
 	 * Autoloads a class from the cache file or the file system
-	 * @param	String $class_name
-	 * @return
+	 * @param $class_name string Name of the class to be loaded
+	 * @throws AutoloaderException
 	 */
 	private function doAutoload($class_name) {
 		if(class_exists($class_name) === true)
@@ -135,7 +135,6 @@ class Autoloader extends core\Observable {
 
 	/**
 	 * Writes the new entries into the cache file (if there are any)
-	 * @return
 	 */
 	public function __destruct() {
 		if($this->cachedClassesChanged === false) {
@@ -149,4 +148,4 @@ class Autoloader extends core\Observable {
 	}
 }
 
-?>
+/* EOF */
