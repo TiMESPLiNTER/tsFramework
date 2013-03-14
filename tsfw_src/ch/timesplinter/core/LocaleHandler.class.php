@@ -3,6 +3,7 @@ namespace ch\timesplinter\core;
 
 use ch\timesplinter\common;
 use ch\timesplinter\core\Core;
+use ch\timesplinter\core\HttpRequest;
 
 /**
  * Description of LocaleHandler
@@ -19,16 +20,15 @@ class LocaleHandler {
 		$this->core = $core;
 		$this->locale = null;
 	}
-	
+
 	/**
-	 * 
-	 * @param \HttpRequest $httpRequest
-	 * @return void
+	 *
+	 * @param HttpRequest $httpRequest
 	 */
 	public function localize(HttpRequest $httpRequest) {
 		/** @var Domain */
 		$currentDomain = DomainUtils::getDomainInfo($this->core->getSettings()->core->domains, $httpRequest->getHost());
-		$domainLocale = $currentDomain->localization;
+		$domainLocale = ($currentDomain !== null)?$currentDomain->localization:$this->core->getSettings()->defaults->localization;
 		
 		if($domainLocale !== 'browser') {
 			setlocale(LC_ALL, $domainLocale);

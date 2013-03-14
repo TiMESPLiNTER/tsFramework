@@ -102,8 +102,8 @@ class Core {
 		$currentDomain = DomainUtils::getDomainInfo($this->settings->core->domains, $this->httpRequest->getHost());
 		
 		if($currentDomain === null) {
-			if(isset($this->settings->core->defaultDomain))
-				RequestHandler::redirect('http://' . $this->settings->core->defaultDomain);
+			if(isset($this->settings->defaults->domain))
+				RequestHandler::redirect('http://' . $this->settings->defaults->domain);
 			
 			return $this->errorHandler->displayHttpError(500, $this->httpRequest);
 		}
