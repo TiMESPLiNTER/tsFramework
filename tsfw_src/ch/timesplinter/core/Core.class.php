@@ -243,6 +243,10 @@ class Core {
 	public function getSessionHandler() {
 		return $this->sessionHandler;
 	}
+
+	public function getErrorHandler() {
+		return $this->errorHandler;
+	}
 	
 	public function invokePluginHook($hookname) {
 		if(is_array($this->plugins) === false)

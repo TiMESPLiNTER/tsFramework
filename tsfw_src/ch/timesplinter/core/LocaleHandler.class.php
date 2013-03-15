@@ -1,7 +1,7 @@
 <?php
 namespace ch\timesplinter\core;
 
-use ch\timesplinter\common;
+use ch\timesplinter\common\StringUtils;
 use ch\timesplinter\core\Core;
 use ch\timesplinter\core\HttpRequest;
 
@@ -27,40 +27,53 @@ class LocaleHandler {
 	 */
 	public function localize(HttpRequest $httpRequest) {
 		/** @var Domain */
+		$localesAvailable = $this->core->getSettings()->locales;
 		$currentDomain = DomainUtils::getDomainInfo($this->core->getSettings()->core->domains, $httpRequest->getHost());
+
+		//var_dump($currentDomain, $localesAvailable);
+
 		$domainLocale = ($currentDomain !== null)?$currentDomain->localization:$this->core->getSettings()->defaults->localization;
-		
-		if($domainLocale !== 'browser') {
-			setlocale(LC_ALL, $domainLocale);
-			$this->locale = $domainLocale;
-		} else {
-			$locales = self::detectBrowserLocalization($httpRequest->getLanguages());
-			
-			if(FrameworkUtils::isOS(FrameworkUtils::OS_WINDOWS) === true)
-				$locales = self::translateLocales($locales);
-			
-			foreach($locales as $k => $l) {
-				if(setlocale(LC_ALL, $l) !== false) {
-					$this->locale = $k;
-					return;
+
+		$locales = ($domainLocale === 'browser')?$this->detectBrowserLocalization($httpRequest->getLanguages()):array($domainLocale => 1.0);
+
+		// Try to set browser locale or fix domain locale
+		$settedLocale = $this->setLocale(array_keys($locales));
+
+		// Try to set fallback locale if browser or fix locale not worked
+		$this->locale = ($settedLocale !== false)?$settedLocale:$this->setLocale(array($this->core->getSettings()->defaults->localization));
+
+
+		$this->timezone = isset($currentDomain)?$currentDomain->timezone:$this->core->getSettings()->defaults->timezone;
+		date_default_timezone_set($this->timezone);
+	}
+
+	private function setLocale($locales) {
+		foreach($locales as $l) {
+			if(!isset($this->core->getSettings()->locales->$l))
+				continue;
+
+			$localeNames = $this->core->getSettings()->locales->$l->names;
+
+			foreach($localeNames as $ln) {
+				if(setlocale(LC_ALL, $ln) !== false) {
+					return $ln;
 				}
 			}
 		}
-		
-		$this->timezone = $currentDomain->timezone;
-		date_default_timezone_set($currentDomain->timezone);
+
+		return false;
 	}
 	
 	public function detectBrowserLocalization($acceptedLangs) {
 		$langs = array();
-		
+
 		foreach($acceptedLangs as $lang => $prio) {
-			$localeStrLang = common\StringUtils::beforeFirst($lang, '-');
-			$localeStrCountry = common\StringUtils::afterFirst($lang, '-');
+			$localeStrLang = StringUtils::beforeFirst($lang, '-');
+			$localeStrCountry = StringUtils::afterFirst($lang, '-');
+
+			$val = $localeStrLang . (($localeStrCountry !== null)? '_' . strtoupper($localeStrCountry):null);
 			
-			$val = $localeStrLang . '_' . strtoupper(($localeStrCountry !== null)?$localeStrCountry:$localeStrLang);
-			
-			 $langs[$val] = $val;
+			 $langs[$val] = $prio;
 		}
 		
 		return $langs;

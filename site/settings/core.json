@@ -6,7 +6,6 @@
 	"@resources": [
 		"domains.json", // all the routes for this site
 		"routes.json", // all the routes for this site
-		"locales.json", // the available locales for this site
 		"plugins.json" // the plugins to use for this site
 	],
 	
