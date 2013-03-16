@@ -1,4 +1,5 @@
 <?php
+
 namespace ch\timesplinter\core;
 
 /**
@@ -23,10 +24,6 @@ class RequestHandler {
 		
 		exit;
 	}
-
-	public function getRequestArray() {
-		return $this->requestArray;
-	}
 }
 
-?>
+/* EOF */

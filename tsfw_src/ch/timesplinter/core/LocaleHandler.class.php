@@ -56,7 +56,7 @@ class LocaleHandler {
 
 			foreach($localeNames as $ln) {
 				if(setlocale(LC_ALL, $ln) !== false) {
-					return $ln;
+					return $l;
 				}
 			}
 		}

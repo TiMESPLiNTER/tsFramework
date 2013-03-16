@@ -51,7 +51,7 @@ class Core {
 	
 	/**
 	 * 
-	 * @return \HttpRequest
+	 * @return HttpRequest
 	 */
 	private function createHttpRequest() {
 		$protocol = (isset($_SERVER['HTTPS']) === true && $_SERVER['HTTPS'] === 'on') ? HttpRequest::PROTOCOL_HTTPS : HttpRequest::PROTOCOL_HTTP;
@@ -95,10 +95,10 @@ class Core {
 		
 		$this->httpRequest = $this->createHttpRequest();
 
+        $this->invokePluginHook('afterRequestBuilt');
+
         $this->localeHandler->localize($this->httpRequest);
 
-		$this->invokePluginHook('afterRequestBuilt');
-		
 		$currentDomain = DomainUtils::getDomainInfo($this->settings->core->domains, $this->httpRequest->getHost());
 		
 		if($currentDomain === null) {
@@ -188,7 +188,7 @@ class Core {
 		/** @var $c FrameworkController */
 		$route = ($this->httpRequest->getRequestMethod() === 'POST' && isset($routes['POST']))?$routes['POST']:$routes['GET'];
 		
-		/** @var ch\timesplinter\core\HttpResponse $httpResponse */
+		/** @var HttpResponse $httpResponse */
 		$response = call_user_func(array($controllers[$route->controllerClass],$route->controllerMethod));
 		
 		if(($response instanceof HttpResponse) === false)
