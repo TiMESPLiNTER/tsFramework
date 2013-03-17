@@ -4,9 +4,9 @@ namespace ch\timesplinter\core;
 /**
  * Description of PHPException
  *
- * @author Pascal Münst
- * @copyright Copyright (c) 2012, Metanet AG
- * @version 1.0
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2012, TiMESPLiNTER
+ * @version 1.0.0
  */
 class PHPException extends FrameworkException {
 	private $errorFile;
@@ -55,4 +55,4 @@ class PHPException extends FrameworkException {
 	}
 }
 
-?>
+/* EOF */

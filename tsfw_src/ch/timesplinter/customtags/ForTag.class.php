@@ -1,7 +1,8 @@
 <?php
 namespace ch\timesplinter\customtags;
 
-use 
+use ch\timesplinter\logger\TSLogger;
+use
  ch\timesplinter\template\TemplateEngine
 ,ch\timesplinter\template\TemplateTag
 ,ch\timesplinter\template\TagNode
@@ -22,7 +23,7 @@ class ForTag extends TemplateTag implements TagNode {
 	private $logger;
 	
 	public function __construct() {
-		$this->logger = LoggerFactory::getLoggerByName('dev',$this);
+		$this->logger = TSLogger::getLoggerByName('dev',$this);
 		
 		parent::__construct('for', false);
 	}

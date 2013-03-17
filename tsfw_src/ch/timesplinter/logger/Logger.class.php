@@ -1,33 +1,38 @@
 <?php
 namespace ch\timesplinter\logger;
 
+use \Exception;
+
 /**
  * the basic logger class
  *
- * @author Pascal Münst <dev@timesplinter.ch>
- * @copyright Copyright (c) 2012, METANET AG, www.metanet.ch
- * @version 1.0
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2012, TiMESPLiNTER
+ * @version 1.0.0
  */
 abstract class Logger {
-
 	const TYPE_FILE = 'file';
 	const TYPE_STDOUT = 'stdout';
 	const TYPE_DB = 'db';
+
 	const LEVEL_FATAL = 'fatal';
 	const LEVEL_ERROR = 'error';
 	const LEVEL_WARN = 'warn';
 	const LEVEL_INFO = 'info';
 	const LEVEL_DEBUG = 'debug';
+
 	const PATTERN_TIMESTAMP = '%TIMESTAMP%';
 	const PATTERN_LEVEL = '%LEVEL%';
 	const PATTERN_MESSAGE = '%MESSAGE%';
 	const PATTERN_CLASS = '%CLASS%';
+    const PATTERN_CLASSNAME = '%CLASSNAME%';
 
 	protected $classContext;
 	protected $loglevels;
 
-	public function __construt($classContext) {
+	public function __construt($classContext, $loglevels) {
 		$this->classContext = (is_object($classContext)) ? get_class($classContext) : $classContext;
+        $this->loglevels = $loglevels;
 	}
 
 	private function checkLevel($level) {
@@ -43,10 +48,9 @@ abstract class Logger {
 	 * Logs an error with optional exception
 	 * @param string $msg
 	 * @param Exception $e
-	 * @param array $vars
 	 */
 	public function error($msg, Exception $e = null) {
-		if(self::checkLevel(self::LEVEL_ERROR) !== true)
+		if($this->checkLevel(self::LEVEL_ERROR) !== true)
 			return;
 
 		if($e !== null)
@@ -58,10 +62,9 @@ abstract class Logger {
 	/**
 	 * Logs a warning
 	 * @param type $msg
-	 * @param type $vars
 	 */
 	public function warn($msg) {
-		if(self::checkLevel(self::LEVEL_WARN) !== true)
+		if($this->checkLevel(self::LEVEL_WARN) !== true)
 			return;
 
 		$this->writeMessage(self::LEVEL_WARN, $msg);
@@ -69,11 +72,11 @@ abstract class Logger {
 
 	/**
 	 * Logs an information
-	 * @param type $msg
+	 * @param string $msg
 	 * @return type
 	 */
 	public function info($msg) {
-		if(self::checkLevel(self::LEVEL_INFO) !== true)
+		if($this->checkLevel(self::LEVEL_INFO) !== true)
 			return;
 
 		$this->writeMessage(self::LEVEL_INFO, $msg);
@@ -85,7 +88,7 @@ abstract class Logger {
 	 * @param array $vars
 	 */
 	public function debug($msg, $vars = array()) {
-		if(self::checkLevel(self::LEVEL_DEBUG) !== true)
+		if($this->checkLevel(self::LEVEL_DEBUG) !== true)
 			return;
 
 		if(!is_array($vars))
@@ -135,4 +138,4 @@ abstract class Logger {
 
 }
 
-?>
+/* EOF */

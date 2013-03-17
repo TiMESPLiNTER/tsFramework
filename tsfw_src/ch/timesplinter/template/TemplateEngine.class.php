@@ -6,6 +6,7 @@ use ch\timesplinter\htmlparser\HtmlDoc;
 use ch\timesplinter\htmlparser\ElementNode;
 use ch\timesplinter\htmlparser\TextNode;
 use ArrayObject;
+use ch\timesplinter\logger\TSLogger;
 
 /**
  * TemplateEngine
@@ -42,7 +43,7 @@ class TemplateEngine {
 	 * @return \TemplateEngine
 	 */
 	public function __construct(TemplateCache $tplCache, $tplFile, $tplNsPrefix) {
-		$this->logger = LoggerFactory::getLoggerByName('dev', $this);
+		$this->logger = TSLogger::getLoggerByName('dev', $this);
 
 		$this->templateCache = $tplCache;
 		$this->tplNsPrefix = $tplNsPrefix;

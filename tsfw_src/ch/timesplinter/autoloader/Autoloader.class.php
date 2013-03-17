@@ -8,9 +8,9 @@ use ch\timesplinter\logger\LoggerFactory;
 /**
  * automatically loads requested classes if they exist in classes (sub-)directory
  *
- * @author Pascal Münst
- * @copyright Copyright (c) 2012, METANET AG
- * @version	1.0
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2012, TiMESPLiNTER
+ * @version	1.0.0
  */
 class Autoloader extends core\Observable {
 	const CACHING_FILE = 'cache.autoload';

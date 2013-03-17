@@ -7,6 +7,7 @@ use ch\timesplinter\core\Core;
 use ch\timesplinter\core\HttpRequest;
 use ch\timesplinter\core\HttpResponse;
 use ch\timesplinter\core\Route;
+use ch\timesplinter\logger\TSLogger;
 
 /**
  * Description of StaticPageController
@@ -18,8 +19,8 @@ class StaticPageController extends PageController {
 	
 	public function __construct(Core $core, HttpRequest $httpRequest, Route $route) {
 		parent::__construct($core, $httpRequest, $route);
-		
-		$this->logger = LoggerFactory::getLoggerByName('dev', __CLASS__);
+
+		$this->logger = TSLogger::getLoggerByName('dev', $this);
 	}
 
 	/**
@@ -29,15 +30,17 @@ class StaticPageController extends PageController {
 	public function getPage() {
 		$pageData = $this->core->getSettings()->pagedata;
 		$routeID = $this->route->id;
-		
+
 		if(isset($pageData->$routeID->active))
 			$this->activeHtmlIds = $pageData->$routeID->active;
 		
 		$html = $this->render($routeID, array(
 			'siteTitle' => isset($pageData->$routeID->title)?$pageData->$routeID->title:null,
-			'runtime' => round(microtime(true) - REQUEST_TIME,3)  
+			'runtime' => round(microtime(true) - REQUEST_TIME,3) ,
+            'locale' => $this->core->getLocaleHandler()->getLocale(),
+            'timezone' => date_default_timezone_get()
 		));
-		//var_dump($domains[$this->core->getRequestHandler()->getRequestDomain()]->locale);
+
 		$headers = array(
 			 'Content-Type' => 'text/html; charset=UTF-8'
 			,'Content-Language' => $this->core->getLocaleHandler()->getLanguage()

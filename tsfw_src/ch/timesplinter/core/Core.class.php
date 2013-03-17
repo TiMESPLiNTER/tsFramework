@@ -6,6 +6,7 @@ use ch\timesplinter\logger\LoggerFactory;
 use ch\timesplinter\core\SessionHandler;
 use ch\timesplinter\core\Settings;
 use \DateTime;
+use ch\timesplinter\logger\TSLogger;
 
 /**
  * Description of Core
@@ -35,10 +36,13 @@ class Core {
         $this->errorHandler = new ErrorHandler($this);
         $this->errorHandler->register();
 
-		$this->settings = new Settings(SETTINGS_DIR);
+		$this->settings = new Settings(SETTINGS_DIR, array(
+            'fw_dir' => FW_DIR,
+            'site_root' => SITE_ROOT
+        ));
 		$this->localeHandler = new LocaleHandler($this);
 		$this->sessionHandler = new SessionHandler($this);
-		$this->logger = LoggerFactory::getLoggerByName('dev', $this);
+		$this->logger = TSLogger::getLoggerByName('dev', $this);
 		
 		$plugins = $this->settings->core->plugins;
 		
@@ -108,7 +112,6 @@ class Core {
 			return $this->errorHandler->displayHttpError(500, $this->httpRequest);
 		}
 		
-		//@TODO: File oder nicht, forbidden oder nicht?
 		if($this->httpRequest->getPath() === '/') {
 			// Load the default page as "virtual" httpRequest for the base url (no uri)
 			$routeId = (string)$currentDomain->startroute;

@@ -81,4 +81,4 @@ class IfTag extends TemplateTag implements TagNode {
 	}
 }
 
-?>
+/* EOF */

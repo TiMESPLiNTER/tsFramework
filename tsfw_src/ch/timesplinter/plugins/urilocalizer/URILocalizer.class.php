@@ -8,7 +8,7 @@ use ch\timesplinter\core\RequestHandler;
 use ch\timesplinter\core\RouteUtils;
 
 /**
- * This plugin takes the first dir in the URI as an language indicator. So an URI like /en/example will be matched
+ * This plugin takes the first dir in the URI as a language indicator. So an URI like /en/example will be matched
  * against /example and the /en will be taken to set the locale for the site.
  *
  * @author Pascal Muenst <dev@timesplinter.ch>

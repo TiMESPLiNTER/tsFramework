@@ -9,9 +9,7 @@ use
 ,ch\timesplinter\htmlparser\ElementNode
 ,ch\timesplinter\htmlparser\TextNode
 ,ch\timesplinter\htmlparser\HtmlNode
-,  ch\timesplinter\common\StringUtils
-,  ch\timesplinter\logger\LoggerFactory
-,	ch\timesplinter\template\TemplateEngineException
+,ch\timesplinter\template\TemplateEngineException
 ;
 
 /**
@@ -47,4 +45,4 @@ class ElseTag extends TemplateTag implements TagNode {
 
 }
 
-?>
+/* EOF */

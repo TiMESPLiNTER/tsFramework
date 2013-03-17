@@ -2,21 +2,21 @@
 namespace ch\timesplinter\logger;
 
 /**
- * a logger that logs messages directly on the screen (browser)
+ * A logger that logs messages directly on the screen (browser)
  *
- * @author Pascal Münst <dev@timesplinter.ch>
- * @copyright Copyright (c) 2012, METANET AG, www.metanet.ch
- * @version 1.0
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2012, TiMESPLiNTER
+ * @version 1.0.0
  */
 class StdOutLogger extends Logger {
 
 	private $pattern;
 	private $dtFormat;
 
-	public function __construct($classContext) {
+	public function __construct($classContext, $logLevels) {
 		ob_start();
 
-		parent::__construt($classContext);
+		parent::__construt($classContext, $logLevels);
 
 		$this->pattern = '%TIMESTAMP% - %MESSAGE%';
 		$this->dtFormat = 'Y-m-d H:i:s';

@@ -1,6 +1,8 @@
 <?php
 namespace ch\timesplinter\template;
 
+use ch\timesplinter\logger\TSLogger;
+
 /**
  * TemplateCache
  *
@@ -14,6 +16,7 @@ class TemplateCache {
 	private $registry;
 	private $cacheChanged;
 	private $saveOnDestruct;
+    private $logger;
 
 	public function __construct($cachePath, $filePath) {
 		if(file_exists($cachePath) === false)
@@ -57,7 +60,7 @@ class TemplateCache {
 		$fp = file_put_contents($cacheFilePath, json_encode($this->registry));
 
 		if($fp === false) {
-			$this->logger = LoggerFactory::getEnvLogger($this);
+			$this->logger = TSLogger::getEnvLogger('dev',$this);
 			$this->logger->error('Could not write template cache-file: ' . $cacheFilePath);
 		}
 	}
@@ -75,10 +78,10 @@ class TemplateCache {
 	}
 
 	/**
-	 *
 	 * @param string $tplFile
 	 * @param string $id
 	 * @param int $size
+     * @param int $changeTime
 	 */
 	public function addCachedTplFile($tplFile, $id, $size, $changeTime) {
 		$tplCacheEntry = new TemplateCacheEntry;
@@ -113,4 +116,4 @@ class TemplateCache {
 
 }
 
-?>
+/* EOF */
