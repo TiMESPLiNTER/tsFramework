@@ -42,7 +42,7 @@ abstract class Logger {
 		return false;
 	}
 
-	abstract function writeMessage($level, $msg, $vars = null);
+	protected abstract function writeMessage($level, $msg, $vars = null);
 
 	/**
 	 * Logs an error with optional exception

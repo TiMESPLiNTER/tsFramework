@@ -41,7 +41,6 @@ class TSLogger {
         } elseif($loggerSettings->type === 'Logger::TYPE_DB') {
             // @TODO implement the db logger
         } elseif($loggerSettings->type === 'Logger::TYPE_STDOUT') {
-            // @TODO implement the stdout logger
             $loggerInstance = new StdOutLogger($classContext, $loggerSettings->log_level);
 
             if(isset($loggerSettings->pattern))

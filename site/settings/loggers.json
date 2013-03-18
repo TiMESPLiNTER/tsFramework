@@ -6,7 +6,7 @@
         "log_level": "debug,info,warn,error,fatal",
         "email_level": "",
         "email_address": "error@example.com",
-        "maxfilesize": 0
+        "maxfilesize": 1024
     },
 
     "live": {

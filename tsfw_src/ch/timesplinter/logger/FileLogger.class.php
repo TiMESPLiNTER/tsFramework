@@ -30,8 +30,33 @@ class FileLogger extends Logger {
 		$this->logfilePath = str_ireplace(array_keys($repl), $repl, $logfilePath);
 
 		if($maxfilesize > 0) {
-			if(file_exists($this->logfilePath) && @filesize($this->logfilePath) > $maxfilesize)
-				rename($this->logfilePath, $this->logfilePath . '.' . date('YmdHis'));
+			if(file_exists($this->logfilePath) && filesize($this->logfilePath) > $maxfilesize) {
+				$filePathParts = explode(DIRECTORY_SEPARATOR, $this->logfilePath);
+				$fileName = array_pop($filePathParts);
+
+				$i = 0;
+				foreach(scandir(implode(DIRECTORY_SEPARATOR, $filePathParts)) as $f) {
+					if($pos = (strpos($f, $fileName)) === false)
+						continue;
+
+					$fileNum = substr($f, $pos + strlen($fileName) + 1);
+
+					if($fileNum > $i)
+						$i = $fileNum;
+				}
+
+				++$i;
+
+				$newFilename = $this->logfilePath . '.' . $i;
+
+				/* rename() does not work proper */
+				$fp = fopen($newFilename, 'a+');
+				fwrite($fp, file_get_contents($this->logfilePath));
+				fclose($fp);
+
+				$fp = fopen($this->logfilePath, 'w+');
+				fclose($fp);
+			}
 		}
 
 		$this->dtFormat = 'Y-m-d H:i:s';
@@ -43,7 +68,7 @@ class FileLogger extends Logger {
 	 * @param type $msg
 	 * @param type $vars
 	 */
-	public function writeMessage($level, $msg, $vars = null) {
+	protected  function writeMessage($level, $msg, $vars = null) {
 		// Because of date('u')-PHP-bug (always 00000)
 		$mtimeParts = explode(' ', microtime());
 

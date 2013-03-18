@@ -31,6 +31,8 @@ class StaticPageController extends PageController {
 		$pageData = $this->core->getSettings()->pagedata;
 		$routeID = $this->route->id;
 
+		$this->logger->info('Requested route: ' . $routeID);
+
 		if(isset($pageData->$routeID->active))
 			$this->activeHtmlIds = $pageData->$routeID->active;
 		
