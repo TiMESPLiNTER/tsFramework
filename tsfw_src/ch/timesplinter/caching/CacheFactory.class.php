@@ -35,12 +35,12 @@ class CacheFactory {
 				
 				$instance = new MemcacheCache();
 				break;
-			case self::TYPE_PHPCACHE:
+			/*case self::TYPE_PHPCACHE:
 				if($selfInclude === true)
 					require FW_DIR . 'classes/caching/PHPCache.class.php';
 				
 				$instance = new PHPCache();
-				break;
+				break;*/
 			default:
 				if($selfInclude === true)
 					require FW_DIR . 'classes/caching/FileCache.class.php';

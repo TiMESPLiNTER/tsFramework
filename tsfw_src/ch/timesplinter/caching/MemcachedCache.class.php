@@ -8,22 +8,39 @@ namespace ch\timesplinter\caching;
  * @copyright Copyright (c) 2012, Metanet AG
  * @version 1.0
  */
-class MemcachedCache extends Cache {
-	public function close() {
-		
-	}
 
-	public function getValue($key) {
-		
-	}
+use \Memcached;
+use \stdClass;
 
-	public function init() {
-		
-	}
+class MemcachedCache extends Memcached implements CacheInterface {
+    public function init(stdClass $settings)  {
+        $connection = false;
 
-	public function storeValue($key, $value) {
-		
-	}
+        foreach($settings->pool as $poolEntry) {
+            if($this->addServer($poolEntry->host, $poolEntry->port, $poolEntry->weight) !== false)
+                $connection = true;
+        }
+
+        if($connection === false)
+            throw new CacheException('Could not access cache');
+    }
+
+    public function close() {
+        if($this->quit() === false)
+            throw new CacheException('Could not close cache');
+    }
+
+    public function get($key) {
+        return $this->get($key);
+    }
+
+    public function put($key, $value, $expiration) {
+        $this->put($key, $value, $expiration);
+    }
+
+    public function delete($key) {
+        $this->delete($key);
+    }
 }
 
-?>
+/* EOF */

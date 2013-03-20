@@ -43,12 +43,12 @@ class Core {
 		$this->localeHandler = new LocaleHandler($this);
 		$this->sessionHandler = new SessionHandler($this);
 		$this->logger = TSLogger::getLoggerByName('dev', $this);
-		
+
 		$plugins = $this->settings->core->plugins;
-		
+
 		foreach($plugins as $plugin) {
 			$pluginClass = str_replace(':','\\',$plugin);
-			
+
 			$this->plugins[] = new $pluginClass($this);
 		}
 	}
@@ -96,7 +96,7 @@ class Core {
 		$this->sessionHandler->start();
 		
 		$this->invokePluginHook('beforeRequestBuilt');
-		
+
 		$this->httpRequest = $this->createHttpRequest();
 
         $this->invokePluginHook('afterRequestBuilt');
