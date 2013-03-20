@@ -31,13 +31,21 @@ class FrameworkUtils {
 		return (is_array($os) === true)?in_array($currOS, $os):($currOS === $os);
 	}
 
-    public static function stringToClassName($str, $seperator = ':') {
+	/**
+	 * @param $str The full qualified namespace
+	 * @param string $seperator
+	 * @param bool $methodIncluded
+	 * @return \stdClass Contains two properties: $className - The class name, $methodName - The method name
+	 */
+	public static function stringToClassName($str, $seperator = ':', $methodIncluded = true) {
         $classParts = explode($seperator, $str);
 
         $returnValue = new \stdClass();
 
-        $returnValue->methodName = array_pop($classParts);
-        $returnValue->className = implode('/', $classParts);
+		if($methodIncluded === true)
+            $returnValue->methodName = array_pop($classParts);
+
+        $returnValue->className = implode('\\', $classParts);
 
         return $returnValue;
     }

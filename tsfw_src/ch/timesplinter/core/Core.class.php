@@ -167,7 +167,7 @@ class Core {
 		foreach($routes as $r) {
 			if($r->sslRequired === true)
 				$requestSSLRequired = true;
-			
+
 			$className = $r->controllerClass;
 			
 			if(!isset($controllers[$className])) {

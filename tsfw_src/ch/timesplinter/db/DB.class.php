@@ -35,37 +35,37 @@ abstract class DB extends PDO {
 	 * @param String $className The mapped class name
 	 * @return array
 	 */
-	abstract public function selectAsObjects(PDOStatement $stmnt, $className, $params = array());
+	abstract public function selectAsObjects(PDOStatement $stmnt, $className, array $params = array());
 
 	/**
 	 * Returns the result as an array of anonymous objects
 	 * @param PDOStatement $stmnt The prepared statement
-	 * @param ArrayObject $params The parameters for the prepared statement
+	 * @param array $params The parameters for the prepared statement
 	 * @return array
 	 */
-	abstract public function select(PDOStatement $stmnt, ArrayObject $params = array());
+	abstract public function select(PDOStatement $stmnt, array $params = array());
 
 	/**
 	 * Inserts a prepared statement with the given parameters
 	 * @param PDOStatement $stmnt The prepared statement
-	 * @param ArrayObject $params The paremeters for the prepared statement
+	 * @param array $params The paremeters for the prepared statement
 	 * @return int ID of inserted row
 	 */
-	abstract public function insert(PDOStatement $stmnt, ArrayObject $params = array());
+	abstract public function insert(PDOStatement $stmnt, array $params = array());
 
 	/**
 	 * @param PDOStatement $stmnt
-	 * @param ArrayObject $params
+	 * @param array $params
 	 * @return int Affected rows
 	 */
-	abstract public function update(PDOStatement $stmnt, ArrayObject $params);
+	abstract public function update(PDOStatement $stmnt, array $params);
 
 	/**
 	 * @param PDOStatement $stmnt
-	 * @param ArrayObject $params
+	 * @param array $params
 	 * @return int Affected rows
 	 */
-	abstract public function delete(PDOStatement $stmnt, $params);
+	abstract public function delete(PDOStatement $stmnt, array $params);
 
 	/**
 	 * Returns the DBConnect object with the current used connection

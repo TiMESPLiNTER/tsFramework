@@ -4,6 +4,8 @@ namespace ch\timesplinter\db;
 
 use ch\timesplinter\db\DB;
 use ch\timesplinter\db\DBConnect;
+use \PDO;
+use \PDOStatement;
 
 /**
  * Description of DBMySQL
@@ -53,7 +55,7 @@ class DBMySQL extends DB {
 		}
 	}
 
-	public function select(PDOStatement $stmnt, $params = array()) {
+	public function select(PDOStatement $stmnt, array $params = array()) {
 		$paramCount = count($params);
 
 		try {
@@ -72,7 +74,7 @@ class DBMySQL extends DB {
 	}
 
 // selectAsObjects($stmnt,$params,$className)
-	public function selectAsObjects(PDOStatement $stmnt, $className, $params = array()) {
+	public function selectAsObjects(PDOStatement $stmnt, $className, array $params = array()) {
 		$paramCount = count($params);
 
 		try {
@@ -90,7 +92,7 @@ class DBMySQL extends DB {
 		}
 	}
 
-	public function insert(PDOStatement $stmnt, $params = array()) {
+	public function insert(PDOStatement $stmnt, array $params = array()) {
 		$paramCount = count($params);
 
 		try {
@@ -108,7 +110,7 @@ class DBMySQL extends DB {
 		}
 	}
 
-	public function update(PDOStatement $stmnt, $params = array()) {
+	public function update(PDOStatement $stmnt, array $params = array()) {
 		$paramCount = count($params);
 
 		try {
@@ -126,7 +128,7 @@ class DBMySQL extends DB {
 		}
 	}
 
-	public function delete(PDOStatement $stmnt, $params) {
+	public function delete(PDOStatement $stmnt, array $params) {
 		$paramCount = count($params);
 
 		try {

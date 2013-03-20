@@ -115,6 +115,9 @@ class Autoloader extends core\Observable {
 	}
 
 	private function pharInclude($includePath, $classPath, $interfacePath) {
+		if(file_exists(FW_DIR . $includePath) === false)
+			return null;
+
 		$libs = scandir(FW_DIR . $includePath);
 		
 		foreach($libs as $lib) {

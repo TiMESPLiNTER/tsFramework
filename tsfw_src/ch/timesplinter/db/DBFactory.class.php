@@ -31,10 +31,10 @@ class DBFactory {
 		$instance = null;
 
 		switch($dbType) {
-			case DB::TYPE_MYSQL:
+			case 'mysql':
 				$instance = new DBMySQL($dbConnect);
 				break;
-			case DB::TYPE_POSTGRESQL:
+			case 'postgresql':
 				// not implemented yet
 				break;
 			default:

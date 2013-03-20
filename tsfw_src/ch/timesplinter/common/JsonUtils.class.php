@@ -12,12 +12,12 @@ use \Exception;
 class JsonUtils {
 
 	public static function decode($json, $toAssoc = false, $minified = true)  {
-        if($minified === false) {
+		if($minified === false) {
 			$json = self::minify($json);
 		}
-		
+
 		$result = json_decode($json, $toAssoc);
-		
+
 		$error = null;
 		
         switch(json_last_error()) {

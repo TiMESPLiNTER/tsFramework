@@ -38,8 +38,8 @@ class TemplateEngine {
 	/**
 	 * 
 	 * @param TemplateCache $tplCache
-	 * @param type $tplFile
-	 * @param type $tplNsPrefix
+	 * @param string $tplFile
+	 * @param string $tplNsPrefix
 	 * @return \TemplateEngine
 	 */
 	public function __construct(TemplateCache $tplCache, $tplFile, $tplNsPrefix) {

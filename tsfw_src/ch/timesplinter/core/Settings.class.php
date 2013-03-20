@@ -35,7 +35,7 @@ class Settings {
 			throw new SettingsException('Could not load settings file: ' . $filePath);
 	
 		$settingsObj = JsonUtils::decode($content, false, false);
-	
+
 		if($settingsObj === null)
 			throw new SettingsException('Invalid JSON code in settings file: ' . $filePath);
 
@@ -44,17 +44,17 @@ class Settings {
 
 		if(isset($settingsObj->{'@resources'}) === false)
 			return $settingsObj;
-		
+
 		foreach($settingsObj->{'@resources'} as $res) {
-			if(($loadedRes = self::loadSettingsFromFile($res)) === null)
+			if(($loadedRes = $this->loadSettingsFromFile($res)) === null)
 				continue;
-		
+
 			foreach($loadedRes as $k => $v)
 				$settingsObj->$k = isset($settingsObj->$k)?(object)array_merge((array)$settingsObj->$k, (array)$v):$v;
 		}
 		
 		unset($settingsObj->{'@resources'});
-	
+
 		return $settingsObj;
 	}
 
@@ -67,7 +67,7 @@ class Settings {
                 $this->interpolateObj($settingsObj->$k, $replace);
             elseif(is_array($settingsObj->$k))
                 $this->interpolateArray($settingsObj->$k, $replace);
-            else
+            elseif(is_string($v) === true)
                 $settingsObj->$k = strtr($v, $replace);
         }
     }
