@@ -7,6 +7,7 @@ use ch\timesplinter\htmlparser\ElementNode;
 use ch\timesplinter\htmlparser\TextNode;
 use ArrayObject;
 use ch\timesplinter\logger\TSLogger;
+use \Exception;
 
 /**
  * TemplateEngine
@@ -209,11 +210,19 @@ class TemplateEngine {
 	 * @return type
 	 */
 	public function getResultAsHtml() {
-		$cacheID = self::parse();
+		$cacheID = $this->parse();
 
-		ob_start();
-		require $this->templateCache->getCachePath() . $cacheID . '.cache';
-		return ob_get_clean();
+		try {
+			ob_start();
+			require $this->templateCache->getCachePath() . $cacheID . '.cache';
+			return ob_get_clean();
+		} catch(Exception $e) {
+			// Throw away the whole template code till now
+			ob_clean();
+
+			// Throw the exception again
+			throw $e;
+		}
 	}
 
 	private function cache() {
@@ -237,7 +246,7 @@ class TemplateEngine {
 		$this->htmlDoc->addSelfClosingTag('tst:loadSubTpl');
 		$this->htmlDoc->addSelfClosingTag('tst:checkbox');
 
-		self::load();
+		$this->load();
 
 		$htmlToReturn = $this->htmlDoc->getHtml();
 		$this->templateCache->setSaveOnDestruct(false);

@@ -172,7 +172,7 @@ class AuthHandlerDB extends AuthHandler {
 		$loginRes = $this->db->select($stmntLogin, array($this->userId));
 		
 		if(count($loginRes) <= 0) {
-			self::logout();
+			$this->logout();
 			
 			if(strpos(basename($_SERVER['REQUEST_URI']), self::LOGIN_SITE) !== 0) {
 				$_SESSION['pageAfterLogin'] = $_SERVER['REQUEST_URI'];
@@ -262,7 +262,48 @@ class AuthHandlerDB extends AuthHandler {
 		session_destroy();
 		
 		$this->sessionHandler->regenerateID();
+
+		$this->loggedIn = false;
+		$this->loginPopo = null;
+	}
+
+	/**
+	 * @param $email The email address of the account
+	 * @return bool Does the account exists or not
+	 */
+	public function accountExists($email) {
+		// E-Mail check
+		$stmntEmailCheck = $this->db->prepare("SELECT ID FROM login WHERE email = ?");
+		$resEmailCheck = $this->db->select($stmntEmailCheck, array($email));
+
+		return (count($resEmailCheck) > 0)?$resEmailCheck[0]->ID:false;
+	}
+
+	/**
+	 * @param $email The email address of the account the token should be generated
+	 * @return string The token
+	 */
+	public function generateToken($userID) {
+		$token = uniqid();
+
+		$stmntToken = $this->db->prepare("UPDATE login SET token = ?, tokentime = NOW() WHERE ID = ?");
+		$this->db->update($stmntToken, array($token, $userID));
+
+		return $token;
+	}
+
+	public function checkToken($token, $userID) {
+		$stmntTokenCheck = $this->db->prepare("
+			SELECT ID
+			FROM login
+			WHERE ID = ?
+			AND token = ?
+			AND DATE_ADD(tokentime, INTERVAL 1 DAY) < NOW()");
+
+		$resTokenCheck = $this->db->select($stmntTokenCheck, array($userID, $token));
+
+		return (count($resTokenCheck) > 0);
 	}
 }
 
-?>
+/* EOF */

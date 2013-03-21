@@ -1,0 +1,11 @@
+{
+	"mypath": {
+		"path": "${site_root}",
+		"mode": "namespace"
+	},
+
+	"swift-mailer": {
+		"path": "${site_root}libs/",
+		"mode": "underscore"
+	}
+}

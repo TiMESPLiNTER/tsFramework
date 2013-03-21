@@ -6,6 +6,9 @@ use ch\timesplinter\db\DBMySQL;
 use ch\timesplinter\db\DBConnect;
 use ch\timesplinter\db\DBException;
 
+use \Swift_Mime_SimpleMessage;
+use \Swift_Mime_HeaderSet;
+
 /**
  *
  *

@@ -28,6 +28,8 @@ require FW_DIR . 'ch/timesplinter/core/Observable.class.php';
 require FW_DIR . 'ch/timesplinter/autoloader/Autoloader.class.php';
 require FW_DIR . 'ch/timesplinter/autoloader/AutoloaderException.class.php';
 $autoloader = new Autoloader();
+$autoloader->addPath(FW_DIR, Autoloader::MODE_NAMESPACE);
+
 $autoloader->register();
 
 $core = new Core();

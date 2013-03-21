@@ -2,8 +2,9 @@
 
 namespace ch\timesplinter\autoloader;
 
-use ch\timesplinter\core as core;
+use ch\timesplinter\core\Observable;
 use ch\timesplinter\logger\LoggerFactory;
+use \stdClass;
 
 /**
  * automatically loads requested classes if they exist in classes (sub-)directory
@@ -12,15 +13,21 @@ use ch\timesplinter\logger\LoggerFactory;
  * @copyright Copyright (c) 2012, TiMESPLiNTER
  * @version	1.0.0
  */
-class Autoloader extends core\Observable {
+class Autoloader extends Observable {
 	const CACHING_FILE = 'cache.autoload';
+
+	const MODE_UNDERSCORE = 'underscore';
+	const MODE_NAMESPACE = 'namespace';
 
 	//private $logger;
 	private $cachedClasses;
 	private $cachedClassesChanged;
 	private $cacheFile;
 
+	private $loadPaths;
+
 	public function __construct() {
+		$this->loadPaths = array();
 		$this->cachedClasses = array();
 		$this->cachedClassesChanged = false;
 		$this->cacheFile = CACHE_DIR . self::CACHING_FILE;
@@ -51,6 +58,28 @@ class Autoloader extends core\Observable {
 	}
 
 	/**
+	 * Checks if a class is cached and returns the cached filepath. If not false is returned.
+	 * @param $className The classname to check if it's cached
+	 * @return bool|string The cached filepath or false
+	 */
+	private function isCached($className) {
+		if(isset($this->cachedClasses[$className]) === false)
+			return false;
+
+		$classPath = FW_DIR . $this->cachedClasses[$className];
+
+		if(file_exists($classPath) === true) {
+			self::notifyObservers($className);
+			return $classPath;
+		} elseif(file_exists('phar://' . $classPath) === true) {
+			self::notifyObservers($className);
+			return 'phar://' . $classPath;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Autoloads a class from the cache file or the file system
 	 * @param $class_name string Name of the class to be loaded
 	 * @throws AutoloaderException
@@ -58,60 +87,58 @@ class Autoloader extends core\Observable {
 	private function doAutoload($class_name) {
 		if(class_exists($class_name) === true)
 			return;
-		
-		if(isset($this->cachedClasses[$class_name]) === true) {
-			$classPath = FW_DIR . $this->cachedClasses[$class_name];
-			if(file_exists($classPath) === true) {
-				self::notifyObservers($class_name);
-				require $classPath; return;
-			} elseif(file_exists('phar://' . $classPath) === true) {
-				self::notifyObservers($class_name);
-				require 'phar://' . $classPath; return;
-			}
+
+
+		if(($includePath = $this->isCached($class_name)) !== false) {
+			echo 'loaded from cache: ' , $class_name , "\n";
+
+			require $includePath;
+			return;
 		}
 
-		$filePath = str_replace(array('\\','/'), DIRECTORY_SEPARATOR, $class_name);
-		$classPath = $filePath . '.class.php';
-		$interfacePath = $filePath . '.interface.php';
-		//$includePath = null;
-		$phar = false;
-		$internal = null;
-		
-		// Look in src directory
-		//$this->logger->debug('load: ' . FW_DIR . $classPath); 
-		if(file_exists(FW_DIR . $classPath) === true) {
-			$includePath = FW_DIR . $classPath;
-		} elseif(file_exists(FW_DIR . $interfacePath) === true) {
-			$includePath = FW_DIR . $interfacePath;
-		} else {
-			$includePath = self::pharInclude(MODULES_DIR, $classPath, $interfacePath);
-			if($includePath !== null)
-				$phar = true;
-		}
-		
-		// Look in site directory
-		if($includePath === null) {
-			$internal = 'site' . DIRECTORY_SEPARATOR;
-			//var_dump(FW_DIR . $internal . $classPath); exit;
-			if(file_exists(SITE_ROOT .  $classPath) === true) {
-				$includePath = SITE_ROOT . $classPath;
-			} elseif(file_exists(SITE_ROOT .  $interfacePath) === true) {
-				$includePath = SITE_ROOT . $interfacePath;
+		foreach($this->loadPaths as $path => $mode) {
+			$delimiter = null;
+
+			if($mode === self::MODE_NAMESPACE) {
+				$delimiter = '\\';
+			} elseif($mode === self::MODE_UNDERSCORE) {
+				$delimiter = '_';
+			} else {
+				throw new AutoloaderException('Unknown mode for path "' . $path . '": ' . $mode);
 			}
+
+			$phpFilePath = str_replace($delimiter, DIRECTORY_SEPARATOR, $class_name);
+
+			$classPath =  $path . $phpFilePath . '.class.php';
+			$interfacePath = $path . $phpFilePath . '.interface.php';
+
+			if(file_exists($classPath) === true) {
+				$this->doInclude($classPath, $class_name) ; return;
+			} elseif(file_exists($interfacePath) === true) {
+				$this->doInclude($interfacePath, $class_name); return;
+			}
+
+			$fallbackClassPath = $path . $phpFilePath . '.php';
+
+			if(file_exists($fallbackClassPath) === true) {
+				$this->doInclude($fallbackClassPath, $class_name) ; return;
+			}
+
+
+			//echo $classPath , '<br>';
+			//throw new AutoloaderException('Could not load class: ' . $class_name);
 		}
-		
-		if($includePath === null) {
-			//$this->logger->error('Could not find class \'' . $class_name . '\' expected at \'' . dirname (FW_DIR . $classPath) . '\' or \'' . dirname(FW_DIR . $internal . $classPath) . '\'');
-			throw new AutoloaderException('Could not find class \'' . $class_name . '\' expected at \'' . dirname (FW_DIR . $classPath) . '\' or \'' . dirname(FW_DIR . $internal . $classPath) . '\'');
-		}
-		
-		require  (($phar === true)?'phar://':null) . $includePath;
-		
-		self::setChanged();
-		self::notifyObservers($class_name);
-		
-		$this->cachedClasses[$class_name] = $includePath;
+
 		$this->cachedClassesChanged = true;
+	}
+
+	private function doInclude($includePath, $className) {
+		require $includePath;
+
+		$this->setChanged();
+		$this->notifyObservers($className);
+
+		$this->cachedClasses[$className] = $includePath;
 	}
 
 	private function pharInclude($includePath, $classPath, $interfacePath) {
@@ -134,6 +161,16 @@ class Autoloader extends core\Observable {
 		}
 		
 		return null;
+	}
+
+	public function addPath($absolutePath, $autoloadType) {
+		$this->loadPaths[$absolutePath] = $autoloadType;
+	}
+
+	public function addPathsFromSettings(stdClass $object) {
+		foreach($object as $o) {
+			$this->addPath($o->path, $o->mode);
+		}
 	}
 
 	/**

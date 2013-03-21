@@ -44,6 +44,10 @@ class Core {
 		$this->sessionHandler = new SessionHandler($this);
 		$this->logger = TSLogger::getLoggerByName('dev', $this);
 
+		$autoloaders = spl_autoload_functions();
+
+		call_user_func_array(array($autoloaders[0][0], 'addPathsFromSettings'), array($this->settings->autoloader));
+
 		$plugins = $this->settings->core->plugins;
 
 		foreach($plugins as $plugin) {
