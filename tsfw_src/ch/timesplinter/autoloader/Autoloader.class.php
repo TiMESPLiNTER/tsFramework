@@ -96,8 +96,11 @@ class Autoloader extends Observable {
 			return;
 		}
 
-		foreach($this->loadPaths as $path => $mode) {
+		foreach($this->loadPaths as $id => $pathOptions) {
 			$delimiter = null;
+
+			$path = $pathOptions['path'];
+			$mode = $pathOptions['mode'];
 
 			if($mode === self::MODE_NAMESPACE) {
 				$delimiter = '\\';
@@ -107,23 +110,22 @@ class Autoloader extends Observable {
 				throw new AutoloaderException('Unknown mode for path "' . $path . '": ' . $mode);
 			}
 
-			$phpFilePath = str_replace($delimiter, DIRECTORY_SEPARATOR, $class_name);
+			$classPathParts = explode($delimiter, $class_name);
 
-			$classPath =  $path . $phpFilePath . '.class.php';
-			$interfacePath = $path . $phpFilePath . '.interface.php';
+			// Throw first dir / array element away
+			array_shift($classPathParts);
 
-			if(file_exists($classPath) === true) {
-				$this->doInclude($classPath, $class_name) ; return;
-			} elseif(file_exists($interfacePath) === true) {
-				$this->doInclude($interfacePath, $class_name); return;
+			$phpFilePath = implode(DIRECTORY_SEPARATOR, $classPathParts);
+
+			foreach($pathOptions['class_suffix'] as $cs) {
+				$includePath = $path . $phpFilePath . $cs;
+
+				if(file_exists($includePath) === false)
+					continue;
+
+				$this->doInclude($includePath, $class_name);
+				return;
 			}
-
-			$fallbackClassPath = $path . $phpFilePath . '.php';
-
-			if(file_exists($fallbackClassPath) === true) {
-				$this->doInclude($fallbackClassPath, $class_name) ; return;
-			}
-
 
 			//echo $classPath , '<br>';
 			//throw new AutoloaderException('Could not load class: ' . $class_name);
@@ -163,13 +165,13 @@ class Autoloader extends Observable {
 		return null;
 	}
 
-	public function addPath($absolutePath, $autoloadType) {
-		$this->loadPaths[$absolutePath] = $autoloadType;
+	public function addPath($id, array $pathOptions) {
+		$this->loadPaths[$id] = $pathOptions;
 	}
 
-	public function addPathsFromSettings(stdClass $object) {
-		foreach($object as $o) {
-			$this->addPath($o->path, $o->mode);
+	public function addPathsFromSettings(stdClass $settingsObject) {
+		foreach($settingsObject as $k => $o) {
+			$this->addPath($k, (array)$o);
 		}
 	}
 

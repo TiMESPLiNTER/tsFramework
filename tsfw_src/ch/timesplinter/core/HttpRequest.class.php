@@ -11,7 +11,11 @@ use \DateTime;
 class HttpRequest {
 	const PROTOCOL_HTTP = 'http';
 	const PROTOCOL_HTTPS = 'https';
-	
+
+	const VAR_GET = '_GET';
+	const VAR_POST = '_POST';
+	const VAR_FILE = '_FILE';
+
 	private $protocol;
 	private $host;
 	private $port;
@@ -127,6 +131,23 @@ class HttpRequest {
 	
 	public function getURL($protocol) {
 		return $protocol . '://' . $this->host . $this->uri;
+	}
+
+	public function getVar($name, $type = self::VAR_GET) {
+		$vars = null;
+
+		if($type === '_GET') {
+			$vars = $_GET;
+		} elseif($type === '_POST') {
+			$vars = $_POST;
+		} elseif($type === '_FILES') {
+			$vars = $_FILES;
+		}
+
+		if(isset($vars[$name]) === false)
+			return null;
+
+		return $vars[$name];
 	}
 }
 

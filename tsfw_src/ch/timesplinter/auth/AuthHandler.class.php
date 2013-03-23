@@ -48,7 +48,7 @@ abstract class AuthHandler {
 	 * @param string userGroup
 	 * @return boolean 
 	 */
-	abstract function checkUG($userGroup);
+	abstract function hasRightgroup($userGroup);
 	
 	/**
 	 *
@@ -59,4 +59,4 @@ abstract class AuthHandler {
 	}
 }
 
-?>
+/* EOF */

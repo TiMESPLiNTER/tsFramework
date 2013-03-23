@@ -126,7 +126,11 @@ class Core {
 				
 		if($matchedRoute === null)
 			return $this->errorHandler->displayHttpError(404, $this->httpRequest);
-		
+
+		if(isset($matchedRoute['GET']) === false || count($matchedRoute['GET']) <= 0) {
+			return $this->errorHandler->displayHttpError(404, $this->httpRequest);
+		}
+
 		preg_match($matchedRoute['GET']->pattern, $this->httpRequest->getPath(), $res);
 		array_shift($res);
 		

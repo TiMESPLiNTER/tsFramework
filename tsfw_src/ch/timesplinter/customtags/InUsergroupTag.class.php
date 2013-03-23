@@ -2,7 +2,8 @@
 
 namespace ch\timesplinter\customtags;
 
-use 
+use ch\timesplinter\auth\AuthHandlerDB;
+use
  ch\timesplinter\template\TemplateEngine
 ,ch\timesplinter\template\TemplateTag
 ,ch\timesplinter\template\TagNode
@@ -41,13 +42,14 @@ class InUsergroupTag extends TemplateTag implements TagNode {
 	}
 
 	public static function checkUGs($usergroups, TemplateEngine $tplEngine) {
+		/** @var $auth AuthHandlerDB */
 		$auth = $tplEngine->getData('_auth');
 		
 		if($auth === null)
 			throw new TemplateEngineException('No auth object accessable');
 		
 		foreach($usergroups as $ug) {
-			if($auth->checkUG($ug) === true)
+			if($auth->hasRightgroup($ug) === true)
 				return true;
 		}
 

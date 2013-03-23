@@ -21,6 +21,8 @@ class OptionsTag extends TemplateTag implements TagNode {
 	}
 
 	public function replaceNode(TemplateEngine $tplEngine, ElementNode $node) {
+		TemplateEngine::checkRequiredAttrs($node, array('options', 'selected'));
+
 		// DATA
 		$compareValue = $node->getAttribute('selected')->value;
 

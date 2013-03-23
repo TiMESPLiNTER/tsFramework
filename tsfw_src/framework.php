@@ -28,7 +28,11 @@ require FW_DIR . 'ch/timesplinter/core/Observable.class.php';
 require FW_DIR . 'ch/timesplinter/autoloader/Autoloader.class.php';
 require FW_DIR . 'ch/timesplinter/autoloader/AutoloaderException.class.php';
 $autoloader = new Autoloader();
-$autoloader->addPath(FW_DIR, Autoloader::MODE_NAMESPACE);
+$autoloader->addPath('fw-logic', array(
+	'path' => FW_DIR . 'ch/', Autoloader::MODE_NAMESPACE,
+	'mode' => 'namespace',
+	'class_suffix' => array('.class.php', '.interface.php')
+));
 
 $autoloader->register();
 

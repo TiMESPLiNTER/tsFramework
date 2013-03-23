@@ -94,7 +94,11 @@ class AuthHandlerDB extends AuthHandler {
 
 			// Save old last login date
 			$_SESSION['lastlogin'] = $this->loginPopo->lastlogin;
-			
+
+			// Update new lastlogin
+			$lastLoginUpdateStmnt = $this->db->prepare("UPDATE login SET lastlogin = NOW() WHERE ID = ?");
+			$this->db->update($lastLoginUpdateStmnt, array($this->userId));
+
 			// Reset wrong login counter
 			//$this->loginPopo->wronglogins = 0;
 			//$this->loginPopo->lastlogin = date('Y-m-d H:i:s');
@@ -117,23 +121,30 @@ class AuthHandlerDB extends AuthHandler {
 	
 	private function loadRightGroups($userID) {
 		// Load grps
-		$stmntLoginGroups = $this->db->prepare(
-			"SELECT loginIDFK
+		$stmntLoginGroups = $this->db->prepare("
+			SELECT loginIDFK
 				   ,rightgroupIDFK
 				   ,datefrom
 				   ,dateto
 				   ,groupkey
 				   ,groupname
+				   ,root
 			FROM login_has_rightgroup lr
 			LEFT JOIN rightgroup r ON r.ID = lr.rightgroupIDFK
 			WHERE loginIDFK = ? 
 			  AND datefrom <= NOW() 
-			  AND (dateto >= NOW() OR dateto IS NULL)");
+			  AND (dateto >= NOW() OR dateto IS NULL)
+		");
 		
 		return $this->db->select($stmntLoginGroups, array($userID));
 	}
-	
-	public function checkUG($userGroup) {
+
+	/**
+	 * If a group as "root" setted to "1" then it's admin and has every rightgroup
+	 * @param $userGroup Key of the usergroup
+	 * @return bool
+	 */
+	public function hasRightgroup($userGroup) {
 		if($this->loginPopo === null)
 			return ($userGroup == 'visitor');
 		
@@ -146,7 +157,7 @@ class AuthHandlerDB extends AuthHandler {
 			return true;
 		
 		foreach($groupEntries as $rg) {
-			if($userGroup === $rg->groupkey)
+			if($userGroup === $rg->groupkey || $rg->root === 1)
 				return true;
 		}
 		
@@ -186,7 +197,7 @@ class AuthHandlerDB extends AuthHandler {
 		}
 				
 		$this->loginPopo = $loginRes[0];
-		$this->loginPopo->rightgroups = self::loadRightGroups($this->loginPopo->ID);
+		$this->loginPopo->rightgroups = $this->loadRightGroups($this->loginPopo->ID);
 		// Restore old last login date from current session
 		$this->loginPopo->lastlogin = array_key_exists('lastlogin', $_SESSION)?$_SESSION['lastlogin']:null;
 	}
@@ -298,7 +309,8 @@ class AuthHandlerDB extends AuthHandler {
 			FROM login
 			WHERE ID = ?
 			AND token = ?
-			AND DATE_ADD(tokentime, INTERVAL 1 DAY) < NOW()");
+			AND DATE_ADD(tokentime, INTERVAL 1 DAY) >= NOW()
+		");
 
 		$resTokenCheck = $this->db->select($stmntTokenCheck, array($userID, $token));
 
