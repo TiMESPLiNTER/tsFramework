@@ -8,9 +8,9 @@
 			"startroute": "/home"
 		},
 		
-		"tsfw.metdev.ch": {
+		"tsfw.localhost": {
 			/*"localization": "browser",*/
-            "localization": "en_US",
+            "localization": "uri",
 			"timezone": "Europe/Zurich",
 			"environment": "dev",
 			"template": "default",

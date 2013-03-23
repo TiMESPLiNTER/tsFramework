@@ -47,7 +47,8 @@
         "names": [
             "de_CH.UTF-8",
             "de_CH",
-            "german-swiss"
+            "german-swiss",
+            "swiss"
         ],
         "timezone": "Europe/Zurich"
     }
