@@ -1,12 +1,12 @@
 <?php
 namespace ch\timesplinter\template;
 
+use ch\timesplinter\core\FrameworkLoggerFactory;
 use ch\timesplinter\logger\LoggerFactory;
 use ch\timesplinter\htmlparser\HtmlDoc;
 use ch\timesplinter\htmlparser\ElementNode;
 use ch\timesplinter\htmlparser\TextNode;
 use ArrayObject;
-use ch\timesplinter\logger\TSLogger;
 use \Exception;
 
 /**
@@ -41,10 +41,10 @@ class TemplateEngine {
 	 * @param TemplateCache $tplCache
 	 * @param string $tplFile
 	 * @param string $tplNsPrefix
-	 * @return \TemplateEngine
+	 * @return TemplateEngine
 	 */
 	public function __construct(TemplateCache $tplCache, $tplFile, $tplNsPrefix) {
-		$this->logger = TSLogger::getLoggerByName('dev', $this);
+		$this->logger = FrameworkLoggerFactory::getLogger($this);
 
 		$this->templateCache = $tplCache;
 		$this->tplNsPrefix = $tplNsPrefix;
@@ -169,8 +169,7 @@ class TemplateEngine {
 
 	/**
 	 * This method parses the given template file
-	 * @param array $nodeList An OPTIONAL array of nodes to parse
-	 * @return
+	 * @return string The parsed template
 	 */
 	public function parse() {
 		$this->cached = self::isTplFileCached($this->tplFile);

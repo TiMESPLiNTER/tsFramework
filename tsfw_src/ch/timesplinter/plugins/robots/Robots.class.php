@@ -13,7 +13,7 @@ use \ch\timesplinter\core\HttpResponse;
  */
 class Robots extends FrameworkPlugin {
 	//put your code here
-	public function beforeRequestBuilt() {
+	public function afterRequestBuilt() {
 		$pluginSettings = $this->core->getSettings()->{'plugin.robots'};
 		
 		//if(isset($pluginSettings->environments->))

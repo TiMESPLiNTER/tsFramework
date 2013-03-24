@@ -101,4 +101,4 @@ class FileLogger extends Logger {
 
 }
 
-?>
+/* EOF */

@@ -1,5 +1,6 @@
 {
     "domain": "tsfw.timesplinter.ch",
     "localization": "en_US",
-    "timezone": "America/Los_Angeles"
+    "timezone": "America/Los_Angeles",
+	"environment": "dev"
 }

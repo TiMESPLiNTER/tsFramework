@@ -2,6 +2,8 @@
     /* Which class:method should handle errors */
     "handler": "ch:timesplinter:core:ErrorHandler:",
 
+	"report_level": 32767,
+
     /* here you can add controllers for each error code */
     "controller": {
         "default": "ch:timesplinter:controller:StaticPageController:getErrorPage"

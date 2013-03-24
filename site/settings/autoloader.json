@@ -1,11 +1,7 @@
 {
 	"mypath": {
 		"path": "${site_root}",
-		"mode": "namespace"
-	},
-
-	"swift-mailer": {
-		"path": "${site_root}libs/",
-		"mode": "underscore"
+		"mode": "namespace",
+		"class_suffix": [".class.php", ".interface.php"]
 	}
 }

@@ -2,6 +2,8 @@
 
 namespace ch\timesplinter\controller;
 
+use ch\timesplinter\core\FrameworkLogger;
+use ch\timesplinter\core\FrameworkLoggerFactory;
 use ch\timesplinter\logger\LoggerFactory;
 use ch\timesplinter\core\Core;
 use ch\timesplinter\core\HttpRequest;
@@ -20,7 +22,7 @@ class StaticPageController extends PageController {
 	public function __construct(Core $core, HttpRequest $httpRequest, Route $route) {
 		parent::__construct($core, $httpRequest, $route);
 
-		$this->logger = TSLogger::getLoggerByName('dev', $this);
+		$this->logger = FrameworkLoggerFactory::getLogger($this);
 	}
 
 	/**
@@ -32,6 +34,7 @@ class StaticPageController extends PageController {
 		$routeID = $this->route->id;
 
 		$this->logger->info('Requested route: ' . $routeID);
+		$this->logger->debug('Route info', array($this->route));
 
 		if(isset($pageData->$routeID->active))
 			$this->activeHtmlIds = $pageData->$routeID->active;

@@ -4,7 +4,6 @@ namespace ch\timesplinter\autoloader;
 
 use ch\timesplinter\core\Observable;
 use ch\timesplinter\logger\LoggerFactory;
-use \stdClass;
 
 /**
  * automatically loads requested classes if they exist in classes (sub-)directory
@@ -13,7 +12,7 @@ use \stdClass;
  * @copyright Copyright (c) 2012, TiMESPLiNTER
  * @version	1.0.0
  */
-class Autoloader extends Observable {
+class Autoloader {
 	const CACHING_FILE = 'cache.autoload';
 
 	const MODE_UNDERSCORE = 'underscore';
@@ -137,9 +136,6 @@ class Autoloader extends Observable {
 	private function doInclude($includePath, $className) {
 		require $includePath;
 
-		$this->setChanged();
-		$this->notifyObservers($className);
-
 		$this->cachedClasses[$className] = $includePath;
 	}
 
@@ -167,12 +163,6 @@ class Autoloader extends Observable {
 
 	public function addPath($id, array $pathOptions) {
 		$this->loadPaths[$id] = $pathOptions;
-	}
-
-	public function addPathsFromSettings(stdClass $settingsObject) {
-		foreach($settingsObject as $k => $o) {
-			$this->addPath($k, (array)$o);
-		}
 	}
 
 	/**
