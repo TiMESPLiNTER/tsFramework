@@ -1,4 +1,5 @@
 <?php
+
 namespace ch\timesplinter\template;
 
 use ch\timesplinter\logger\LoggerFactory;
@@ -43,14 +44,11 @@ class TemplateEngine {
 	 * @param string $tplNsPrefix
 	 * @return \TemplateEngine
 	 */
-	public function __construct(TemplateCache $tplCache, $tplFile, $tplNsPrefix) {
+	public function __construct(TemplateCache $tplCache, $tplNsPrefix) {
 		$this->logger = TSLogger::getLoggerByName('dev', $this);
 
 		$this->templateCache = $tplCache;
 		$this->tplNsPrefix = $tplNsPrefix;
-
-		$this->tplFile = $tplFile;
-
 		$this->dataPool = new ArrayObject();
 	}
 
@@ -65,7 +63,7 @@ class TemplateEngine {
 			throw new TemplateEngineException('That\'s no valid template-file');
 
 		try {
-			self::copyNodes($nodeList);
+			$this->copyNodes($nodeList);
 		} catch(DOMException $e) {
 			throw new TemplateEngineException('Error while processing the template file: ' . $e->getMessage());
 		}
@@ -83,7 +81,7 @@ class TemplateEngine {
 
 				if($countAttrs > 0) {
 					for($i = 0; $i < $countAttrs; $i++)
-						$attrs[$i]->value = self::replInlineTag($attrs[$i]->value);
+						$attrs[$i]->value = $this->replInlineTag($attrs[$i]->value);
 				}
 			} else {
 				
@@ -94,7 +92,7 @@ class TemplateEngine {
 			}
 			
 			if(count($node->childNodes) > 0)
-				self::copyNodes($node->childNodes);
+				$this->copyNodes($node->childNodes);
 
 			if($node->namespace !== $this->tplNsPrefix)
 				continue;
@@ -172,14 +170,14 @@ class TemplateEngine {
 	 * @param array $nodeList An OPTIONAL array of nodes to parse
 	 * @return
 	 */
-	public function parse() {
-		$this->cached = self::isTplFileCached($this->tplFile);
+	public function parse($tplFile) {
+		$this->cached = $this->isTplFileCached($tplFile);
 		
 		// PARSE IT NEW: No NodeList given? Okay! I'll load defaults for you
 		if($this->cached !== null)
 			return $this->cached;
 		
-		return self::cache();
+		return $this->cache($tplFile);
 	}
 
 	/**
@@ -193,10 +191,10 @@ class TemplateEngine {
 		if($tplCacheEntry === null)
 			return null;
 
-		$changeTime = @filemtime($filePath);
-		$changeTimeReal = ($changeTime !== false) ? $changeTime : @filectime($filePath);
+		$changeTime = filemtime($filePath);
+		$changeTimeReal = ($changeTime !== false) ? $changeTime : filectime($filePath);
 
-		if($tplCacheEntry->size !== @filesize($filePath) || $tplCacheEntry->changeTime !== $changeTimeReal) {
+		if($tplCacheEntry->size !== filesize($filePath) || $tplCacheEntry->changeTime !== $changeTimeReal) {
 			$this->templateCache->getCachedTplFile($filePath)->size = -1;
 			return null;
 		}
@@ -209,8 +207,10 @@ class TemplateEngine {
 	 * enabled)
 	 * @return type
 	 */
-	public function getResultAsHtml() {
-		$cacheID = $this->parse();
+	public function getResultAsHtml($tplFile, $tplVars = array()) {
+		$this->dataPool = new ArrayObject($tplVars);
+
+		$cacheID = $this->parse($tplFile);
 
 		try {
 			ob_start();
@@ -225,21 +225,21 @@ class TemplateEngine {
 		}
 	}
 
-	private function cache() {
+	private function cache($tplFile) {
 		$cacheFileName = null;
 		
-		if(file_exists($this->tplFile) === false)
-			throw new TemplateEngineException('Template file \'' . $this->tplFile . '\' does not exists');
+		if(file_exists($tplFile) === false)
+			throw new TemplateEngineException('Template file \'' . $tplFile . '\' does not exists');
 		
 		/** @var TemplateCacheEntry */
-		$cacheEntry = $this->templateCache->getCachedTplFile($this->tplFile);
-		$fileSize = @filesize($this->tplFile);
+		$cacheEntry = $this->templateCache->getCachedTplFile($tplFile);
+		$fileSize = @filesize($tplFile);
 
-		$changeTime = @filemtime($this->tplFile);
-		$changeTimeReal = ($changeTime !== false) ? $changeTime : @filectime($this->tplFile);
+		$changeTime = @filemtime($tplFile);
+		$changeTimeReal = ($changeTime !== false) ? $changeTime : @filectime($tplFile);
 		
 		// Render tpl
-		$content = file_exists($this->tplFile) ? file_get_contents($this->tplFile):null;
+		$content = file_exists($tplFile) ? file_get_contents($tplFile):null;
 		$this->htmlDoc = new HtmlDoc($content, $this->tplNsPrefix);
 		$this->htmlDoc->addSelfClosingTag('tst:text');
 		$this->htmlDoc->addSelfClosingTag('tst:lang');
@@ -255,10 +255,10 @@ class TemplateEngine {
 
 		if($cacheEntry === null) {
 			$cacheId = uniqid();
-			$this->templateCache->addCachedTplFile($this->tplFile, $cacheId, $fileSize, $changeTimeReal);
+			$this->templateCache->addCachedTplFile($tplFile, $cacheId, $fileSize, $changeTimeReal);
 		} else {
 			$cacheId = $cacheEntry->ID;
-			$this->templateCache->addCachedTplFile($this->tplFile, $cacheId, $fileSize, $changeTimeReal);
+			$this->templateCache->addCachedTplFile($tplFile, $cacheId, $fileSize, $changeTimeReal);
 		}
 
 		$cacheFileName = $this->templateCache->getCachePath() . $cacheId . self::CACHE_SUBFIX;
@@ -277,7 +277,7 @@ class TemplateEngine {
 			$this->logger->error('Could not cache template-file: ' . $cacheFileName);
 		}
 
-		$this->logger->debug('Tpl-File (re-)cached: ' . $this->tplFile . ' -> ' . $cacheId);
+		$this->logger->debug('Tpl-File (re-)cached: ' . $tplFile . ' -> ' . $cacheId);
 		
 		return $cacheId;
 	}

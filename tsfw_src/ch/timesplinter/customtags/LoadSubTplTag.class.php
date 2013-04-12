@@ -25,11 +25,8 @@ class LoadSubTplTag extends TemplateTag implements TagNode {
 		$dataKey = $node->getAttribute('tplfile')->value;
 
 		$tplFile = null;
-		
-		if(preg_match('/^\{(.+)\}$/', $dataKey, $res) !== false)
-			$tplFile = 'self::getData(\'' . $res[1] . '\')';
-		else
-			$tplFile = '\'' . $dataKey . '\'';
+
+		$tplFile = (preg_match('/^\{(.+)\}$/', $dataKey, $res) !== false)?'$this->getData(\'' . $res[1] . '\')':'\'' . $dataKey . '\'';
 
 		/* $newTpl = new TemplateEngine($dataKey,$tplEngine->getTplNsPrefix());
 		  $newTpl->setCacheDir($tplEngine->getCacheDir());
@@ -40,7 +37,7 @@ class LoadSubTplTag extends TemplateTag implements TagNode {
 
 		/** @var TextNode */
 		$newNode = new TextNode($tplEngine->getDomReader());
-		$newNode->content = '<?php ' . __NAMESPACE__ . '\\LoadSubTplTag::requireFile(' . $tplFile . ',$this); ?>'; //$newTpl->getResultAsHtml();
+		$newNode->content = '<?php ' . __NAMESPACE__ . '\\LoadSubTplTag::requireFile(' . $tplFile . ', $this); ?>'; //$newTpl->getResultAsHtml();
 
 		$node->parentNode->replaceNode($node, $newNode);
 	}
@@ -56,14 +53,11 @@ class LoadSubTplTag extends TemplateTag implements TagNode {
 	 * @param string $file The full filepath to include (OR magic {this})
 	 */
 	public static function requireFile($file, TemplateEngine $tplEngine) {
-		$tplEngineNew = new TemplateEngine($tplEngine->getTemplateCache(), $file, $tplEngine->getTplNsPrefix());
+		$tplEngineNew = new TemplateEngine($tplEngine->getTemplateCache(), $tplEngine->getTplNsPrefix());
 
-		$tplEngineNew->setAllData($tplEngine->getAllData());
-		$tplEngineNew->parse();
-
-		echo $tplEngineNew->getResultAsHtml();
+		echo $tplEngineNew->getResultAsHtml($file, $tplEngine->getAllData());
 	}
 
 }
 
-?>
+/* EOF */
