@@ -1,13 +1,12 @@
 <?php
-
 namespace ch\timesplinter\template;
 
+use ch\timesplinter\core\FrameworkLoggerFactory;
 use ch\timesplinter\logger\LoggerFactory;
 use ch\timesplinter\htmlparser\HtmlDoc;
 use ch\timesplinter\htmlparser\ElementNode;
 use ch\timesplinter\htmlparser\TextNode;
 use ArrayObject;
-use ch\timesplinter\logger\TSLogger;
 use \Exception;
 
 /**
@@ -42,13 +41,16 @@ class TemplateEngine {
 	 * @param TemplateCache $tplCache
 	 * @param string $tplFile
 	 * @param string $tplNsPrefix
-	 * @return \TemplateEngine
+	 * @return TemplateEngine
 	 */
-	public function __construct(TemplateCache $tplCache, $tplNsPrefix) {
-		$this->logger = TSLogger::getLoggerByName('dev', $this);
+	public function __construct(TemplateCache $tplCache, $tplFile, $tplNsPrefix) {
+		$this->logger = FrameworkLoggerFactory::getLogger($this);
 
 		$this->templateCache = $tplCache;
 		$this->tplNsPrefix = $tplNsPrefix;
+
+		$this->tplFile = $tplFile;
+
 		$this->dataPool = new ArrayObject();
 	}
 
@@ -63,7 +65,7 @@ class TemplateEngine {
 			throw new TemplateEngineException('That\'s no valid template-file');
 
 		try {
-			$this->copyNodes($nodeList);
+			self::copyNodes($nodeList);
 		} catch(DOMException $e) {
 			throw new TemplateEngineException('Error while processing the template file: ' . $e->getMessage());
 		}
@@ -81,7 +83,7 @@ class TemplateEngine {
 
 				if($countAttrs > 0) {
 					for($i = 0; $i < $countAttrs; $i++)
-						$attrs[$i]->value = $this->replInlineTag($attrs[$i]->value);
+						$attrs[$i]->value = self::replInlineTag($attrs[$i]->value);
 				}
 			} else {
 				
@@ -92,7 +94,7 @@ class TemplateEngine {
 			}
 			
 			if(count($node->childNodes) > 0)
-				$this->copyNodes($node->childNodes);
+				self::copyNodes($node->childNodes);
 
 			if($node->namespace !== $this->tplNsPrefix)
 				continue;
@@ -167,17 +169,16 @@ class TemplateEngine {
 
 	/**
 	 * This method parses the given template file
-	 * @param array $nodeList An OPTIONAL array of nodes to parse
-	 * @return
+	 * @return string The parsed template
 	 */
-	public function parse($tplFile) {
-		$this->cached = $this->isTplFileCached($tplFile);
+	public function parse() {
+		$this->cached = self::isTplFileCached($this->tplFile);
 		
 		// PARSE IT NEW: No NodeList given? Okay! I'll load defaults for you
 		if($this->cached !== null)
 			return $this->cached;
 		
-		return $this->cache($tplFile);
+		return self::cache();
 	}
 
 	/**
@@ -191,10 +192,10 @@ class TemplateEngine {
 		if($tplCacheEntry === null)
 			return null;
 
-		$changeTime = filemtime($filePath);
-		$changeTimeReal = ($changeTime !== false) ? $changeTime : filectime($filePath);
+		$changeTime = @filemtime($filePath);
+		$changeTimeReal = ($changeTime !== false) ? $changeTime : @filectime($filePath);
 
-		if($tplCacheEntry->size !== filesize($filePath) || $tplCacheEntry->changeTime !== $changeTimeReal) {
+		if($tplCacheEntry->size !== @filesize($filePath) || $tplCacheEntry->changeTime !== $changeTimeReal) {
 			$this->templateCache->getCachedTplFile($filePath)->size = -1;
 			return null;
 		}
@@ -207,10 +208,8 @@ class TemplateEngine {
 	 * enabled)
 	 * @return type
 	 */
-	public function getResultAsHtml($tplFile, $tplVars = array()) {
-		$this->dataPool = new ArrayObject($tplVars);
-
-		$cacheID = $this->parse($tplFile);
+	public function getResultAsHtml() {
+		$cacheID = $this->parse();
 
 		try {
 			ob_start();
@@ -225,21 +224,21 @@ class TemplateEngine {
 		}
 	}
 
-	private function cache($tplFile) {
+	private function cache() {
 		$cacheFileName = null;
 		
-		if(file_exists($tplFile) === false)
-			throw new TemplateEngineException('Template file \'' . $tplFile . '\' does not exists');
+		if(file_exists($this->tplFile) === false)
+			throw new TemplateEngineException('Template file \'' . $this->tplFile . '\' does not exists');
 		
 		/** @var TemplateCacheEntry */
-		$cacheEntry = $this->templateCache->getCachedTplFile($tplFile);
-		$fileSize = @filesize($tplFile);
+		$cacheEntry = $this->templateCache->getCachedTplFile($this->tplFile);
+		$fileSize = @filesize($this->tplFile);
 
-		$changeTime = @filemtime($tplFile);
-		$changeTimeReal = ($changeTime !== false) ? $changeTime : @filectime($tplFile);
+		$changeTime = @filemtime($this->tplFile);
+		$changeTimeReal = ($changeTime !== false) ? $changeTime : @filectime($this->tplFile);
 		
 		// Render tpl
-		$content = file_exists($tplFile) ? file_get_contents($tplFile):null;
+		$content = file_exists($this->tplFile) ? file_get_contents($this->tplFile):null;
 		$this->htmlDoc = new HtmlDoc($content, $this->tplNsPrefix);
 		$this->htmlDoc->addSelfClosingTag('tst:text');
 		$this->htmlDoc->addSelfClosingTag('tst:lang');
@@ -255,10 +254,10 @@ class TemplateEngine {
 
 		if($cacheEntry === null) {
 			$cacheId = uniqid();
-			$this->templateCache->addCachedTplFile($tplFile, $cacheId, $fileSize, $changeTimeReal);
+			$this->templateCache->addCachedTplFile($this->tplFile, $cacheId, $fileSize, $changeTimeReal);
 		} else {
 			$cacheId = $cacheEntry->ID;
-			$this->templateCache->addCachedTplFile($tplFile, $cacheId, $fileSize, $changeTimeReal);
+			$this->templateCache->addCachedTplFile($this->tplFile, $cacheId, $fileSize, $changeTimeReal);
 		}
 
 		$cacheFileName = $this->templateCache->getCachePath() . $cacheId . self::CACHE_SUBFIX;
@@ -277,7 +276,7 @@ class TemplateEngine {
 			$this->logger->error('Could not cache template-file: ' . $cacheFileName);
 		}
 
-		$this->logger->debug('Tpl-File (re-)cached: ' . $tplFile . ' -> ' . $cacheId);
+		$this->logger->debug('Tpl-File (re-)cached: ' . $this->tplFile . ' -> ' . $cacheId);
 		
 		return $cacheId;
 	}

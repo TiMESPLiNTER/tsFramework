@@ -8,7 +8,9 @@ use \Exception;
 /**
  * Description of ErrorHandler
  *
- * @author pascal91
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2013, TiMESPLiNTER
+ * @version 1.0.0
  */
 class ErrorHandler {
 	private $core;
