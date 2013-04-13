@@ -54,12 +54,9 @@ class StaticPageController extends PageController {
 		return new HttpResponse(200, $html, $headers);
 	}
 	
-	public function getErrorPage($errorCode, $errorMsg) {
-		$html = $this->render('error', array(
-			'siteTitle' => 'Error ' . $errorCode,
-			'error_code' => $errorCode,
-			'error_msg' => $errorMsg
-		));
+	public function getErrorPage($tplVars, $errorCode) {
+		//var_dump($errorCode); exit;
+		$html = $this->render('error', $tplVars);
 
 		$headers = array(
 			 'Content-Type' => 'text/html; charset=UTF-8'
