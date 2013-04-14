@@ -68,10 +68,10 @@ class Autoloader {
 		$classPath = FW_DIR . $this->cachedClasses[$className];
 
 		if(file_exists($classPath) === true) {
-			self::notifyObservers($className);
+			//self::notifyObservers($className);
 			return $classPath;
 		} elseif(file_exists('phar://' . $classPath) === true) {
-			self::notifyObservers($className);
+			//self::notifyObservers($className);
 			return 'phar://' . $classPath;
 		}
 

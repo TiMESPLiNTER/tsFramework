@@ -73,7 +73,7 @@ class Core {
 		$path = StringUtils::beforeLast($uri, '?');
 
 		$languages = array();
-		$langsRates = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+		$langsRates = explode(',', isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])?$_SERVER['HTTP_ACCEPT_LANGUAGE']:null);
 
 		foreach($langsRates as $lr) {
 			$lrParts = explode(';', $lr);
@@ -96,7 +96,7 @@ class Core {
 
 		$httpRequest->setRequestTime($requestTime);
 		$httpRequest->setRequestMethod($_SERVER['REQUEST_METHOD']);
-		$httpRequest->setUserAgent($_SERVER['HTTP_USER_AGENT']);
+		$httpRequest->setUserAgent(isset($_SERVER['HTTP_USER_AGENT'])?$_SERVER['HTTP_USER_AGENT']:null);
 		$httpRequest->setLanguages($languages);
 
 		return $httpRequest;

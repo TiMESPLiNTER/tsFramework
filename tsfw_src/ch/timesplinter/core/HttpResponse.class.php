@@ -55,8 +55,8 @@ class HttpResponse {
 	}
 	
 	public function send() {
-		header(self::getHttpStatusHeader($this->httpStatusCode));
-		
+		header($this->getHttpStatusHeader($this->httpStatusCode));
+
 		foreach($this->headers as $key => $value)
 			header($key . ': ' . $value);
 		
@@ -136,4 +136,4 @@ class HttpResponse {
 	}
 }
 
-?>
+/* EOF */
