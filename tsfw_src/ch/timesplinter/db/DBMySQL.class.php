@@ -15,10 +15,11 @@ use \PDOStatement;
  *
  * @author Pascal Münst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2012, TiMESPLiNTER
- * @version 1.1.2
+ * @version 1.1.3
  * 
  * @change 2012-10-10 Uses now the new abstract class 'DB' instead of the interface and makes use of the execute()-method in it (pam)
  * @change 2012-10-23 Method prepare() from PDO class overridden. Throws now a DBException. (pam)
+ * @change 2013-05-28 Uses listeners to react on events like select, update, insert, execute and prepare
  */
 class DBMySQL extends DB {
 
@@ -49,7 +50,14 @@ class DBMySQL extends DB {
 	
 	public function prepare($sql, $driver_options = array()) {
 		try {
-			return parent::prepare($sql, $driver_options);
+			$stmnt = parent::prepare($sql, $driver_options);
+
+			foreach($this->listeners as $l) {
+				/** @var DBListener $l */
+				$l->onPrepare($this, $stmnt);
+			}
+
+			return $stmnt;
 		} catch(PDOException $e) {
 			throw new DBException('PDO could not prepare query: ' . $e->getMessage(), 203, $sql);
 		}
@@ -66,6 +74,11 @@ class DBMySQL extends DB {
 			}
 
 			parent::execute($stmnt);
+
+			foreach($this->listeners as $l) {
+				/** @var DBListener $l */
+				$l->onSelect($this, $stmnt, $params);
+			}
 
 			return $stmnt->fetchAll(PDO::FETCH_OBJ);
 		} catch(PDOException $e) {
@@ -86,6 +99,11 @@ class DBMySQL extends DB {
 
 			parent::execute($stmnt);
 
+			foreach($this->listeners as $l) {
+				/** @var DBListener $l */
+				$l->onSelect($this, $stmnt, $params);
+			}
+
 			return $stmnt->fetchAll(PDO::FETCH_CLASS, $className);
 		} catch(PDOException $e) {
 			throw new DBException('PDO could not execute select query: ' . $e->getMessage(), 202, $stmnt->queryString, $params);
@@ -103,6 +121,11 @@ class DBMySQL extends DB {
 			}
 
 			parent::execute($stmnt);
+
+			foreach($this->listeners as $l) {
+				/** @var DBListener $l */
+				$l->onInsert($this, $stmnt, $params);
+			}
 
 			return $this->lastInsertId();
 		} catch(PDOException $e) {
@@ -122,6 +145,11 @@ class DBMySQL extends DB {
 			
 			parent::execute($stmnt);
 
+			foreach($this->listeners as $l) {
+				/** @var DBListener $l */
+				$l->onUpdate($this, $stmnt, $params);
+			}
+
 			return $stmnt->rowCount();
 		} catch(PDOException $e) {
 			throw new DBException('PDO could not execute update query: ' . $e->getMessage(), 205, $stmnt->queryString, $params);
@@ -139,6 +167,11 @@ class DBMySQL extends DB {
 			}
 
 			parent::execute($stmnt);
+
+			foreach($this->listeners as $l) {
+				/** @var DBListener $l */
+				$l->onDelete($this, $stmnt, $params);
+			}
 
 			return $stmnt->rowCount();
 		} catch(PDOException $e) {

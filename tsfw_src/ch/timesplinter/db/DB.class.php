@@ -14,12 +14,21 @@ use \ArrayObject;
  * 
  * @change 2012-10-10 Changed from interface to abstract class, new method 'execute' (pam)
  * @change 2012-10-23 Method prepareStatement() is deprecated now (pam)
+ * @change 2013-05-28 Possibility to use listeners to react on events like select, update, insert, execute and prepare
  */
 abstract class DB extends PDO {
 	const TYPE_MYSQL = 1;
 	const TYPE_POSTGRESQL = 2;
 	const TYPE_MSSQL = 3;
-	
+
+	protected $listeners;
+
+	public function __construct ($dsn, $username = null, $passwd = null, $options = null) {
+		parent::__construct($dsn, $username, $passwd, $options);
+
+		$this->listeners = new ArrayObject();
+	}
+
 	/**
 	 * Returns the SQL as a prepared statement
 	 * @deprecated since version 2.0.1
@@ -81,12 +90,56 @@ abstract class DB extends PDO {
 	 * @param PDOStatement $stmnt The statement to execute
 	 */
 	public function execute(PDOStatement $stmnt) {
+		//try {
 		$old = setlocale(LC_NUMERIC, NULL);
 		setlocale(LC_NUMERIC, 'us_US');
 
 		$stmnt->execute();
-		
+
 		setlocale(LC_NUMERIC, $old);
+
+		foreach($this->listeners as $l) {
+			/** @var DBListener $l */
+			$l->onExecute($this, $stmnt);
+		}
+		/*} catch(\PDOException $e) {
+			throw new DBException($e->getMessage(), $e->getCode(), $stmnt->queryString, array());
+		}*/
+	}
+
+	/**
+	 * @param DBListener $listener The listener object to register
+	 * @param string $name The name of the listener [optional]
+	 */
+	public function addListener(DBListener $listener, $name = null) {
+		if($name !== null)
+			$this->listeners->offsetSet($name, $listener);
+		else
+			$this->listeners->append($listener);
+	}
+
+	/**
+	 * Removes the listener
+	 * @param $name The name of the listener which should be removed
+	 */
+	public function removeListener($name) {
+		$this->listeners->offsetUnset($name);
+	}
+
+	/**
+	 * Removes all registered listeners at once
+	 */
+	public function removeAllListeners() {
+		$this->listeners = new ArrayObject();
+	}
+
+	/**
+	 * Creates a string like "?,?,?,..." for the number of array entries given
+	 * @param $paramArr
+	 * @return string
+	 */
+	public static function createInQuery($paramArr) {
+		return implode(',', array_fill(0, count($paramArr), '?'));
 	}
 }
 
