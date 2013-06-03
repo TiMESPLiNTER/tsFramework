@@ -41,7 +41,7 @@ class StringUtils {
         if($posFrom === false)
             return null;
         
-        return substr($str, $posFrom+1);
+        return substr($str, $posFrom+strlen($after));
     }
 	
 	public static function afterFirst($str, $after) {
