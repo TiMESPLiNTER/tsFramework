@@ -23,9 +23,9 @@ class BroadcastLogger extends Logger {
 	/**
 	 * Logs an error with optional exception
 	 * @param string $msg
-	 * @param Exception $e
+	 * @param \Exception $e
 	 */
-	public function error($msg, Exception $e = null) {
+	public function error($msg, \Exception $e = null) {
 		foreach($this->loggers as $logger)
 			$logger->error($msg, $e);
 	}

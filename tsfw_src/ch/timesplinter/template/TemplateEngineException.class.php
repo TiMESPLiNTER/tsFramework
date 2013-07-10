@@ -16,4 +16,4 @@ class TemplateEngineException extends Exception {
 	}
 }
 
-?>
+/* EOF */

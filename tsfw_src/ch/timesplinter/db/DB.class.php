@@ -22,11 +22,16 @@ abstract class DB extends PDO {
 	const TYPE_MSSQL = 3;
 
 	protected $listeners;
+	protected $muteListeners;
+	protected $transactionName;
+	protected $dbConnect;
 
 	public function __construct ($dsn, $username = null, $passwd = null, $options = null) {
 		parent::__construct($dsn, $username, $passwd, $options);
 
 		$this->listeners = new ArrayObject();
+		$this->muteListeners = false;
+		$this->transactionName = null;
 	}
 
 	/**
@@ -90,24 +95,52 @@ abstract class DB extends PDO {
 	 * @param PDOStatement $stmnt The statement to execute
 	 */
 	public function execute(PDOStatement $stmnt) {
-		//try {
-		$old = setlocale(LC_NUMERIC, NULL);
-		setlocale(LC_NUMERIC, 'us_US');
+		try {
+			$old = setlocale(LC_NUMERIC, NULL);
+			setlocale(LC_NUMERIC, 'us_US');
 
-		$stmnt->execute();
+			$stmnt->execute();
 
-		setlocale(LC_NUMERIC, $old);
+			setlocale(LC_NUMERIC, $old);
 
-		foreach($this->listeners as $l) {
-			/** @var DBListener $l */
-			$l->onExecute($this, $stmnt);
+			$this->triggerListeners('onExecute', array($this, $stmnt));
+		} catch(\PDOException $e) {
+			throw new DBException('PDO could not execute query: ' . $e->getMessage(), 301, $stmnt->queryString);
 		}
-		/*} catch(\PDOException $e) {
-			throw new DBException($e->getMessage(), $e->getCode(), $stmnt->queryString, array());
-		}*/
+	}
+
+	public function beginTransaction($transactionName = null) {
+		$this->transactionName = $transactionName;
+
+		try {
+			$this->triggerListeners('beforeBeginTransaction', array($this));
+
+			parent::beginTransaction();
+		} catch(PDOException $e) {
+			throw new DBException('PDO could not begin transaction: ' . $e->getMessage(), 302);
+		}
 	}
 
 	/**
+	 * (PHP 5 &gt;= 5.1.0, PECL pdo &gt;= 0.1.0)<br/>
+	 * Commits a transaction
+	 * @link http://php.net/manual/en/pdo.commit.php
+	 * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
+	 */
+	public function commit() {
+		try {
+			parent::commit();
+
+			$this->triggerListeners('afterCommit', array($this));
+
+			$this->transactionName = null;
+		} catch(PDOException $e) {
+			throw new DBException('PDO could not commit transaction: ' . $e->getMessage(), 303);
+		}
+	}
+
+	/**
+	 * Adds a DBListener to listen on some events of the DB class
 	 * @param DBListener $listener The listener object to register
 	 * @param string $name The name of the listener [optional]
 	 */
@@ -120,7 +153,7 @@ abstract class DB extends PDO {
 
 	/**
 	 * Removes the listener
-	 * @param $name The name of the listener which should be removed
+	 * @param string $name The name of the listener which should be removed
 	 */
 	public function removeListener($name) {
 		$this->listeners->offsetUnset($name);
@@ -131,6 +164,52 @@ abstract class DB extends PDO {
 	 */
 	public function removeAllListeners() {
 		$this->listeners = new ArrayObject();
+	}
+
+	/**
+	 * Returns the name of the current transaction or null if none given
+	 * @return string|null
+	 */
+	public function getTransactionName() {
+		return $this->transactionName;
+	}
+
+	/**
+	 * Sets the listeners to mute so they'll be not triggered until mute is set to false again
+	 * @param boolean $mute Mute = true, unmute = false
+	 */
+	public function setListenersMute($mute) {
+		$this->muteListeners = $mute;
+	}
+
+	/**
+	 * Returns the state of the listeners if they're mute or not
+	 * @return bool The mute state of the listeners
+	 */
+	public function areListenersMute() {
+		return $this->muteListeners;
+	}
+
+	/**
+	 * Triggers a call of a specific method from all registered listener classes if the listeners are not set to mute
+	 * @param $method The listener method that should be called
+	 * @param array $params The parameters for the listener method
+	 */
+	protected function triggerListeners($method, array $params = array()) {
+		if($this->muteListeners === true)
+			return;
+
+		// Mute all the listeners cause we don't want listeners called in listeners
+		// If we do so: unmute the listeners in the listener method itself
+		$this->muteListeners = true;
+
+		foreach($this->listeners as $l) {
+			/** @var DBListener $l */
+			call_user_func_array(array($l, $method), $params);
+		}
+
+		// Unmute listeners cause from now on we're not in a listener method anymore
+		$this->muteListeners = false;
 	}
 
 	/**

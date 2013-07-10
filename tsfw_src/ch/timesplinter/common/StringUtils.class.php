@@ -62,6 +62,32 @@ class StringUtils {
 		
 		return (strrpos($str, $endStr)+$endStrlen === strlen($str));
 	}
+
+	public static function urlify($str, $maxLength = 0) {
+		$charMap = array(
+			' ' => '-', '.' => '', ':' => '', ',' => '', '?' => '', '!' => '', '´' => '', '"' => '',
+			'(' => '', ')' => '', '[' => '', ']' => '', '{' => '', '}' => '',
+
+			// German
+			'ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue',
+
+			// Francais
+			'é' => 'e', 'è' => 'e', 'ê' => 'e', 'à' => 'a', 'â' => 'a', 'ç' => 'c', 'ï' => '', 'î' => '',
+
+			// Espanol
+			'ñ' => 'n', 'ó' => 'o', 'ú' => 'u', '¿' => '', '¡' => ''
+		);
+
+		$urlifiedStr = str_replace(array_keys($charMap), $charMap, strtolower(trim($str)));
+
+		// Replace multiple dashes
+		$urlifiedStr = preg_replace('/[-]{2,}/', '-', $urlifiedStr);
+
+		if($maxLength === 0)
+			return $urlifiedStr;
+
+		return substr($urlifiedStr, 0, $maxLength);
+	}
 }
 
-?>
+/* EOF */

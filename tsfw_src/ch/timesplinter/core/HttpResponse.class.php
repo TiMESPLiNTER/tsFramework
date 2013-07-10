@@ -12,6 +12,8 @@ class HttpResponse {
 	private $httpStatusCode;
 	private $headers;
 	private $content;
+	private $stream;
+	private $streamContext;
 	
 	/**
 	 * 
@@ -20,10 +22,12 @@ class HttpResponse {
 	 * @param array $headers
 	 * @return HttpResponse
 	 */
-	public function __construct($httpStatusCode = 200, $content = null, $headers = array('Content-Type' => 'text/html; charset=UTF-8')) {
+	public function __construct($httpStatusCode = 200, $content = null, $headers = array('Content-Type' => 'text/html; charset=UTF-8'), $stream = false, $streamContext = null) {
 		$this->httpStatusCode = $httpStatusCode;
 		$this->headers = $headers;
 		$this->content = $content;
+		$this->stream = $stream;
+		$this->streamContext = $streamContext;
 	}
 	
 	public function getHeaders() {
@@ -60,8 +64,14 @@ class HttpResponse {
 		foreach($this->headers as $key => $value)
 			header($key . ': ' . $value);
 		
-		if($this->content !== null)
+		if($this->content === null)
+			return;
+
+		if($this->stream === false) {
 			echo $this->content;
+		} else {
+			readfile($this->content, false, $this->streamContext);
+		}
 	}
 	
 	public static function getHttpStatusHeader($statusCode) {

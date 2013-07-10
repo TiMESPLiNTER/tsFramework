@@ -15,7 +15,7 @@ class FrameworkLoggerFactory {
 	private static $environmet;
 
 	/**
-	 * @param $classContext The context the logger should be for
+	 * @param mixed $classContext The context the logger should be for
 	 * @param string|null $name The name of the logger or null instead
 	 * @return BroadcastLogger The logger instance
 	 */

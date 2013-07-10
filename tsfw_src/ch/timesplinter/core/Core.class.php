@@ -43,7 +43,15 @@ class Core {
 			'domain' => $this->httpRequest->getHost()
 		));
 
+		/*
+		 * TODO: if we request a file that doesn't exist from a domain that is not registered in settings of the fw
+		 * we can't do that so
+		 */
+
 		$this->environment = $this->getEnvironmentFromRequest($this->httpRequest);
+
+		if($this->environment === null)
+			RequestHandler::redirect($this->settings->defaults->domain);
 
 		FrameworkLoggerFactory::setEnvironment($this->environment);
 
@@ -125,7 +133,9 @@ class Core {
 		if($this->httpRequest->getPath() === '/') {
 			// Load the default page as "virtual" httpRequest for the base url (no uri)
 			$routeId = (string)$currentDomain->startroute;
-			RequestHandler::redirect($routeId);
+
+			if($this->httpRequest->getPath() !== $routeId)
+				RequestHandler::redirect($routeId);
 		}
 
 		$matchedRoute = RouteUtils::matchRoutes($this->settings->core->routes, $this->httpRequest->getPath());
@@ -133,9 +143,8 @@ class Core {
 		if($matchedRoute === null)
 			return $this->errorHandler->displayHttpError(404, $this->httpRequest);
 
-		if(isset($matchedRoute['GET']) === false || count($matchedRoute['GET']) <= 0) {
+		if(isset($matchedRoute['GET']) === false || count($matchedRoute['GET']) <= 0)
 			return $this->errorHandler->displayHttpError(404, $this->httpRequest);
-		}
 
 		preg_match($matchedRoute['GET']->pattern, $this->httpRequest->getPath(), $res);
 		array_shift($res);
@@ -176,11 +185,15 @@ class Core {
 	 */
 	public function processPage($routes) {
 		$requestSSLRequired = false;
+		$requestSSLForbidden = false;
 		$controllers = array();
 
 		foreach($routes as $r) {
 			if($r->sslRequired === true)
 				$requestSSLRequired = true;
+
+			if($r->sslForbidden === true)
+				$requestSSLForbidden = true;
 
 			$className = $r->controllerClass;
 
@@ -192,7 +205,7 @@ class Core {
 
 		if($requestSSLRequired === true && $this->httpRequest->getProtocol() !== HttpRequest::PROTOCOL_HTTPS)
 			RequestHandler::redirect($this->httpRequest->getURL(HttpRequest::PROTOCOL_HTTPS));
-		elseif($requestSSLRequired === false && $this->httpRequest->getProtocol() !== HttpRequest::PROTOCOL_HTTP)
+		elseif($requestSSLForbidden === true && $this->httpRequest->getProtocol() !== HttpRequest::PROTOCOL_HTTP)
 			RequestHandler::redirect($this->httpRequest->getURL(HttpRequest::PROTOCOL_HTTP));
 
 		//$this->localeHandler->localize($this->httpRequest);
@@ -202,17 +215,21 @@ class Core {
 		$route = ($this->httpRequest->getRequestMethod() === 'POST' && isset($routes['POST']))?$routes['POST']:$routes['GET'];
 
 		/** @var HttpResponse $httpResponse */
-		$response = call_user_func(array($controllers[$route->controllerClass],$route->controllerMethod));
+		if($controllers[$route->controllerClass] instanceof HttpResponse) {
+			$response = $controllers[$route->controllerClass];
+		} else {
+			$response = call_user_func(array($controllers[$route->controllerClass],$route->controllerMethod));
+		}
 
 		if(($response instanceof HttpResponse) === false)
-			throw new CoreException('Return value of the controller method is not an object of type HttpResponse but of ' . get_class($response));
+			throw new CoreException('Return value of the controller method "' . $route->controllerClass . '->' . $route->controllerMethod . '" is not an object of type HttpResponse but of ' . get_class($response));
 
 		return $response;
 	}
 
 	private function getEnvironmentFromRequest(HttpRequest $httpRequest) {
 		if(($di = DomainUtils::getDomainInfo($this->settings->core->domains, $httpRequest->getHost())) === null) {
-			return $this->settings->defaults->environment;
+			return isset($this->settings->defaults->environment)?$this->settings->defaults->environment:null;
 		}
 
 		return $di->environment;

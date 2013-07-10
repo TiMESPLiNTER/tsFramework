@@ -20,6 +20,7 @@ class Route {
 	public $id;
 	public $pattern;
 	public $sslRequired;
+	public $sslForbidden;
 	public $method;
 	public $controllerClass;
 	public $controllerMethod;

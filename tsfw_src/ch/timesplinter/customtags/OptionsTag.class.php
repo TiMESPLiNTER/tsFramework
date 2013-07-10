@@ -10,9 +10,9 @@ use ch\timesplinter\htmlparser\TextNode;
 /**
  *
  *
- * @author				entwicklung@metanet.ch
- * @copyright	Copyright (c) 2012, METANET AG, www.metanet.ch
- * @version			1
+ * @author Pascal Muenst <entwicklung@metanet.ch>
+ * @copyright Copyright (c) 2012, METANET AG, www.metanet.ch
+ * @version 1.0.0
  */
 class OptionsTag extends TemplateTag implements TagNode {
 
@@ -21,15 +21,25 @@ class OptionsTag extends TemplateTag implements TagNode {
 	}
 
 	public function replaceNode(TemplateEngine $tplEngine, ElementNode $node) {
-		TemplateEngine::checkRequiredAttrs($node, array('options', 'selected'));
+		TemplateEngine::checkRequiredAttrs($node, array('options'));
 
 		// DATA
-		$compareValue = $node->getAttribute('selected')->value;
+		$compareValue = ($node->getAttribute('selected')->value !== null)?$tplEngine->getSelectorAsPHPStr($node->getAttribute('selected')->value):null;
 
-		$dataKey = $node->getAttribute('options')->value;
+		$dataKey = $tplEngine->getSelectorAsPHPStr($node->getAttribute('options')->value);
 
-		$textContent = '<?php foreach($this->getData(\'' . $dataKey . '\') as $key => $val) {
-			$selected = ($key == $this->getData(\'' . $compareValue . '\'))?\' selected="selected"\':\'\';
+		$compareStr = '$selected = null;';
+
+		if($compareValue !== null) {
+			if(is_object($tplEngine->getSelectorValue($node->getAttribute('selected')->value))) {
+				$compareStr = '$selected = in_array($key, (array)' . $compareValue . ')?\' selected\':null;';
+			} else {
+				$compareStr = '$selected = ($key == ' . $compareValue . ')?\' selected\':null;';
+			}
+		}
+
+		$textContent = '<?php foreach(' . $dataKey . ' as $key => $val) {
+			' . $compareStr . '
 			echo \'<option value="\'.$key.\'"\'.$selected.\'>\'.$val.\'</option>\' . "\n";
 		} ?>';
 
@@ -41,4 +51,4 @@ class OptionsTag extends TemplateTag implements TagNode {
 	}
 }
 
-?>
+/* EOF */

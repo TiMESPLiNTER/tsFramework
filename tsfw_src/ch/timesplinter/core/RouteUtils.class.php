@@ -44,7 +44,8 @@ class RouteUtils {
 		
 		$route->method = Route::METHOD_UNKNOWN;
 		$route->sslRequired = isset($routeEntry->sslRequired)?$routeEntry->sslRequired:false;
-		
+		$route->sslForbidden = isset($routeEntry->sslForbidden)?$routeEntry->sslForbidden:false;
+
 		$routeEntryMethod = $routeEntry->method;
 		
 		if($routeEntryMethod === 'GET')

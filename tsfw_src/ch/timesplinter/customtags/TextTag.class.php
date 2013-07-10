@@ -41,13 +41,27 @@ class TextTag extends TemplateTag implements TagNode, TagInline {
 		array_shift($paramsArr);
 		
 		if(is_object($tplEngine->getData($firstParam))) {
-			$restParams = (count($paramsArr) > 0)?'->' . implode('->', $paramsArr):null;
+			if($tplEngine->getData($firstParam) instanceof \stdClass) {
+				$restParams = (count($paramsArr) > 0)?'->' . implode('->', $paramsArr):null;
+			} else {
+				$getters = array();
+
+				foreach($paramsArr as $param) {
+					$getters[] = 'get' . ucfirst($param) . '()';
+				}
+
+				$restParams = (count($paramsArr) > 0)?'->' . implode('->', $getters):null;
+
+				return '<?php $textData = self::getData(\'' . $firstParam . '\'); echo $textData' . $restParams . '; ?>';
+			}
 		} else {
 			$restParams = (count($paramsArr) > 0)?'[\'' . implode('\'][\'', $paramsArr) . '\']':null;
 		}
-		
+
 		return '<?php $textData = self::getData(\'' . $firstParam . '\'); echo isset($textData' . $restParams . ')?$textData' . $restParams . ':null; ?>';
+		
+
 	}
 }
 
-?>
+/* EOF */

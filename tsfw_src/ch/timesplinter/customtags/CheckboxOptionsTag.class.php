@@ -1,8 +1,11 @@
 <?php
 namespace ch\timesplinter\customtags;
 
-use ch\timesplinter\template\TemplateTag as TemplateTag;
-use ch\timesplinter\template\TagNode as TagNode;
+use ch\timesplinter\template\TemplateTag;
+use ch\timesplinter\template\TagNode;
+use ch\timesplinter\template\TemplateEngine;
+use ch\timesplinter\htmlparser\ElementNode;
+use ch\timesplinter\htmlparser\TextNode;
 
 /**
  * @author Pascal Münst
@@ -11,23 +14,20 @@ use ch\timesplinter\template\TagNode as TagNode;
  */
 class CheckboxOptionsTag extends TemplateTag implements TagNode {
 
-	private $tagName = 'options';
-
 	public function __construct() {
-		echo 'CheckboxOptionsTag.class.php TO BE DONE!!!!';
-		exit;
-		parent::__construct(false);
+		parent::__construct('checkboxOptions', false);
 	}
 
 	public function replaceNode(TemplateEngine $tplEngine, ElementNode $node) {
 		// DATA
-		$compareArr = explode('|', $node->getAttribute('checked')->value);
-		$dataKey = $node->getAttribute('options')->value;
+		$compareArr = $tplEngine->getSelectorAsPHPStr($node->getAttribute('checked')->value);
+		$dataKey = $tplEngine->getSelectorAsPHPStr($node->getAttribute('options')->value);
+		$fldName = $node->getAttribute('name')->value . '[]';
 
-		$textContent = '<?php foreach($this->getData(\'' . $dataKey . '\') as $key => $val) {
-			$checked = (in_array($key, $this->getData(\'' . $compareValue . '\')))?\' checked="checked"\':\'\';
-			echo \'<option value="\'.$key.\'"\'.$selected.\'>\'.$val.\'</option>\' . "\n";
-		} ?>';
+		$textContent = '<?php echo "<ul>";  foreach(' . $dataKey . ' as $key => $val) {
+			$checked = in_array($key, ((array)' . $compareArr . '))?\' checked\':null;
+			echo \'<li><label><input type="checkbox" value="\'.$key.\'" name="' . $fldName . '"\'.$checked.\'>\'.$val.\'</label></li>\' . "\n";
+		} echo "</ul>"; ?>';
 
 		$newNode = new TextNode($tplEngine->getDomReader());
 		$newNode->content = $textContent;
@@ -42,4 +42,4 @@ class CheckboxOptionsTag extends TemplateTag implements TagNode {
 
 }
 
-?>
+/* EOF */

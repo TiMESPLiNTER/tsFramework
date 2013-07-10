@@ -2,6 +2,8 @@
 
 namespace ch\timesplinter\common;
 
+use ch\timesplinter\core\FrameworkException;
+use ch\timesplinter\core\JSONException;
 use \Exception;
 
 /**
@@ -28,18 +30,32 @@ class JsonUtils {
                 $error = 'Unexpected control character found';
                 break;
             case JSON_ERROR_SYNTAX:
-                $error = 'Syntax error, malformed JSON';
+                $error = 'Syntax error, malformed JSON markup';
                 break;
             case JSON_ERROR_NONE:
+	        case 0:
+		        break;
             default:
-                $error = null;                   
+                $error = 'Unknown error in JSON: ' . json_last_error();
         }
-		
+
         if($error !== null)
-            throw new Exception('Invalid JSON code: ' . $error);       
+            throw new JSONException('Invalid JSON code: ' . $error);
        
         return $result;
     }
+
+	public static function decodeFile($filePath, $toAssoc = false, $minified = true) {
+		if(file_exists($filePath) === false)
+			throw new JSONException('JSON-File does not exist: ' . $filePath);
+
+		try {
+			return self::decode(file_get_contents($filePath), $toAssoc, $minified);
+		} catch(\Exception $e) {
+
+			throw new JSONException($e->getMessage() . ', File: ' . $filePath);
+		}
+	}
 
 	/**
 	 * JSON.minify()

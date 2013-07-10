@@ -1,6 +1,7 @@
 <?php
 namespace ch\timesplinter\customtags;
 
+use ch\timesplinter\core\FrameworkLoggerFactory;
 use ch\timesplinter\logger\TSLogger;
 use
  ch\timesplinter\template\TemplateEngine
@@ -23,7 +24,7 @@ class ForTag extends TemplateTag implements TagNode {
 	private $logger;
 	
 	public function __construct() {
-		$this->logger = TSLogger::getLoggerByName('dev',$this);
+		$this->logger = FrameworkLoggerFactory::getLogger($this);
 		
 		parent::__construct('for', false);
 	}
@@ -54,7 +55,9 @@ class ForTag extends TemplateTag implements TagNode {
 
 		$nodeForStart = new TextNode($tplEngine->getDomReader());
 		$nodeForStart->content = "<?php\n";
-		$nodeForStart->content .= "\$arr_{$forUID} = (isset({$phpVar}) === false)?\$this->getData('" . $dataKey . "'):{$phpVar};\n";
+		$nodeForStart->content .= "/* for: start */ \$tmpArr = (isset({$phpVar}) === false)?\$this->getData('" . $dataKey . "'):{$phpVar};\n";
+		$nodeForStart->content .= "if(\$tmpArr === null) \$tmpArr = array();\n";
+		$nodeForStart->content .= "\$arr_{$forUID} = array_values((is_object(\$tmpArr) === false)?\$tmpArr:(array)\$tmpArr);\n";
 		$nodeForStart->content .= "\$arrCount_{$forUID} = count(\$arr_{$forUID});\n";
 		$nodeForStart->content .= "\$i_{$forUID} = 0;\n";
 		
@@ -67,18 +70,26 @@ class ForTag extends TemplateTag implements TagNode {
 				$nodeForStart->content .= "\t\${$asVar}" . ($i+1) . " = (isset(\$arr_{$forUID}[\$i_{$forUID}+{$i}]) === true)?\$arr_{$forUID}[\$i_{$forUID}+{$i}]:null;\n";
 			}
 		}
-		
+
+		$nodeForStart->content .= "\t\$_count = \$i_{$forUID};\n";
 		$nodeForStart->content .= "?>";
 		
 		$nodeForEnd = new TextNode($tplEngine->getDomReader());
-		$nodeForEnd->content =  '<?php } ?>';
+		$nodeForEnd->content =  '<?php } /* for: end */ ?>';
 
 		$node->parentNode->insertBefore($nodeForStart, $node);
-			
+
+		$forPattern = '/(.*?)(\/\* for: start \*\/.*\/\* for: end \*\/ \?>)(.*)/ims';
+		$nodeInnerHtml = $node->getInnerHtml();
+
+		if(preg_match($forPattern, $nodeInnerHtml, $resVal)) {
+			$nodeInnerHtml = $resVal[1] . $resVal[2] . "<?php \$_count = \$i_{$forUID}; ?>" . $resVal[3];
+		}
+
 		// No fist/last class magic
 		if($firstClass === null && $lastClass === null) {
 			$txtForNode = new TextNode($tplEngine->getDomReader());
-			$txtForNode->content = $node->getInnerHtml();
+			$txtForNode->content = $nodeInnerHtml;
 			$node->parentNode->insertBefore($txtForNode, $node);
 
 			$node->parentNode->insertBefore($nodeForEnd, $node);
@@ -87,7 +98,12 @@ class ForTag extends TemplateTag implements TagNode {
 			return;
 		}
 
-		$forDOM = new HtmlDoc($node->getInnerHtml(), null);
+		if(preg_match($forPattern, $nodeInnerHtml, $resVal)) {
+			echo 'matched'; exit;
+			$nodeInnerHtml = $resVal[1] . $resVal[2] . " \$_count = \$i_{$forUID}; " . $resVal[3];
+		}
+
+		$forDOM = new HtmlDoc($nodeInnerHtml, null);
 		$forDOM->parse();
 		
 		foreach($forDOM->getNodeTree()->childNodes as $forNode) {
@@ -153,7 +169,9 @@ class ForTag extends TemplateTag implements TagNode {
 	}
 	
 	public function replaceEcho($m) {
-		return '<?php echo $' . $m[2] . ((is_numeric($m[1]) === true)?$m[1]:null) . '->' . str_replace('.','->',$m[3]) . '; ?>';
+		$further = isset($m[3])?'->' . str_replace('.','->',$m[3]) :null;
+
+		return '<?php echo $' . $m[2] . ((is_numeric($m[1]) === true)?$m[1]:null) . $further . '; ?>';
 	}
 	
 	public function replaceVar($m) {
@@ -161,4 +179,4 @@ class ForTag extends TemplateTag implements TagNode {
 	}
 }
 
-?>
+/* EOF */

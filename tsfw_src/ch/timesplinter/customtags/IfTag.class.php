@@ -2,6 +2,7 @@
 
 namespace ch\timesplinter\customtags;
 
+use ch\timesplinter\core\FrameworkLoggerFactory;
 use ch\timesplinter\logger\TSLogger;
 use ch\timesplinter\template\TemplateEngine;
 use ch\timesplinter\template\TemplateTag;
@@ -9,6 +10,7 @@ use ch\timesplinter\template\TagNode;
 use ch\timesplinter\htmlparser\ElementNode;
 use ch\timesplinter\htmlparser\TextNode;
 use ch\timesplinter\htmlparser\HtmlNode;
+use ch\timesplinter\common\StringUtils;
 
 /**
  *
@@ -22,7 +24,7 @@ class IfTag extends TemplateTag implements TagNode {
 	private $logger;
 
 	public function __construct() {
-		$this->logger = TSLogger::getLoggerByName('dev', $this);
+		$this->logger = FrameworkLoggerFactory::getLogger($this);
 		parent::__construct('if', true);
 	}
 
@@ -41,9 +43,9 @@ class IfTag extends TemplateTag implements TagNode {
 		$compareValParts = explode('.', $compareAttr);
 
 		if(in_array($parentTagName, $varTags) === true)
-			$compareVal = '$' . $compareValParts[0];
+			$compareVal = "(isset(\$" . $compareValParts[0] . ")?\$" . $compareValParts[0] . ":\$this->getData('" . $compareValParts[0] . "'))";
 		else
-			$compareVal = 'self::getData(\'' . $compareValParts[0] . '\')';
+			$compareVal = '$this->getData(\'' . $compareValParts[0] . '\')';
 
 		array_shift($compareValParts);
 		$compareVal .= (count($compareValParts) > 0)?'->' . implode('->', $compareValParts):null;
@@ -56,7 +58,7 @@ class IfTag extends TemplateTag implements TagNode {
 			if(strtolower($againstAttr) === 'null') {
 				//$againstAttr = 'null';
 			} elseif(strtolower($againstAttr) === 'true' || strtolower($againstAttr) === 'false') {
-				$againstAttr = ($againstAttr === 'true')?true:false;
+				//$againstAttr = ($againstAttr === 'true')?true:false;
 			} elseif(StringUtils::startsWith($againstAttr, '{') && StringUtils::endsWith($againstAttr, '}')) {
 				$arr = substr(explode(',', $againstAttr), 1, -1);
 				$againstAttr = array();

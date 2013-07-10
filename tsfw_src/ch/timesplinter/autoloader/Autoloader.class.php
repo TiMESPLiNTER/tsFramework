@@ -2,7 +2,6 @@
 
 namespace ch\timesplinter\autoloader;
 
-use ch\timesplinter\core\Observable;
 use ch\timesplinter\logger\LoggerFactory;
 
 /**
@@ -65,7 +64,7 @@ class Autoloader {
 		if(isset($this->cachedClasses[$className]) === false)
 			return false;
 
-		$classPath = FW_DIR . $this->cachedClasses[$className];
+		$classPath = $this->cachedClasses[$className];
 
 		if(file_exists($classPath) === true) {
 			//self::notifyObservers($className);
@@ -84,16 +83,15 @@ class Autoloader {
 	 * @throws AutoloaderException
 	 */
 	private function doAutoload($class_name) {
-		if(class_exists($class_name) === true)
-			return;
-
+		/*if(class_exists($class_name, false) === true)
+			return;*/
 
 		if(($includePath = $this->isCached($class_name)) !== false) {
-			echo 'loaded from cache: ' , $class_name , "\n";
-
 			require $includePath;
 			return;
 		}
+
+		$searchedPaths = array();
 
 		foreach($this->loadPaths as $id => $pathOptions) {
 			$delimiter = null;
@@ -112,31 +110,33 @@ class Autoloader {
 			$classPathParts = explode($delimiter, $class_name);
 
 			// Throw first dir / array element away
-			array_shift($classPathParts);
+			//array_shift($classPathParts);
 
 			$phpFilePath = implode(DIRECTORY_SEPARATOR, $classPathParts);
 
 			foreach($pathOptions['class_suffix'] as $cs) {
 				$includePath = $path . $phpFilePath . $cs;
 
-				if(file_exists($includePath) === false)
+				if(file_exists($includePath) === false) {
+					$searchedPaths[] = $includePath;
 					continue;
+				}
 
 				$this->doInclude($includePath, $class_name);
 				return;
 			}
-
-			//echo $classPath , '<br>';
-			//throw new AutoloaderException('Could not load class: ' . $class_name);
 		}
 
-		$this->cachedClassesChanged = true;
+		//echo $classPath , '<br>';
+		//throw new AutoloaderException('Could not load class: ' . $class_name);
+		throw new \Exception('Could not find class ' . $class_name . '. Searched in: ' . implode(", \n", $searchedPaths));
 	}
 
 	private function doInclude($includePath, $className) {
-		require $includePath;
+		require_once $includePath;
 
 		$this->cachedClasses[$className] = $includePath;
+		$this->cachedClassesChanged = true;
 	}
 
 	private function pharInclude($includePath, $classPath, $interfacePath) {

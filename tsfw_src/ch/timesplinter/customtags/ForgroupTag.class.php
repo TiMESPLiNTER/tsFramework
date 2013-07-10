@@ -2,7 +2,12 @@
 
 namespace ch\timesplinter\customtags;
 
-use ch\timesplinter\logger\TSLogger;
+use ch\timesplinter\core\FrameworkLoggerFactory;
+use ch\timesplinter\template\TemplateTag;
+use ch\timesplinter\template\TagNode;
+use ch\timesplinter\template\TemplateEngine;
+use ch\timesplinter\htmlparser\ElementNode;
+use ch\timesplinter\htmlparser\TextNode;
 
 class ForgroupTag extends TemplateTag implements TagNode {
 	private $logger;
@@ -11,7 +16,7 @@ class ForgroupTag extends TemplateTag implements TagNode {
 	private $no;
 	
 	public function __construct() {
-		$this->logger = TSLogger::getLoggerByName('dev', $this);
+		$this->logger = FrameworkLoggerFactory::getLogger($this);
 		parent::__construct('forgroup', false);
 	}
 	

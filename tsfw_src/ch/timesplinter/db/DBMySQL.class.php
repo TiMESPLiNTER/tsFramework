@@ -19,11 +19,9 @@ use \PDOStatement;
  * 
  * @change 2012-10-10 Uses now the new abstract class 'DB' instead of the interface and makes use of the execute()-method in it (pam)
  * @change 2012-10-23 Method prepare() from PDO class overridden. Throws now a DBException. (pam)
- * @change 2013-05-28 Uses listeners to react on events like select, update, insert, execute and prepare
+ * @change 2013-05-28 Uses listeners to react on events like select, update, insert, execute and prepare, etc.
  */
 class DBMySQL extends DB {
-
-	private $dbConnect;
 
 	public function __construct(DBConnect $dbConnect) {
 		$this->dbConnect = $dbConnect;
@@ -39,8 +37,10 @@ class DBMySQL extends DB {
 
 			$this->query("SET NAMES '" . $dbConnect->getCharset() . "'");
 			$this->query("SET CHARSET '" . $dbConnect->getCharset() . "'");
+
+			$this->triggerListeners('onConnect', array($this, $this->dbConnect));
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not connect to the database ' . $dbConnect->getDatabase() . '@' . $dbConnect->getHost(), 201);
+			throw new DBException('PDO could not connect to the database ' . $dbConnect->getDatabase() . '@' . $dbConnect->getHost(), 401);
 		}
 	}
 
@@ -52,14 +52,11 @@ class DBMySQL extends DB {
 		try {
 			$stmnt = parent::prepare($sql, $driver_options);
 
-			foreach($this->listeners as $l) {
-				/** @var DBListener $l */
-				$l->onPrepare($this, $stmnt);
-			}
+			$this->triggerListeners('onPrepare', array($this, $stmnt));
 
 			return $stmnt;
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not prepare query: ' . $e->getMessage(), 203, $sql);
+			throw new DBException('PDO could not prepare query: ' . $e->getMessage(), 402, $sql);
 		}
 	}
 
@@ -68,26 +65,23 @@ class DBMySQL extends DB {
 
 		try {
 			// Bind params to statement
-			for($i = 0; $i < $paramCount; $i++) {
+			/*for($i = 0; $i < $paramCount; $i++) {
 				$paramType = (is_int($params[$i])) ? PDO::PARAM_INT : PDO::PARAM_STR;
 				$stmnt->bindParam(($i + 1), $params[$i], $paramType);
-			}
+			}*/
+			$stmnt->execute($params);
+			//$this->execute($stmnt);
 
-			parent::execute($stmnt);
-
-			foreach($this->listeners as $l) {
-				/** @var DBListener $l */
-				$l->onSelect($this, $stmnt, $params);
-			}
+			$this->triggerListeners('onSelect', array($this, $stmnt, $params));
 
 			return $stmnt->fetchAll(PDO::FETCH_OBJ);
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not execute select query: ' . $e->getMessage(), 202, $stmnt->queryString, $params);
+			throw new DBException('PDO could not execute select query: ' . $e->getMessage(), 403, $stmnt->queryString, $params);
 		}
 	}
 
 // selectAsObjects($stmnt,$params,$className)
-	public function selectAsObjects(PDOStatement $stmnt, $className, array $params = array()) {
+	public function selectAsObjects(PDOStatement $stmnt, $className, array $params = null) {
 		$paramCount = count($params);
 
 		try {
@@ -97,16 +91,13 @@ class DBMySQL extends DB {
 				$stmnt->bindParam(($i + 1), $params[$i], $paramType);
 			}
 
-			parent::execute($stmnt);
+			$this->execute($stmnt);
 
-			foreach($this->listeners as $l) {
-				/** @var DBListener $l */
-				$l->onSelect($this, $stmnt, $params);
-			}
+			$this->triggerListeners('onSelect', array($this, $stmnt, $params));
 
 			return $stmnt->fetchAll(PDO::FETCH_CLASS, $className);
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not execute select query: ' . $e->getMessage(), 202, $stmnt->queryString, $params);
+			throw new DBException('PDO could not execute select query: ' . $e->getMessage(), 404, $stmnt->queryString, $params);
 		}
 	}
 
@@ -114,22 +105,21 @@ class DBMySQL extends DB {
 		$paramCount = count($params);
 
 		try {
+			$this->triggerListeners('beforeMutation', array($this, $stmnt, $params, DBListener::QUERY_TYPE_INSERT));
+
 			// Bind params to statement
 			for($i = 0; $i < $paramCount; $i++) {
 				$paramType = (is_int($params[$i])) ? PDO::PARAM_INT : PDO::PARAM_STR;
 				$stmnt->bindParam(($i + 1), $params[$i], $paramType);
 			}
 
-			parent::execute($stmnt);
+			$this->execute($stmnt);
 
-			foreach($this->listeners as $l) {
-				/** @var DBListener $l */
-				$l->onInsert($this, $stmnt, $params);
-			}
+			$this->triggerListeners('afterMutation', array($this, $stmnt, $params, DBListener::QUERY_TYPE_INSERT));
 
 			return $this->lastInsertId();
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not execute insert query: ' . $e->getMessage(), 204, $stmnt->queryString, $params);
+			throw new DBException('PDO could not execute insert query: ' . $e->getMessage(), 405, $stmnt->queryString, $params);
 		}
 	}
 
@@ -137,22 +127,21 @@ class DBMySQL extends DB {
 		$paramCount = count($params);
 
 		try {
+			$this->triggerListeners('beforeMutation', array($this, $stmnt, $params, DBListener::QUERY_TYPE_UPDATE));
+
 			// Bind params to statement
 			for($i = 0; $i < $paramCount; $i++) {
 				$paramType = (is_int($params[$i])) ? PDO::PARAM_INT : PDO::PARAM_STR;
 				$stmnt->bindParam(($i + 1), $params[$i], $paramType);
 			}
 			
-			parent::execute($stmnt);
+			$this->execute($stmnt);
 
-			foreach($this->listeners as $l) {
-				/** @var DBListener $l */
-				$l->onUpdate($this, $stmnt, $params);
-			}
+			$this->triggerListeners('afterMutation', array($this, $stmnt, $params, DBListener::QUERY_TYPE_UPDATE));
 
 			return $stmnt->rowCount();
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not execute update query: ' . $e->getMessage(), 205, $stmnt->queryString, $params);
+			throw new DBException('PDO could not execute update query: ' . $e->getMessage(), 406, $stmnt->queryString, $params);
 		}
 	}
 
@@ -160,22 +149,21 @@ class DBMySQL extends DB {
 		$paramCount = count($params);
 
 		try {
+			$this->triggerListeners('beforeMutation', array($this, $stmnt, $params, DBListener::QUERY_TYPE_DELETE));
+
 			// Bind params to statement
 			for($i = 0; $i < $paramCount; $i++) {
 				$paramType = (is_int($params[$i])) ? PDO::PARAM_INT : PDO::PARAM_STR;
 				$stmnt->bindParam(($i + 1), $params[$i], $paramType);
 			}
 
-			parent::execute($stmnt);
+			$this->execute($stmnt);
 
-			foreach($this->listeners as $l) {
-				/** @var DBListener $l */
-				$l->onDelete($this, $stmnt, $params);
-			}
+			$this->triggerListeners('afterMutation', array($this, $stmnt, $params, DBListener::QUERY_TYPE_DELETE));
 
 			return $stmnt->rowCount();
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not execute delete query: ' . $e->getMessage(), 205, $stmnt->queryString, $params);
+			throw new DBException('PDO could not execute delete query: ' . $e->getMessage(), 407, $stmnt->queryString, $params);
 		}
 	}
 

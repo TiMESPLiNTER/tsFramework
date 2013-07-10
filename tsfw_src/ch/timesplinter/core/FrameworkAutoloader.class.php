@@ -19,3 +19,5 @@ class FrameworkAutoloader extends Autoloader {
 		}
 	}
 }
+
+/* EOF */

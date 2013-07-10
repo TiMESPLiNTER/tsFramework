@@ -77,9 +77,9 @@ class HttpRequest {
 		return $this->params;
 	}
 	
-	public function getParam($key) {
+	public function getParam($key, $cleaned = true) {
 		if(isset($this->params[$key]))
-			return $this->params[$key];
+			return ($cleaned === true)?strip_tags($this->params[$key]):$this->params[$key];
 		
 		return null;
 	}

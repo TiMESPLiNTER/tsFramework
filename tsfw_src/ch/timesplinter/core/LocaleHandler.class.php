@@ -90,6 +90,18 @@ class LocaleHandler {
 	public function getLanguage() {
 		return substr($this->locale, 0, 2);
 	}
+
+	public function getDateTimeFormat() {
+		return $this->core->getSettings()->locales->{$this->locale}->datetime_format;
+	}
+
+	public function getDateFormat() {
+		return $this->core->getSettings()->locales->{$this->locale}->date_format;
+	}
+
+	public function getTimeFormat() {
+		return $this->core->getSettings()->locales->{$this->locale}->time_format;
+	}
 }
 
 /* EOF */

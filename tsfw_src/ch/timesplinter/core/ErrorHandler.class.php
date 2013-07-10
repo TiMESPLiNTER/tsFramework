@@ -24,14 +24,16 @@ class ErrorHandler {
 		set_exception_handler(array($this, 'handleException'));
 	}
 	
-	public function displayHttpError($errorCode, $httpRequest) {
+	public function displayHttpError($errorCode, $httpRequest, $errorStr = null) {
         $language = $this->core->getLocaleHandler()->getLanguage();
         $messages = $this->core->getSettings()->errorhandling->messages;
 
-        if($language === false)
-            $language = 'en';
+		if($errorStr !== null) {
+	        if($language === false)
+	            $language = 'en';
 
-        $errorStr = isset($messages->$errorCode)?$messages->$errorCode->$language:$messages->default->$language;
+	        $errorStr = isset($messages->$errorCode)?$messages->$errorCode->$language:$messages->default->$language;
+		}
 
 		$errorControllerMethod = isset($this->core->getSettings()->errorhandling->controller->$errorCode)?$errorCode:'default';
 		$errorHandlerController = $this->core->getSettings()->errorhandling->controller->$errorControllerMethod;
@@ -59,7 +61,7 @@ class ErrorHandler {
 	 * @throws PHPException
 	 */
 	public function handlePHPError($error_number,$error,$error_file,$error_line) {
-		throw new PHPException($error_number,$error,$error_file,$error_line);
+		throw new PHPException($error_number, $error, $error_file, $error_line);
 	}
 	
 	/**

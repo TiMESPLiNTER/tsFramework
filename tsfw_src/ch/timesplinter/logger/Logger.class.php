@@ -54,7 +54,7 @@ abstract class Logger {
 			return;
 
 		if($e !== null)
-			$msg .= "\r\n\tException: (" . $e->getCode() . ') ' . $e->getMessage();
+			$msg .= "\r\n\t" . get_class($e) . ': (' . $e->getCode() . ') "' . $e->getMessage() . "\"\r\n\tthrown in file: " . $e->getFile() . ' (Line: ' . $e->getLine() . ')' . "\r\n\n\t" . str_replace("\n", "\n\t", $e->getTraceAsString());
 
 		$this->writeMessage(self::LEVEL_ERROR, $msg);
 	}

@@ -9,17 +9,42 @@ class Settings {
 	private $settings;
 	private $settingsPath;
     private $replace;
+	private $cacheFile;
+	private $cacheChanged;
+	private $cachedSettingsFiles;
+	private $cachedFiletime;
+	private $resourcesChecked;
 	
 	public function __construct($settingsPath, array $replace = array()) {
 		$this->settingsPath = $settingsPath;
 		$this->settings = new stdClass;
         $this->replace = array();
+		$this->resourcesChecked = array();
+
+		$this->cacheFile = CACHE_DIR . 'settings.cache';
+		$this->cacheChanged = false;
+		$this->loadSettingsFromCache();
 
         foreach($replace as $k => $v) {
             $this->replace['${' . $k . '}'] = $v;
         }
 	}
-	
+
+	private function loadSettingsFromCache() {
+		if(file_exists($this->cacheFile) === false)
+			return;
+
+		$settingsCache = null;
+		$settingsCacheFiles = null;
+
+		$cachedData = unserialize(file_get_contents($this->cacheFile));
+
+		$this->settings = $cachedData['settings'];
+		$this->cachedFiletime = $cachedData['cachetime'];
+
+		$this->cachedSettingsFiles = $cachedData['files'];
+	}
+
 	private function loadSettingsFromFile($file) {
 		$filePath = $this->settingsPath . $file;
 		
@@ -33,8 +58,12 @@ class Settings {
 		
 		if($content === false)
 			throw new SettingsException('Could not load settings file: ' . $filePath);
-	
-		$settingsObj = JsonUtils::decode($content, false, false);
+
+		try {
+			$settingsObj = JsonUtils::decode($content, false, false);
+		} catch(\Exception $e) {
+			throw new SettingsException('Could not load settings file, JSON Error: ' . $e->getMessage() . ' in file: ' .$filePath );
+		}
 
 		if($settingsObj === null)
 			throw new SettingsException('Invalid JSON code in settings file: ' . $filePath);
@@ -53,7 +82,7 @@ class Settings {
 				$settingsObj->$k = isset($settingsObj->$k)?(object)array_merge((array)$settingsObj->$k, (array)$v):$v;
 		}
 		
-		unset($settingsObj->{'@resources'});
+		//unset($settingsObj->{'@resources'});
 
 		return $settingsObj;
 	}
@@ -87,10 +116,38 @@ class Settings {
     }
 
 	public function __get($property) {
-		if(!isset($this->settings->$property))
-			$this->settings->$property = self::loadSettingsFromFile($property . '.json');
-			
+		/* property not exist OR cache file is older than the json file here */
+		if(!isset($this->settings->$property) || filemtime($this->settingsPath . $property . '.json') > $this->cachedFiletime) {
+			$this->settings->$property = $this->loadSettingsFromFile($property . '.json');
+			$this->cacheChanged = true;
+		}
+
+		if(isset($this->settings->$property->{'@resources'}) === true && in_array($property, $this->resourcesChecked) === false) {
+			$this->resourcesChecked[] = $property;
+
+			foreach($this->settings->$property->{'@resources'} as $rsc) {
+				if(filemtime($this->settingsPath . $rsc) > $this->cachedFiletime) {
+					$this->settings->$property = $this->loadSettingsFromFile($property . '.json');
+					$this->cacheChanged = true;
+
+					break;
+				}
+			}
+		}
+
 		return $this->settings->$property;
+	}
+
+	public function __destruct() {
+		if($this->cacheChanged === false)
+			return;
+
+		// TODO: save it to php
+		file_put_contents($this->cacheFile, serialize(array(
+			'cachetime' => time(),
+			'files' => array(),
+			'settings' => $this->settings
+		)));
 	}
 }
 

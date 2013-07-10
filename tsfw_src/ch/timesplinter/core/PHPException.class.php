@@ -9,14 +9,11 @@ namespace ch\timesplinter\core;
  * @version 1.0.0
  */
 class PHPException extends FrameworkException {
-	private $errorFile;
-	private $errorLine;
-	
-	public function __construct($errorNumber,$errorMessage,$errorFile,$errorLine) {
-		parent::__construct($errorMessage, $errorNumber);
-		
-		$this->errorFile = $errorFile;
-		$this->errorLine = $errorLine;
+	public function __construct($number, $message, $file, $line) {
+		parent::__construct($message, $number);
+
+		$this->file = $file;
+		$this->line = $line;
 	}
 
 	public function handleException() {
@@ -46,8 +43,8 @@ class PHPException extends FrameworkException {
 		echo '<b>' , $title , "</b>\n";
 		echo str_pad('', strlen($title), '-') , "\n";
 		echo 'Message: ' , $this->message , "\n";
-		echo 'File:    ' , $this->errorFile , "\n";
-		echo 'Line:    ' , $this->errorLine , "\n\n";
+		echo 'File:    ' , $this->file , "\n";
+		echo 'Line:    ' , $this->line , "\n\n";
 		
 		echo $this->getTraceAsString();
 		

@@ -28,7 +28,7 @@ class AuthHandlerDB extends AuthHandler {
 		
 		$this->db = $db;
 		$this->sessionHandler = $sessionHandler;
-		$this->userId = (isset($_SESSION['userid']))?$_SESSION['userid']:-1;
+		$this->userId = (isset($_SESSION['userid']))?$_SESSION['userid']:0;
 		
 		if($this->loggedIn === true)
 			self::loadUserPopo();
@@ -315,6 +315,10 @@ class AuthHandlerDB extends AuthHandler {
 		$resTokenCheck = $this->db->select($stmntTokenCheck, array($userID, $token));
 
 		return (count($resTokenCheck) > 0);
+	}
+
+	public function getUserID() {
+		return $this->userId;
 	}
 }
 

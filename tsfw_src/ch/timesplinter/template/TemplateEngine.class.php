@@ -24,7 +24,6 @@ class TemplateEngine {
 	private $htmlDoc;
 	private $tplNsPrefix;
 	private $dataPool;
-	private $tplFile;
 //	private $callbackMethods;
 
 	private $cached;
@@ -43,13 +42,11 @@ class TemplateEngine {
 	 * @param string $tplNsPrefix
 	 * @return TemplateEngine
 	 */
-	public function __construct(TemplateCache $tplCache, $tplFile, $tplNsPrefix) {
+	public function __construct(TemplateCache $tplCache, $tplNsPrefix) {
 		$this->logger = FrameworkLoggerFactory::getLogger($this);
 
 		$this->templateCache = $tplCache;
 		$this->tplNsPrefix = $tplNsPrefix;
-
-		$this->tplFile = $tplFile;
 
 		$this->dataPool = new ArrayObject();
 	}
@@ -171,14 +168,14 @@ class TemplateEngine {
 	 * This method parses the given template file
 	 * @return string The parsed template
 	 */
-	public function parse() {
-		$this->cached = self::isTplFileCached($this->tplFile);
+	public function parse($tplFile) {
+		$this->cached = $this->isTplFileCached($tplFile);
 		
 		// PARSE IT NEW: No NodeList given? Okay! I'll load defaults for you
 		if($this->cached !== null)
 			return $this->cached;
 		
-		return self::cache();
+		return $this->cache($tplFile);
 	}
 
 	/**
@@ -186,6 +183,9 @@ class TemplateEngine {
 	 * @return boolean Is file cached or not
 	 */
 	private function isTplFileCached($filePath) {
+		if(file_exists($filePath) === false)
+			throw new TemplateEngineException('Could not find template file: ' . $filePath);
+
 		/** @var TemplateCacheEntry */
 		$tplCacheEntry = $this->templateCache->getCachedTplFile($filePath);
 
@@ -208,8 +208,9 @@ class TemplateEngine {
 	 * enabled)
 	 * @return type
 	 */
-	public function getResultAsHtml() {
-		$cacheID = $this->parse();
+	public function getResultAsHtml($tplFile, $tplVars = array()) {
+		$this->dataPool = new ArrayObject($tplVars);
+		$cacheID = $this->parse($tplFile);
 
 		try {
 			ob_start();
@@ -224,21 +225,21 @@ class TemplateEngine {
 		}
 	}
 
-	private function cache() {
+	private function cache($tplFile) {
 		$cacheFileName = null;
 		
-		if(file_exists($this->tplFile) === false)
-			throw new TemplateEngineException('Template file \'' . $this->tplFile . '\' does not exists');
+		if(file_exists($tplFile) === false)
+			throw new TemplateEngineException('Template file \'' . $tplFile . '\' does not exists');
 		
 		/** @var TemplateCacheEntry */
-		$cacheEntry = $this->templateCache->getCachedTplFile($this->tplFile);
-		$fileSize = @filesize($this->tplFile);
+		$cacheEntry = $this->templateCache->getCachedTplFile($tplFile);
+		$fileSize = @filesize($tplFile);
 
-		$changeTime = @filemtime($this->tplFile);
-		$changeTimeReal = ($changeTime !== false) ? $changeTime : @filectime($this->tplFile);
+		$changeTime = @filemtime($tplFile);
+		$changeTimeReal = ($changeTime !== false) ? $changeTime : @filectime($tplFile);
 		
 		// Render tpl
-		$content = file_exists($this->tplFile) ? file_get_contents($this->tplFile):null;
+		$content = file_exists($tplFile) ? file_get_contents($tplFile):null;
 		$this->htmlDoc = new HtmlDoc($content, $this->tplNsPrefix);
 		$this->htmlDoc->addSelfClosingTag('tst:text');
 		$this->htmlDoc->addSelfClosingTag('tst:lang');
@@ -254,10 +255,10 @@ class TemplateEngine {
 
 		if($cacheEntry === null) {
 			$cacheId = uniqid();
-			$this->templateCache->addCachedTplFile($this->tplFile, $cacheId, $fileSize, $changeTimeReal);
+			$this->templateCache->addCachedTplFile($tplFile, $cacheId, $fileSize, $changeTimeReal);
 		} else {
 			$cacheId = $cacheEntry->ID;
-			$this->templateCache->addCachedTplFile($this->tplFile, $cacheId, $fileSize, $changeTimeReal);
+			$this->templateCache->addCachedTplFile($tplFile, $cacheId, $fileSize, $changeTimeReal);
 		}
 
 		$cacheFileName = $this->templateCache->getCachePath() . $cacheId . self::CACHE_SUBFIX;
@@ -276,7 +277,7 @@ class TemplateEngine {
 			$this->logger->error('Could not cache template-file: ' . $cacheFileName);
 		}
 
-		$this->logger->debug('Tpl-File (re-)cached: ' . $this->tplFile . ' -> ' . $cacheId);
+		$this->logger->debug('Tpl-File (re-)cached: ' . $tplFile . ' -> ' . $cacheId);
 		
 		return $cacheId;
 	}
@@ -378,6 +379,87 @@ class TemplateEngine {
 		return true;
 	}
 
+
+	public function getSelectorAsPHPStr($selectorStr, $echo = false) {
+		$selParts = explode('.', $selectorStr);
+		$firstPart = array_shift($selParts);
+
+		if($this->dataPool->offsetExists($firstPart) === false) {
+			throw new TemplateEngineException('The data with offset "' . $firstPart . '" does not exist.');
+		}
+
+		$varData = $this->dataPool->offsetGet($firstPart);
+
+		$selPHPStr = "\$this->getData('" . $selectorStr . "')";
+
+		if(is_array($varData) === true) {
+			$selPHPStr = "((object)\$this->getData('" . $firstPart . "'))" . ((count($selParts) > 0)?'->' . implode('->', $selParts):null);
+		} elseif(is_object($varData) === true) {
+			// TODO: Make this recursive through all $selParts array entries
+			$getProperty = new \ReflectionProperty($varData, $selParts[0]);
+
+			if($getProperty->isPrivate()) {
+				$selParts[0] = 'get' . ucfirst($selParts[0]) . '()';
+			}
+
+			$selPHPStr = "\$this->getData('" . $firstPart . "')" . ((count($selParts) > 0)?'->' . implode('->', $selParts):null);
+		} else {
+			$selPHPStr = "\$this->getData('" . $selectorStr . "')";
+		}
+
+		$returnVal = ($echo)?'<?php echo ' . $selPHPStr . '; ?>':$selPHPStr;
+
+		return $returnVal;
+	}
+
+	public function getSelectorValue($selectorStr) {
+		$selParts = explode('.', $selectorStr);
+		$firstPart = array_shift($selParts);
+		$properties = null;
+
+		if($this->dataPool->offsetExists($firstPart) === false) {
+			throw new TemplateEngineException('The data with offset "' . $firstPart . '" does not exist.');
+		}
+
+		$varData = $this->dataPool->offsetGet($firstPart);
+
+		if(is_array($varData) === true) {
+			$varData = ((object)$firstPart);
+
+
+			if(count($selParts) > 0) {
+				$selectorOther = implode('->', $selParts);
+				return $varData->{$selectorOther};
+			}
+
+			return $varData;
+		}
+
+		if(is_object($varData) === true) {
+			$getProperty = new \ReflectionProperty($varData, $selParts[0]);
+
+			if($getProperty->isPrivate()) {
+				$selParts[0] = 'get' . ucfirst($selParts[0]) . '()';
+			}
+
+			$selPHPStr = $firstPart;
+			$properties = ((count($selParts) > 0)?implode('->', $selParts):null);
+		} else {
+			$selPHPStr = $selectorStr;
+		}
+
+		$returnVal = call_user_func(array($this, 'getData'), $selPHPStr);
+
+		if($properties !== null) {
+			return $returnVal->{$properties};
+		}
+
+		return $returnVal;
+	}
+
+	public static function getVar($selector) {
+
+	}
 }
 
-?>
+/* EOF */

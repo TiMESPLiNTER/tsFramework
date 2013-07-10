@@ -17,8 +17,8 @@ define('CACHE_DIR' , SITE_ROOT . 'cache' . DIRECTORY_SEPARATOR);
 define('SETTINGS_DIR' , SITE_ROOT . 'settings' . DIRECTORY_SEPARATOR);
 
 // Initialize Autoloader
-require FW_DIR . 'ch/timesplinter/autoloader/Autoloader.class.php';
-require FW_DIR . 'ch/timesplinter/core/FrameworkAutoloader.class.php';
+require_once FW_DIR . 'ch/timesplinter/autoloader/Autoloader.class.php';
+require_once FW_DIR . 'ch/timesplinter/core/FrameworkAutoloader.class.php';
 
 $autoloader = new FrameworkAutoloader();
 $autoloader->addPath('fw-logic', array(

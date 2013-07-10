@@ -19,4 +19,4 @@ interface TagNode {
 	public function replaceNode(TemplateEngine $tplEngine, ElementNode $tagNode);
 }
 
-?>
+/* EOF */

@@ -1,6 +1,7 @@
 <?php
 namespace ch\timesplinter\auth;
 
+use ch\timesplinter\core\FrameworkLoggerFactory;
 use ch\timesplinter\logger\LoggerFactory;
 
 /**
@@ -21,7 +22,7 @@ abstract class AuthHandler {
 	protected $logger;
 	
 	public function __construct() {
-		$this->logger = LoggerFactory::getLoggerByName('dev', $this);
+		$this->logger = FrameworkLoggerFactory::getLogger($this);
 		$this->loggedIn = (isset($_SESSION['loggedin']))?$_SESSION['loggedin']:false;
 	}
 	
