@@ -22,7 +22,7 @@ require_once FW_DIR . 'ch/timesplinter/core/FrameworkAutoloader.class.php';
 
 $autoloader = new FrameworkAutoloader();
 $autoloader->addPath('fw-logic', array(
-	'path' => FW_DIR . 'ch/',
+	'path' => FW_DIR,
 	'mode' => Autoloader::MODE_NAMESPACE,
 	'class_suffix' => array('.class.php', '.interface.php')
 ));

@@ -153,7 +153,13 @@ class Core {
 
 		$this->pluginManager->invokePluginHook('beforeResponseBuilt');
 
-		$this->httpResponse = $this->processPage($matchedRoute);
+		try {
+			$this->httpResponse = $this->processPage($matchedRoute);
+		} catch(HttpException $e) {
+			return $this->errorHandler->displayHttpError($e->getCode(), $this->httpRequest, $e->getMessage());
+		} catch(\Exception $e) {
+			throw $e;
+		}
 
 		$this->pluginManager->invokePluginHook('afterResponseBuilt');
 
@@ -214,7 +220,6 @@ class Core {
 		/** @var $c FrameworkController */
 		$route = ($this->httpRequest->getRequestMethod() === 'POST' && isset($routes['POST']))?$routes['POST']:$routes['GET'];
 
-		/** @var HttpResponse $httpResponse */
 		if($controllers[$route->controllerClass] instanceof HttpResponse) {
 			$response = $controllers[$route->controllerClass];
 		} else {
@@ -222,7 +227,7 @@ class Core {
 		}
 
 		if(($response instanceof HttpResponse) === false)
-			throw new CoreException('Return value of the controller method "' . $route->controllerClass . '->' . $route->controllerMethod . '" is not an object of type HttpResponse but of ' . get_class($response));
+			throw new CoreException('Return value of the controller method "' . $route->controllerClass . '->' . $route->controllerMethod . '" is not an object of type HttpResponse but of ' . (is_object($response)?get_class($response):'a php native type'));
 
 		return $response;
 	}

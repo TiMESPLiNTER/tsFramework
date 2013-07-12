@@ -6,6 +6,7 @@ use ch\timesplinter\db\DB;
 use ch\timesplinter\db\DBConnect;
 use \PDO;
 use \PDOStatement;
+use \PDOException;
 
 /**
  * Description of DBMySQL

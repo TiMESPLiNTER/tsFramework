@@ -18,7 +18,7 @@ class RouteUtils {
 			
 			if(preg_match($routeObj->pattern, $uri) === 0)
 				continue;
-			
+
 			$routeEntries[$routeObj->method] = self::createRouteObject($routeID, $r);
 		}
 		
@@ -40,7 +40,7 @@ class RouteUtils {
 	private static function createRouteObject($routeID, stdClass $routeEntry) {
 		$route = new Route;
 		
-		$pattern = str_replace(array('/'), array('\/'), $routeEntry->pattern);
+		//$pattern = str_replace(array('/'), array('\/'), $routeEntry->pattern);
 		
 		$route->method = Route::METHOD_UNKNOWN;
 		$route->sslRequired = isset($routeEntry->sslRequired)?$routeEntry->sslRequired:false;
@@ -53,8 +53,7 @@ class RouteUtils {
 		elseif($routeEntryMethod === 'POST')
 			$route->method = Route::METHOD_POST;
 		
-		$route->pattern = '/^' . $pattern . '$/';
-		
+		$route->pattern = '@^' . $routeEntry->pattern . '$@';
 		
 		$ctrlParts = explode(':',$routeEntry->controller);
 		
