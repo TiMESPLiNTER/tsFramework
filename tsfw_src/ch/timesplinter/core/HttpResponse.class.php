@@ -9,6 +9,73 @@ namespace ch\timesplinter\core;
  * @version 1.0
  */
 class HttpResponse {
+	private static $STATUS_CODES = array(
+		// 1xx - Informations
+		 100 => 'Continue'
+		,101 => 'Switching Protocols'
+		,102 => 'Processing'
+		,118 => 'Connection timed out'
+
+		// 2xx - Successful operation
+		,200 => 'OK'
+		,201 => 'Created'
+		,202 => 'Accepted'
+		,203 => 'Non-Authorative Information'
+		,204 => 'No Content'
+		,205 => 'Reset Content'
+		,206 => 'Partial Content'
+		,207 => 'Multi-Status'
+
+		// 3xx - Redirection
+		,300 => 'Multiple Choices'
+		,301 => 'Moved Permanently'
+		,302 => 'Found'
+		,303 => 'See Other'
+		,304 => 'Not Modified'
+		,305 => 'Use Proxy'
+		,306 => 'Switch Proxy'
+		,307 => 'Temporary Redirect'
+
+		// 4xx - Client errors
+		,400 => 'Bad Request'
+		,401 => 'Unauthorized'
+		,402 => 'Payment Required'
+		,403 => 'Forbidden'
+		,404 => 'Not Found'
+		,405 => 'Method Not Allowed'
+		,406 => 'Not Acceptable'
+		,407 => 'Proxy Authentication Required'
+		,408 => 'Request Time-out'
+		,409 => 'Conflict'
+		,410 => 'Gone'
+		,411 => 'Length Required'
+		,412 => 'Precondition Failed'
+		,413 => 'Request Entity Too Large'
+		,414 => 'Reuqest-URL Too Long'
+		,415 => 'Unsupported Media Type'
+		,416 => 'Requested range not satisfiable'
+		,417 => 'Expectation Failed'
+		,421 => 'There are too many connections from your internet address'
+		,422 => 'Unprocessable Entity'
+		,423 => 'Locked'
+		,424 => 'Failed Dependency'
+		,425 => 'Unordered Collection'
+		,426 => 'Upgrade Required'
+		,451 => 'Unavailable For Legal Reason'
+
+		// 5xx - server errors
+		,500 => 'Internal Server Error'
+		,501 => 'Not Implemented'
+		,502 => 'Bad Gateway'
+		,503 => 'Service Unavailable'
+		,504 => 'Gateway Time-out'
+		,505 => 'HTTP Version not supported'
+		,506 => 'Variant Also Negotiates'
+		,507 => 'Insufficient Storage'
+		,509 => 'Bandwidth Limit Exceeded'
+		,510 => 'Not Extended'
+	);
+
 	private $httpStatusCode;
 	private $headers;
 	private $content;
@@ -73,76 +140,13 @@ class HttpResponse {
 			readfile($this->content, false, $this->streamContext);
 		}
 	}
-	
-	public static function getHttpStatusHeader($statusCode) {
-		$statusArray = array(
-			 // 1xx - Informations
-			 100 => 'Continue'
-			,101 => 'Switching Protocols'
-			,102 => 'Processing'
-			,118 => 'Connection timed out'
-			
-			// 2xx - Successful operation
-			,200 => 'OK'
-			,201 => 'Created'
-			,202 => 'Accepted'
-			,203 => 'Non-Authorative Information'
-			,204 => 'No Content'
-			,205 => 'Reset Content'
-			,206 => 'Partial Content'
-			,207 => 'Multi-Status'
-			
-			// 3xx - Redirection
-			,300 => 'Multiple Choices'
-			,301 => 'Moved Permanently'
-			,302 => 'Found'
-			,303 => 'See Other'
-			,304 => 'Not Modified'
-			,305 => 'Use Proxy'
-			,306 => 'Switch Proxy'
-			,307 => 'Temporary Redirect'
-			
-			// 4xx - Client errors
-			,400 => 'Bad Request'
-			,401 => 'Unauthorized'
-			,402 => 'Payment Required'
-			,403 => 'Forbidden'
-			,404 => 'Not Found'
-			,405 => 'Method Not Allowed'
-			,406 => 'Not Acceptable'
-			,407 => 'Proxy Authentication Required'
-			,408 => 'Request Time-out'
-			,409 => 'Conflict'
-			,410 => 'Gone'
-			,411 => 'Length Required'
-			,412 => 'Precondition Failed'
-			,413 => 'Request Entity Too Large'
-			,414 => 'Reuqest-URL Too Long'
-			,415 => 'Unsupported Media Type'
-			,416 => 'Requested range not satisfiable'
-			,417 => 'Expectation Failed'
-			,421 => 'There are too many connections from your internet address'
-			,422 => 'Unprocessable Entity'
-			,423 => 'Locked'
-			,424 => 'Failed Dependency'
-			,425 => 'Unordered Collection'
-			,426 => 'Upgrade Required'
-			,451 => 'Unavailable For Legal Reason'
-			
-			// 5xx - server errors
-			,500 => 'Internal Server Error'
-			,501 => 'Not Implemented'
-			,502 => 'Bad Gateway'
-			,503 => 'Service Unavailable'
-			,504 => 'Gateway Time-out'
-			,505 => 'HTTP Version not supported'
-			,506 => 'Variant Also Negotiates'
-			,507 => 'Insufficient Storage'
-			,509 => 'Bandwidth Limit Exceeded'
-			,510 => 'Not Extended'
-		);
-		
-		return 'HTTP/1.1 ' . $statusCode . (isset($statusArray[$statusCode])?' ' . $statusArray[$statusCode]:null);
+
+	public static function getHttpStatusString($statusCode) {
+		return (isset(self::$STATUS_CODES[$statusCode])?' ' . self::$STATUS_CODES[$statusCode]:null);
+	}
+
+	private function getHttpStatusHeader($statusCode) {
+		return 'HTTP/1.1 ' . $statusCode . $this::getHttpStatusString($statusCode);
 	}
 }
 

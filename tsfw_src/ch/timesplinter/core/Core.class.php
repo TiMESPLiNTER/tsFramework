@@ -220,10 +220,17 @@ class Core {
 		/** @var $c FrameworkController */
 		$route = ($this->httpRequest->getRequestMethod() === 'POST' && isset($routes['POST']))?$routes['POST']:$routes['GET'];
 
-		if($controllers[$route->controllerClass] instanceof HttpResponse) {
-			$response = $controllers[$route->controllerClass];
-		} else {
-			$response = call_user_func(array($controllers[$route->controllerClass],$route->controllerMethod));
+		try {
+			if($controllers[$route->controllerClass] instanceof HttpResponse) {
+				$response = $controllers[$route->controllerClass];
+			} else {
+				$response = call_user_func(array($controllers[$route->controllerClass],$route->controllerMethod));
+			}
+		} catch(HttpException $e) {
+			if($controllers[$route->controllerClass] instanceof HandleHttpError)
+				$response = $controllers[$route->controllerClass]->displayHttpError($e);
+			else
+				throw $e;
 		}
 
 		if(($response instanceof HttpResponse) === false)

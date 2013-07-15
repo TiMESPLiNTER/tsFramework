@@ -28,9 +28,12 @@ class HttpRequest {
 	private $requestTime;
 	private $languages;
 	private $userAgent;
+
+	private $requestVars;
 	
 	public function __construct() {
 		$this->params = array();
+		$this->requestVars = array_merge($_GET, $_POST);
 	}
 	
 	public function setProtocol($protocol) {
@@ -133,21 +136,23 @@ class HttpRequest {
 		return $protocol . '://' . $this->host . $this->uri;
 	}
 
-	public function getVar($name, $type = self::VAR_GET) {
-		$vars = null;
-
-		if($type === '_GET') {
-			$vars = $_GET;
-		} elseif($type === '_POST') {
-			$vars = $_POST;
-		} elseif($type === '_FILES') {
-			$vars = $_FILES;
-		}
-
-		if(isset($vars[$name]) === false)
+	/**
+	 * Returns the value of a variable with key $name from either $_GET or $_POST
+	 * @param $name The name of the GET or POST variable
+	 * @return mixed|null Returns the value of the variable or null if it does not exist
+	 */
+	public function getVar($name) {
+		if(isset($this->requestVars[$name]) === false)
 			return null;
 
-		return $vars[$name];
+		return $this->requestVars[$name];
+	}
+
+	public function getFile($name) {
+		if(isset($_FILES[$name]) === false)
+			return null;
+
+		return $_FILES[$name];
 	}
 }
 
