@@ -16,12 +16,12 @@ class AuthHandlerDB extends AuthHandler {
 	const HASH_TYPE = 'sha256';
 	const LOGIN_SITE = '/login.html';
 	const DEFAULT_SITE_AFTER_LOGIN = '/home.html?n=uebersicht';
-	
-	private $userId;
+
+	protected $userId;
 	/* @var $db DB */
-	private $db;
+	protected $db;
 	/** @var SessionHandler $sessionHandler */
-	private $sessionHandler;
+	protected $sessionHandler;
 	
 	public function __construct(DB $db, SessionHandler $sessionHandler) {
 		parent::__construct();
@@ -83,7 +83,7 @@ class AuthHandlerDB extends AuthHandler {
 			if($this->loginPopo->active != 1)
 				return false;
 			
-			$this->loginPopo->rightgroups = self::loadRightGroups($this->loginPopo->ID);
+			$this->loginPopo->rightgroups = $this->loadRightGroups($this->loginPopo->ID);
 			
 			// Security!
 			$this->sessionHandler->regenerateID();
@@ -157,10 +157,19 @@ class AuthHandlerDB extends AuthHandler {
 			return true;
 		
 		foreach($groupEntries as $rg) {
-			if($userGroup === $rg->groupkey || $rg->root === 1)
+			if($userGroup === $rg->groupkey || $rg->root == 1)
 				return true;
 		}
 		
+		return false;
+	}
+
+	public function hasRootAccess() {
+		foreach($this->loginPopo->rightgroups as $rg) {
+			if($rg->root == 1)
+				return true;
+		}
+
 		return false;
 	}
 		
