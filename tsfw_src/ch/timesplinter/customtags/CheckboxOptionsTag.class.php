@@ -1,6 +1,7 @@
 <?php
 namespace ch\timesplinter\customtags;
 
+use ch\timesplinter\common\StringUtils;
 use ch\timesplinter\template\TemplateTag;
 use ch\timesplinter\template\TagNode;
 use ch\timesplinter\template\TemplateEngine;

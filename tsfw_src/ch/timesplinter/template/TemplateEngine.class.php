@@ -1,6 +1,7 @@
 <?php
 namespace ch\timesplinter\template;
 
+use ch\timesplinter\common\StringUtils;
 use ch\timesplinter\core\FrameworkLoggerFactory;
 use ch\timesplinter\logger\LoggerFactory;
 use ch\timesplinter\htmlparser\HtmlDoc;
@@ -381,6 +382,9 @@ class TemplateEngine {
 
 
 	public function getSelectorAsPHPStr($selectorStr, $echo = false) {
+		if(StringUtils::startsWith($selectorStr, '${') === true)
+			return $selectorStr;
+
 		$selParts = explode('.', $selectorStr);
 		$firstPart = array_shift($selParts);
 
