@@ -42,13 +42,13 @@ abstract class PageController extends FrameworkController {
 		
 		$cacheDir = CACHE_DIR . 'pages' . DIRECTORY_SEPARATOR . $this->currentDomain->template . DIRECTORY_SEPARATOR;
 		$tplCache = new TemplateCache($cacheDir, 'cache.template');
-		$this->tplEngine = new TemplateEngine($tplCache, $templateFile, 'tst');
-		
+		$this->tplEngine = new TemplateEngine($tplCache, 'tst');
+
 		$this->tplEngine->setAllData($vars);
-		$this->tplEngine->addData('this', $tplFilePath);
-		$this->tplEngine->addData('_site', ($this->route !== null)?(string)$this->route->id:null);
+		$vars['this'] = $tplFilePath;
+		$vars['_site'] = ($this->route !== null)?(string)$this->route->id:null;
 		
-		return preg_replace_callback('/\s+id="nav-(.+?)"/', array($this,'setCSSActive'), $this->tplEngine->getResultAsHtml());
+		return preg_replace_callback('/\s+id="nav-(.+?)"/', array($this,'setCSSActive'), $this->tplEngine->getResultAsHtml($templateFile, $vars));
 	}
 	
 	protected function generateHttpResponse($httpStatusCode = 200, $html = null, $headers = array()) {

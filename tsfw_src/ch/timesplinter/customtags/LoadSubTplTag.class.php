@@ -53,9 +53,10 @@ class LoadSubTplTag extends TemplateTag implements TagNode {
 	 * @param string $file The full filepath to include (OR magic {this})
 	 */
 	public static function requireFile($file, TemplateEngine $tplEngine) {
-		$tplEngineNew = new TemplateEngine($tplEngine->getTemplateCache(), $tplEngine->getTplNsPrefix());
+		/*$tplEngineNew = new TemplateEngine($tplEngine->getTemplateCache(), $tplEngine->getTplNsPrefix());
+		$tplEngineNew->setAllData($tplEngine->getAllData());*/
 
-		echo $tplEngineNew->getResultAsHtml($file, $tplEngine->getAllData());
+		echo $tplEngine->getResultAsHtml($file, $tplEngine->getAllData());
 	}
 
 }
