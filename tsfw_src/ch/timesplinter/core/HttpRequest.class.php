@@ -138,7 +138,7 @@ class HttpRequest {
 
 	/**
 	 * Returns the value of a variable with key $name from either $_GET or $_POST
-	 * @param $name The name of the GET or POST variable
+	 * @param string $name The name of the GET or POST variable
 	 * @return mixed|null Returns the value of the variable or null if it does not exist
 	 */
 	public function getVar($name) {

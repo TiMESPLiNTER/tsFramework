@@ -9,7 +9,9 @@ use \Exception;
 /**
  * Description of JsonUtils
  *
- * @author pascal91
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2013 by TiMESPLiNTER Webdevelopment
+ * @version 1.0.0
  */
 class JsonUtils {
 

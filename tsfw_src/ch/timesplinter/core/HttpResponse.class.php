@@ -87,6 +87,8 @@ class HttpResponse {
 	 * @param int $httpResponseCode
 	 * @param string $content
 	 * @param array $headers
+	 * @param boolean $stream
+	 * @param mixed $streamContext
 	 * @return HttpResponse
 	 */
 	public function __construct($httpStatusCode = 200, $content = null, $headers = array('Content-Type' => 'text/html; charset=UTF-8'), $stream = false, $streamContext = null) {

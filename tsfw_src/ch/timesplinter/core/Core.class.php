@@ -1,4 +1,5 @@
 <?php
+
 namespace ch\timesplinter\core;
 
 use ch\timesplinter\common\StringUtils;
@@ -127,7 +128,7 @@ class Core {
 			if(isset($this->settings->defaults->domain))
 				RequestHandler::redirect('http://' . $this->settings->defaults->domain);
 
-			return $this->errorHandler->displayHttpError(500, $this->httpRequest);
+			throw new HttpException('No default domain set in settings', 500);
 		}
 
 		if($this->httpRequest->getPath() === '/') {
@@ -141,10 +142,10 @@ class Core {
 		$matchedRoute = RouteUtils::matchRoutes($this->settings->core->routes, $this->httpRequest->getPath());
 
 		if($matchedRoute === null)
-			return $this->errorHandler->displayHttpError(404, $this->httpRequest);
+			throw new HttpException('No route did match for: ' . $this->httpRequest->getPath(), 404);
 
 		if(isset($matchedRoute['GET']) === false || count($matchedRoute['GET']) <= 0)
-			return $this->errorHandler->displayHttpError(404, $this->httpRequest);
+			throw new HttpException('Not GET entry found for matched path: ' . $this->httpRequest->getPath(), 404);
 
 		preg_match($matchedRoute['GET']->pattern, $this->httpRequest->getPath(), $res);
 		array_shift($res);
@@ -156,7 +157,10 @@ class Core {
 		try {
 			$this->httpResponse = $this->processPage($matchedRoute);
 		} catch(HttpException $e) {
-			return $this->errorHandler->displayHttpError($e->getCode(), $this->httpRequest, $e->getMessage());
+			if($this->settings->core->environments->{$this->environment}->debug === false)
+				return $this->errorHandler->displayHttpError($e->getCode(), $this->httpRequest, $e->getMessage());
+
+			throw $e;
 		} catch(\Exception $e) {
 			throw $e;
 		}
@@ -190,6 +194,7 @@ class Core {
      * @throws CoreException
 	 */
 	public function processPage($routes) {
+
 		$requestSSLRequired = false;
 		$requestSSLForbidden = false;
 		$controllers = array();
@@ -215,7 +220,6 @@ class Core {
 			RequestHandler::redirect($this->httpRequest->getURL(HttpRequest::PROTOCOL_HTTP));
 
 		//$this->localeHandler->localize($this->httpRequest);
-
 
 		/** @var $c FrameworkController */
 		$route = ($this->httpRequest->getRequestMethod() === 'POST' && isset($routes['POST']))?$routes['POST']:$routes['GET'];

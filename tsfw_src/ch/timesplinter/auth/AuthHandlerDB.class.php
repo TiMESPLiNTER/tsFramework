@@ -25,13 +25,13 @@ class AuthHandlerDB extends AuthHandler {
 	
 	public function __construct(DB $db, SessionHandler $sessionHandler) {
 		parent::__construct();
-		
+
 		$this->db = $db;
 		$this->sessionHandler = $sessionHandler;
 		$this->userId = (isset($_SESSION['userid']))?$_SESSION['userid']:0;
 		
 		if($this->loggedIn === true)
-			self::loadUserPopo();
+			$this->loadUserPopo();
 	}
 	
 	public static function encryptPassword($password, $salt) {	
@@ -65,7 +65,7 @@ class AuthHandlerDB extends AuthHandler {
 			if($this->loginPopo->wronglogins >= 5)
 				return false;
 			
-			$inputPwHash = self::encryptPassword($password, $this->loginPopo->salt);
+			$inputPwHash = $this->encryptPassword($password, $this->loginPopo->salt);
 			
 			if($inputPwHash !== $this->loginPopo->password) {
 				// Woring login update
@@ -165,6 +165,9 @@ class AuthHandlerDB extends AuthHandler {
 	}
 
 	public function hasRootAccess() {
+		if($this->loginPopo === null)
+			return false;
+
 		foreach($this->loginPopo->rightgroups as $rg) {
 			if($rg->root == 1)
 				return true;
@@ -173,7 +176,7 @@ class AuthHandlerDB extends AuthHandler {
 		return false;
 	}
 		
-	private function loadUserPopo() {
+	protected function loadUserPopo() {
 		$stmntLogin = $this->db->prepare(
 				"SELECT ID
 					   ,username
@@ -226,7 +229,7 @@ class AuthHandlerDB extends AuthHandler {
 				token = NULL
 		");
 		
-		$salt = self::generateSalt();
+		$salt = $this->generateSalt();
 		
 		try {
 			$this->db->beginTransaction();
@@ -234,7 +237,7 @@ class AuthHandlerDB extends AuthHandler {
 			$userID = $this->db->insert($stmntSingup, array(
 				isset($login->username)?$login->username:null,
 				$login->email,
-				self::encryptPassword($login->password, $salt),
+				$this->encryptPassword($login->password, $salt),
 				isset($login->registeredBy)?$login->registeredBy:null,
 				$salt
 			));

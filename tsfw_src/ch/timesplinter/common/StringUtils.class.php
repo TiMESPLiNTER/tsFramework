@@ -2,9 +2,10 @@
 namespace ch\timesplinter\common;
 
 /**
- * Description of StringUtils
- *
- * @author pascal91
+ * Some useful functions for string operations
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2013 by TiMESPLiNTER Webdevelopment
+ * @version 1.0.0
  */
 class StringUtils {
     public static function between($str, $start, $end) {
