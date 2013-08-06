@@ -28,6 +28,7 @@ class HttpRequest {
 	private $requestTime;
 	private $languages;
 	private $userAgent;
+	private $remoteAddress;
 
 	private $requestVars;
 	
@@ -130,6 +131,14 @@ class HttpRequest {
 	
 	public function getRequestMethod() {
 		return $this->requestMethod;
+	}
+
+	public function getRemoteAddress() {
+		return $this->remoteAddress;
+	}
+
+	public function setRemoteAddress($remoteAddress) {
+		$this->remoteAddress = $remoteAddress;
 	}
 	
 	public function getURL($protocol) {

@@ -27,7 +27,7 @@ class CheckboxOptionsTag extends TemplateTag implements TagNode {
 
 		$textContent = '<?php echo "<ul>";  foreach(' . $dataKey . ' as $key => $val) {
 			$checked = in_array($key, ((array)' . $compareArr . '))?\' checked\':null;
-			echo \'<li><label><input type="checkbox" value="\'.$key.\'" name="' . $fldName . '"\'.$checked.\'>\'.$val.\'</label></li>\' . "\n";
+			echo \'<li><label><input type="checkbox" value="\'.$key.\'" name="' . $fldName . '"\'.$checked.\'> \'.$val.\'</label></li>\' . "\n";
 		} echo "</ul>"; ?>';
 
 		$newNode = new TextNode($tplEngine->getDomReader());

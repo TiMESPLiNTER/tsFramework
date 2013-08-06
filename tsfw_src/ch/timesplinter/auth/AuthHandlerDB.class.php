@@ -141,7 +141,7 @@ class AuthHandlerDB extends AuthHandler {
 
 	/**
 	 * If a group as "root" setted to "1" then it's admin and has every rightgroup
-	 * @param $userGroup Key of the usergroup
+	 * @param string $userGroup Key of the usergroup
 	 * @return bool
 	 */
 	public function hasRightgroup($userGroup) {
@@ -223,10 +223,11 @@ class AuthHandlerDB extends AuthHandler {
 				registeredby = ?,
 				salt = ?,
 				confirmed = NULL,
-				active = 0,
+				active = ?,
 				lastlogin = NULL,
 				wronglogins = 0,
-				token = NULL
+				token = ?,
+				tokentime = ?
 		");
 		
 		$salt = $this->generateSalt();
@@ -237,13 +238,18 @@ class AuthHandlerDB extends AuthHandler {
 			$userID = $this->db->insert($stmntSingup, array(
 				isset($login->username)?$login->username:null,
 				$login->email,
-				$this->encryptPassword($login->password, $salt),
+				isset($login->password)?$this->encryptPassword($login->password, $salt):null,
 				isset($login->registeredBy)?$login->registeredBy:null,
-				$salt
+				$salt,
+				isset($login->active)?$login->active:0,
+				isset($login->token)?$login->token:null,
+				isset($login->token)?date('Y-m-d H:i:s'):null
 			));
 			
-			if(!isset($login->rightGroups) || !is_array($login->rightGroups))
+			if(!isset($login->rightGroups) || !is_array($login->rightGroups)) {
+				$this->db->commit();
 				return $userID;
+			}
 			
 			$stmntRghtGrps = $this->db->prepare("
 				INSERT INTO login_has_rightgroup SET
@@ -259,10 +265,10 @@ class AuthHandlerDB extends AuthHandler {
 			$this->db->commit();
 			
 			return $userID;
-		} catch(DBException $e) {
+		} catch(\Exception $e) {
 			$this->db->rollBack();
 			
-			return false;
+			throw $e;
 		}
 		
 		return false;

@@ -25,6 +25,7 @@ class TemplateEngine {
 	private $htmlDoc;
 	private $tplNsPrefix;
 	private $dataPool;
+	private $customTags;
 //	private $callbackMethods;
 
 	private $cached;
@@ -38,18 +39,41 @@ class TemplateEngine {
 
 	/**
 	 * 
-	 * @param TemplateCache $tplCache
-	 * @param string $tplFile
-	 * @param string $tplNsPrefix
-	 * @return TemplateEngine
+	 * @param TemplateCache $tplCache The template cache object
+	 * @param string $tplNsPrefix The prefix for custom tags in the template file
+	 * @param array $customTags Additional custom tags to be loaded
+	 * @return TemplateEngine A template engine instance to render files
 	 */
-	public function __construct(TemplateCache $tplCache, $tplNsPrefix) {
+	public function __construct(TemplateCache $tplCache, $tplNsPrefix, array $customTags = array()) {
 		$this->logger = FrameworkLoggerFactory::getLogger($this);
 
 		$this->templateCache = $tplCache;
 		$this->tplNsPrefix = $tplNsPrefix;
+		$this->customTags = array_merge($this->getDefaultCustomTags(), $customTags);
 
 		$this->dataPool = new ArrayObject();
+	}
+
+	private function getDefaultCustomTags() {
+		return array(
+			'text' => 'ch\timesplinter\customtags\TextTag',
+			'checkboxOptions' => 'ch\timesplinter\customtags\CheckboxOptionsTag',
+			'checkbox' => 'ch\timesplinter\customtags\CheckboxTag',
+			'date' => 'ch\timesplinter\customtags\DateTag',
+			'else' => 'ch\timesplinter\customtags\ElseTag',
+			'forgroup' => 'ch\timesplinter\customtags\ForgroupTag',
+			'for' => 'ch\timesplinter\customtags\ForTag',
+			'if' => 'ch\timesplinter\customtags\IfTag',
+			'inUsergroup' => 'ch\timesplinter\customtags\InUsergroupTag',
+			'lang' => 'ch\timesplinter\customtags\LangTag',
+			'loadSubTpl' => 'ch\timesplinter\customtags\LoadSubTplTag',
+			'options' => 'ch\timesplinter\customtags\OptionsTag',
+			'option' => 'ch\timesplinter\customtags\OptionTag',
+			'radioOptions' => 'ch\timesplinter\customtags\RadioOptionsTag',
+			'radio' => 'ch\timesplinter\customtags\RadioTag',
+			'subNavi' => 'ch\timesplinter\customtags\SubNaviTag',
+			'subSite' => 'ch\timesplinter\customtags\SubSiteTag'
+		);
 	}
 
 	private function load() {
@@ -97,8 +121,11 @@ class TemplateEngine {
 			if($node->namespace !== $this->tplNsPrefix)
 				continue;
 
-			$tagClassName = 'ch\\timesplinter\\customtags\\' . ucfirst($node->tagName) . 'Tag';
-			
+			if(isset($this->customTags[$node->tagName]) === false)
+				throw new TemplateEngineException('The custom tag "' . $node->tagName . '" is not registered in this template engine instance');
+
+			$tagClassName = $this->customTags[$node->tagName];
+
 			if(class_exists($tagClassName) === false)
 				throw new TemplateEngineException('The Tag "' . $tagClassName . '" does not exist');
 
@@ -131,15 +158,21 @@ class TemplateEngine {
 			return $value;
 
 		for($j = 0; $j < count($inlineTags); $j++) {
-			$tagClassName = 'ch\\timesplinter\\customtags\\' . ucfirst($inlineTags[$j][1]) . 'Tag';
-			$tag = new $tagClassName;
+			$tagName = $inlineTags[$j][1];
 
-			if($tag instanceof TemplateTag === false) {
+			if(isset($this->customTags[$tagName]) === false)
+				throw new TemplateEngineException('The custom tag "' . $tagName . '" is not registered in this template engine instance');
+
+			$tagClassName = $this->customTags[$tagName];
+
+			$tagInstance = new $tagClassName;
+
+			if($tagInstance instanceof TemplateTag === false) {
 				$this->templateCache->setSaveOnDestruct(false);
 				throw new TemplateEngineException('The class "' . $tagClassName . '" does not implement the abstract class "TemplateTag" and is so not recognized as an illegal class for a custom tag."');
 			}
 
-			if($tag instanceof TagInline === false)
+			if($tagInstance instanceof TagInline === false)
 				throw new TemplateEngineException('CustomTag "' . $tagClassName . '" is not allowed to use inline.');
 
 			// Params
@@ -154,7 +187,7 @@ class TemplateEngine {
 			}
 
 			try {
-				$repl = $tag->replaceInline($this, $params);
+				$repl = $tagInstance->replaceInline($this, $params);
 				$value = str_replace($inlineTags[$j][0], $repl, $value);
 			} catch(TemplateEngineException $e) {
 				$this->templateCache->setSaveOnDestruct(false);

@@ -107,6 +107,7 @@ class Core {
 		$httpRequest->setRequestMethod($_SERVER['REQUEST_METHOD']);
 		$httpRequest->setUserAgent(isset($_SERVER['HTTP_USER_AGENT'])?$_SERVER['HTTP_USER_AGENT']:null);
 		$httpRequest->setLanguages($languages);
+		$httpRequest->setRemoteAddress($_SERVER['REMOTE_ADDR']);
 
 		return $httpRequest;
 	}
