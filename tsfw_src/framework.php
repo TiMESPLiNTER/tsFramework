@@ -8,7 +8,7 @@ use ch\timesplinter\core\FrameworkAutoloader;
 
 // Framework specific constants
 define('REQUEST_TIME', $_SERVER['REQUEST_TIME']+microtime());
-define('FW_DIR', dirname($_SERVER['SCRIPT_FILENAME']) . DIRECTORY_SEPARATOR);
+define('FW_DIR', dirname(__FILE__) . DIRECTORY_SEPARATOR);
 define('MODULES_DIR', 'modules' . DIRECTORY_SEPARATOR);
 
 // Site specific constants
