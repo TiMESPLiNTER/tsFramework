@@ -1,13 +1,12 @@
 <?php
-/**
- * @author pascal91
- * @copyright Copyright (c) 2013, Pascal Muenst
- * @version 1.0.0
- */
 
 namespace ch\timesplinter\core;
 
-
+/**
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2013, Pascal Muenst
+ * @version 1.0.0
+ */
 class PluginManager {
 	private $core;
 	private $plugins;
@@ -25,13 +24,20 @@ class PluginManager {
 		}
 	}
 
-
+	/**
+	 * Invokes a specific plugin hook
+	 * @param string $hookname The name of the hook to invoke
+	 * @param mixed $parameter,... Paramters for the hook
+	 */
 	public function invokePluginHook($hookname) {
+		$args = func_get_args();
+		array_shift($args);
+
 		foreach($this->plugins as $plugin) {
 			if(method_exists($plugin, $hookname) === false)
 				continue;
 
-			$plugin->$hookname();
+			call_user_func_array(array($plugin, $hookname), $args);
 		}
 	}
 }
