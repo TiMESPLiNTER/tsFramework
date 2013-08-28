@@ -8,7 +8,13 @@ namespace ch\timesplinter\common;
  * @version 1.0.0
  */
 class StringUtils {
-    public static function between($str, $start, $end) {
+	/**
+	 * @param string $str
+	 * @param string $start
+	 * @param string $end
+	 * @return null|string
+	 */
+	public static function between($str, $start, $end) {
         $posStart = strpos($str, $start) + strlen($start);
         $posEnd = strrpos($str, $end, $posStart);
         
@@ -17,7 +23,12 @@ class StringUtils {
 		
         return substr($str, $posStart, $posEnd-$posStart);   
     }
-    
+
+	/**
+	 * @param string $str
+	 * @param string $before
+	 * @return string
+	 */
 	public static function beforeFirst($str, $before) {
         $posUntil = strpos($str, $before);
         
@@ -26,8 +37,13 @@ class StringUtils {
         
         return substr($str, 0, $posUntil);
     }
-	
-    public static function beforeLast($str, $before) {
+
+	/**
+	 * @param string $str
+	 * @param string $before
+	 * @return string
+	 */
+	public static function beforeLast($str, $before) {
         $posUntil = strrpos($str, $before);
         
         if($posUntil === false)
@@ -35,8 +51,13 @@ class StringUtils {
         
         return substr($str, 0, $posUntil);
     }
-    
-    public static function afterLast($str, $after) {
+
+	/**
+	 * @param string $str
+	 * @param string $after
+	 * @return null|string
+	 */
+	public static function afterLast($str, $after) {
         $posFrom = strrpos($str, $after);
         
         if($posFrom === false)
@@ -44,7 +65,12 @@ class StringUtils {
         
         return substr($str, $posFrom+strlen($after));
     }
-	
+
+	/**
+	 * @param string $str
+	 * @param string $after
+	 * @return null|string
+	 */
 	public static function afterFirst($str, $after) {
         $posFrom = strpos($str, $after);
         
@@ -53,21 +79,71 @@ class StringUtils {
         
         return substr($str, $posFrom+strlen($after));
     }
-	
+
+	/**
+	 * @param string $str
+	 * @param string $startStr
+	 * @return bool
+	 */
 	public static function startsWith($str, $startStr) {
 		return (strpos($str, $startStr) === 0);
 	}
-	
+
+	/**
+	 * @param string $str
+	 * @param string $endStr
+	 * @return bool
+	 */
 	public static function endsWith($str, $endStr) {
 		$endStrlen = strlen($endStr);
 		
 		return (strrpos($str, $endStr)+$endStrlen === strlen($str));
 	}
 
+	/**
+	 * @param string $str The string to split
+	 * @param string $token The tokens to split the string
+	 * @return array The splitted parts
+	 */
+	public static function tokenize($str, $token) {
+		$tokenArr = array();
+		$tokStr = strtok($str, $token);
+
+		while($tokStr !== false) {
+			$tokenArr[] = $tokStr;
+
+			$tokStr = strtok($token);
+		}
+
+		return $tokenArr;
+	}
+
+	/**
+	 * @param string|array $tokens
+	 * @param string $str
+	 * @return array
+	 */
+	public static function explode($tokens, $str) {
+		$strToExplode = $str;
+		$explodeStr = $tokens;
+
+		if(is_array($tokens) === true) {
+			$explodeStr = chr(31);
+			$strToExplode = str_replace($tokens, $explodeStr, $str);
+		}
+
+		return explode($explodeStr, $strToExplode);
+	}
+
+	/**
+	 * @param string $str The string to urlify
+	 * @param int $maxLength The max length of the urlified string. 0 is no length limit.
+	 * @return string The urlified string
+	 */
 	public static function urlify($str, $maxLength = 0) {
 		$charMap = array(
 			' ' => '-', '.' => '', ':' => '', ',' => '', '?' => '', '!' => '', '´' => '', '"' => '',
-			'(' => '', ')' => '', '[' => '', ']' => '', '{' => '', '}' => '',
+			'(' => '', ')' => '', '[' => '', ']' => '', '{' => '', '}' => '', '\'' => '',
 
 			// German
 			'ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue',
