@@ -50,7 +50,9 @@ class IfTag extends TemplateTag implements TagNode {
 		array_shift($compareValParts);
 		$compareVal .= (count($compareValParts) > 0)?'->' . implode('->', $compareValParts):null;
 
-		if(is_int($againstAttr) === true) {
+		if(strlen($againstAttr) === 0) {
+			$againstAttr = "''";
+		} elseif(is_int($againstAttr) === true) {
 			$againstAttr = intval($againstAttr);
 		} elseif(is_float($againstAttr) === true) {
 			$againstAttr = floatval($againstAttr);
