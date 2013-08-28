@@ -66,12 +66,12 @@ class DBMySQL extends DB {
 
 		try {
 			// Bind params to statement
-			/*for($i = 0; $i < $paramCount; $i++) {
+			for($i = 0; $i < $paramCount; $i++) {
 				$paramType = (is_int($params[$i])) ? PDO::PARAM_INT : PDO::PARAM_STR;
 				$stmnt->bindParam(($i + 1), $params[$i], $paramType);
-			}*/
-			$stmnt->execute($params);
-			//$this->execute($stmnt);
+			}
+
+			$this->execute($stmnt);
 
 			$this->triggerListeners('onSelect', array($this, $stmnt, $params));
 
