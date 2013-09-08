@@ -130,8 +130,12 @@ class HttpResponse {
 	public function send() {
 		header($this->getHttpStatusHeader($this->httpStatusCode));
 
-		foreach($this->headers as $key => $value)
-			header($key . ': ' . $value);
+		foreach($this->headers as $key => $value) {
+			if($value === null)
+				header_remove($key);
+			else
+				header($key . ': ' . $value);
+		}
 		
 		if($this->content === null)
 			return;

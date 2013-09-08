@@ -148,13 +148,29 @@ class HttpRequest {
 	/**
 	 * Returns the value of a variable with key $name from either $_GET or $_POST
 	 * @param string $name The name of the GET or POST variable
+	 * @param string|array $filters Functions to filter the input value
 	 * @return mixed|null Returns the value of the variable or null if it does not exist
 	 */
-	public function getVar($name) {
+	public function getVar($name, $filters = null) {
 		if(isset($this->requestVars[$name]) === false)
 			return null;
 
-		return $this->requestVars[$name];
+		if($filters === null)
+			return $this->requestVars[$name];
+
+		$varValue = $this->requestVars[$name];
+
+		if(is_string($filters) === true)
+			return call_user_func($filters, $varValue);
+
+		if(is_array($filters)=== true) {
+			foreach($filters as $f)
+				$varValue = call_user_func($f, $varValue);
+
+			return $varValue;
+		}
+
+		return $varValue;
 	}
 
 	public function getFile($name) {

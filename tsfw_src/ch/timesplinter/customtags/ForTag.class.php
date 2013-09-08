@@ -3,15 +3,12 @@ namespace ch\timesplinter\customtags;
 
 use ch\timesplinter\core\FrameworkLoggerFactory;
 use ch\timesplinter\logger\TSLogger;
-use
- ch\timesplinter\template\TemplateEngine
-,ch\timesplinter\template\TemplateTag
-,ch\timesplinter\template\TagNode
-,ch\timesplinter\htmlparser\HtmlNode
-,ch\timesplinter\htmlparser\ElementNode
-,ch\timesplinter\htmlparser\TextNode
-,ch\timesplinter\logger\LoggerFactory
-;
+use ch\timesplinter\template\TemplateEngine;
+use ch\timesplinter\template\TemplateTag;
+use ch\timesplinter\template\TagNode;
+use ch\timesplinter\htmlparser\HtmlNode;
+use ch\timesplinter\htmlparser\ElementNode;
+use ch\timesplinter\htmlparser\TextNode;
 
 /**
  * @author Pascal Münst <entwicklung@metanet.ch>
@@ -32,7 +29,7 @@ class ForTag extends TemplateTag implements TagNode {
 	public function replaceNode(TemplateEngine $tplEngine, ElementNode $node) {
 		// DATA
 		TemplateEngine::checkRequiredAttrs($node, array('value','var'));
-		
+
 		$dataKeyAttr = $node->getAttribute('value')->value;
 		$asVarAttr = $node->getAttribute('var')->value;
 		$stepAttr = $node->getAttribute('groups');
