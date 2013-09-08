@@ -14,7 +14,7 @@ abstract class FrameworkException extends Exception {
 	}
 	
 	//put your code here
-	public function handleException() {
+	public function handleException(Core $core, HttpRequest $httpRequest) {
         $exceptionClassName = get_class($this);
         $grammar = (strtolower(substr($exceptionClassName,0,1)) === 'e')?'n':null;
 

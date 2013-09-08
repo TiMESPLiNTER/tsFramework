@@ -72,7 +72,7 @@ class ErrorHandler {
 		$content = null;
 		
 		if($e instanceof FrameworkException) {
-			$content = $e->handleException();
+			$content = $e->handleException($this->core, $this->core->getHttpRequest());
 		} else {
 			$content = '<pre>';
 
@@ -86,7 +86,7 @@ class ErrorHandler {
 			$content .= '</pre>';
 		}
 		
-		$httpResponse = new HttpResponse(500, $content);
+		$httpResponse = new HttpResponse((($e->getCode() !== 0)?$e->getCode():500), $content);
 		$httpResponse->send();
 
 		exit;

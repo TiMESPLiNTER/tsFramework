@@ -16,7 +16,7 @@ class PHPException extends FrameworkException {
 		$this->line = $line;
 	}
 
-	public function handleException() {
+	public function handleException(Core $core, HttpRequest $httpRequest) {
 		$phpErrors = array(
 			 E_ERROR => array('name' => 'E_ERROR', 'title' => 'fatal run-time error')
 			,E_WARNING => array('name' => 'E_WARNING', 'title' => 'run-time warning')

@@ -34,6 +34,7 @@ class Core {
 	private $httpResponse;
 
 	private $environment;
+	private $currentDomain;
 
 	public function __construct() {
 		$this->httpRequest = $this->createHttpRequest();
@@ -50,6 +51,8 @@ class Core {
 		 */
 
 		$this->environment = $this->getEnvironmentFromRequest($this->httpRequest);
+		$this->currentDomain = isset($this->settings->core->domains->{$this->httpRequest->getHost()})
+			?$this->settings->core->domains->{$this->httpRequest->getHost()}:null;
 
 		if($this->environment === null)
 			RequestHandler::redirect($this->settings->defaults->domain);
@@ -278,6 +281,14 @@ class Core {
 	 */
 	public function getSettings() {
 		return $this->settings;
+	}
+
+	/**
+	 * Returns the current domain in which the framework is operating
+	 * @return string|null The current domain or null if no domain matched
+	 */
+	public function getCurrentDomain() {
+		return $this->currentDomain;
 	}
 
 	/**
