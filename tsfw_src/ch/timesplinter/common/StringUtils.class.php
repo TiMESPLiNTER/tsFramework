@@ -75,9 +75,11 @@ class StringUtils {
         $posFrom = strpos($str, $after);
         
         if($posFrom === false)
-            return null;
-        
-        return substr($str, $posFrom+strlen($after));
+            return '';
+
+		$afterStr = substr($str, $posFrom+strlen($after));
+
+        return ($afterStr !== false)?$afterStr:'';
     }
 
 	/**
