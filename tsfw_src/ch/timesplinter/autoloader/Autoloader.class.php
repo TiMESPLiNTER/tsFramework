@@ -2,8 +2,6 @@
 
 namespace ch\timesplinter\autoloader;
 
-use ch\timesplinter\logger\LoggerFactory;
-
 /**
  * automatically loads requested classes if they exist in classes (sub-)directory
  *
@@ -12,23 +10,20 @@ use ch\timesplinter\logger\LoggerFactory;
  * @version	1.0.0
  */
 class Autoloader {
-	const CACHING_FILE = 'cache.autoload';
-
 	const MODE_UNDERSCORE = 'underscore';
 	const MODE_NAMESPACE = 'namespace';
 
-	//private $logger;
 	private $cachedClasses;
 	private $cachedClassesChanged;
 	private $cacheFile;
 
 	private $loadPaths;
 
-	public function __construct() {
+	public function __construct($cacheFilePath = null) {
 		$this->loadPaths = array();
 		$this->cachedClasses = array();
 		$this->cachedClassesChanged = false;
-		$this->cacheFile = CACHE_DIR . self::CACHING_FILE;
+		$this->cacheFile = $cacheFilePath;
 
 		$this->loadCache();
 	}
@@ -37,11 +32,8 @@ class Autoloader {
 	 * Fills the cache array with the known classes
 	 */
 	private function loadCache() {
-		$cacheFile = $this->cacheFile;
-
-		if(file_exists($cacheFile) === false) {
+		if($this->cacheFile === null || file_exists($this->cacheFile) === false)
 			return;
-		}
 		
 		$serialized = file_get_contents($this->cacheFile); 
 		$this->cachedClasses = json_decode($serialized, true);
@@ -52,7 +44,6 @@ class Autoloader {
 	 */
 	public function register() {
 		spl_autoload_register(array($this, 'doAutoload'));
-		//$this->logger = LoggerFactory::getLoggerByName('dev', $this);
 	}
 
 	/**
@@ -66,13 +57,10 @@ class Autoloader {
 
 		$classPath = $this->cachedClasses[$className];
 
-		if(file_exists($classPath) === true) {
-			//self::notifyObservers($className);
+		if(file_exists($classPath) === true)
 			return $classPath;
-		} elseif(file_exists('phar://' . $classPath) === true) {
-			//self::notifyObservers($className);
+		elseif(file_exists('phar://' . $classPath) === true)
 			return 'phar://' . $classPath;
-		}
 
 		return false;
 	}
@@ -88,7 +76,7 @@ class Autoloader {
 
 		if(($includePath = $this->isCached($class_name)) !== false) {
 			require $includePath;
-			return;
+			return true;
 		}
 
 		$searchedPaths = array();
@@ -117,19 +105,21 @@ class Autoloader {
 			foreach($pathOptions['class_suffix'] as $cs) {
 				$includePath = $path . $phpFilePath . $cs;
 
-				if(file_exists($includePath) === false) {
+				if(stream_resolve_include_path($includePath) === false) {
 					$searchedPaths[] = $includePath;
 					continue;
 				}
 
 				$this->doInclude($includePath, $class_name);
-				return;
+				return true;
 			}
 		}
 
 		//echo $classPath , '<br>';
 		//throw new AutoloaderException('Could not load class: ' . $class_name);
 		throw new \Exception('Could not find class ' . $class_name . '. Searched in: ' . implode(", \n", $searchedPaths));
+
+		return false;
 	}
 
 	private function doInclude($includePath, $className) {
@@ -139,44 +129,41 @@ class Autoloader {
 		$this->cachedClassesChanged = true;
 	}
 
-	private function pharInclude($includePath, $classPath, $interfacePath) {
-		if(file_exists(FW_DIR . $includePath) === false)
+	/*private function pharInclude($includePath, $classPath, $interfacePath) {
+		if(file_exists($this->baseIncludePath . $includePath) === false)
 			return null;
 
-		$libs = scandir(FW_DIR . $includePath);
+		$libs = scandir($this->baseIncludePath . $includePath);
 		
 		foreach($libs as $lib) {
 			if(in_array($lib, array('.', '..')) === true)
 				continue;
 			
 			$pharClass = $includePath . $lib . '/' . $classPath;
-			if(file_exists('phar://' . FW_DIR . $pharClass) === true)
+			if(file_exists('phar://' . $this->baseIncludePath . $pharClass) === true)
 				return $pharClass;
 			
 			$pharInterface = $includePath . $lib . '/' . $interfacePath;
-			if(file_exists('phar://' . FW_DIR . $pharInterface) === true)
+			if(file_exists('phar://' . $this->baseIncludePath . $pharInterface) === true)
 				return $pharInterface;
 		}
 		
 		return null;
-	}
+	}*/
 
 	public function addPath($id, array $pathOptions) {
-		$this->loadPaths[$id] = $pathOptions;
+		$this->loadPaths[$id] = str_replace('/', DIRECTORY_SEPARATOR, $pathOptions);
 	}
 
 	/**
 	 * Writes the new entries into the cache file (if there are any)
 	 */
 	public function __destruct() {
-		if($this->cachedClassesChanged === false) {
+		if($this->cacheFile === null || $this->cachedClassesChanged === false)
 			return;
-		}
-
-		$cacheFile = $this->cacheFile;
 		
 		$serialized = json_encode($this->cachedClasses); 
-		file_put_contents($cacheFile, $serialized); 
+		file_put_contents($this->cacheFile, $serialized);
 	}
 }
 
