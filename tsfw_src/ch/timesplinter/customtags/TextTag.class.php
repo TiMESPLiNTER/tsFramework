@@ -14,9 +14,9 @@ use
 /**
  * TextTag
  *
- * @author Pascal Münst <dev@timesplinter.ch>
- * @copyright Copyright (c) 2012, METANET AG, www.metanet.ch
- * @version 1.0
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2012, TiMESPLiNTER Webdevelopment
+ * @version 1.0.0
  */
 class TextTag extends TemplateTag implements TagNode, TagInline {
 	public function __construct() {

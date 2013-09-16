@@ -1,5 +1,4 @@
 <?php
-
 namespace ch\timesplinter\template;
 
 use ch\timesplinter\common\StringUtils;
@@ -244,6 +243,9 @@ class TemplateEngine {
 	/**
 	 * Returns the final HTML-code or includes the cached file (if caching is
 	 * enabled)
+	 * @param $tplFile
+	 * @param array $tplVars
+	 * @throws \Exception
 	 * @return type
 	 */
 	public function getResultAsHtml($tplFile, $tplVars = array()) {

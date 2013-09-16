@@ -1,11 +1,13 @@
 <?php
+
 namespace ch\timesplinter\htmlparser;
+
 /**
  * HtmlDoc
  *
- * @author Pascal Münst <entwicklung@metanet.ch>
- * @copyright Copyright (c) 2012, METANET AG, www.metanet.ch
- * @version 1.0
+ * @author Pascal Münst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2012, TiMESPLiNTER Webdevelopment
+ * @version 1.0.0
  */
 class HtmlDoc {
 	private $htmlContent;
@@ -18,7 +20,7 @@ class HtmlDoc {
 
 	//private $logger;
 	
-	public function __construct($htmlContent, $namespace = null) {
+	public function __construct($htmlContent = null, $namespace = null) {
 		//$this->logger = LoggerFactory::getEnvLogger($this);
 		$this->currentLine = 1; // Start at line 1 not 0, we are no nerds ;-)
 		
@@ -33,9 +35,12 @@ class HtmlDoc {
 	}
 
 	public function parse() {
+		if($this->htmlContent === null)
+			return;
+
 		$this->contentPos = 0;
 
-		while(self::findNextNode() !== false);
+		while($this->findNextNode() !== false);
 		
 		if($this->contentPos !== strlen($this->htmlContent)) {
 			$restNode = new TextNode($this);
@@ -46,8 +51,6 @@ class HtmlDoc {
 			
 			$this->currentLine += substr_count($restNode->content, "\n");
 		}
-		
-		//$this->logger->debug('--close all: parsing finish--');
 	}
 
 	private function findNextNode() {
@@ -221,7 +224,7 @@ class HtmlDoc {
 			if(!$node->hasChilds())
 				continue;
 
-			$nodes = array_merge($nodes, self::getNodesByTagName($tagname, $node));
+			$nodes = array_merge($nodes, $this->getNodesByTagName($tagname, $node));
 		}
 
 		return $nodes;
@@ -258,7 +261,7 @@ class HtmlDoc {
 
 
 			if(($node->tagType === ElementNode::TAG_OPEN && $node->closed === true) || $node->tagType === ElementNode::TAG_CLOSE)
-				$html .= self::getHtml($node) . '</' . $tagStr . '>';
+				$html .= $this->getHtml($node) . '</' . $tagStr . '>';
 		}
 
 		return $html;
