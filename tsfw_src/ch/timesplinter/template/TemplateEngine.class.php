@@ -200,6 +200,7 @@ class TemplateEngine {
 
 	/**
 	 * This method parses the given template file
+	 * @param string $tplFile The path to the template file to parse
 	 * @return string The parsed template
 	 */
 	public function parse($tplFile) {
@@ -214,6 +215,8 @@ class TemplateEngine {
 
 	/**
 	 * Returns if file is cached or not
+	 * @param string $filePath Path to the templace file that should be checked
+	 * @throws TemplateEngineException
 	 * @return boolean Is file cached or not
 	 */
 	private function isTplFileCached($filePath) {
@@ -361,10 +364,8 @@ class TemplateEngine {
 	 * @return mixed The value for that key or the key itselfs
 	 */
 	public function getData($key) {
-		if($this->dataPool->offsetExists($key) === false) {
-			$this->logger->debug('Key not found in datapool',array($key));
+		if($this->dataPool->offsetExists($key) === false)
 			return null;
-		}
 
 		return $this->dataPool->offsetGet($key);
 	}
