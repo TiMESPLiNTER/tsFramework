@@ -1,4 +1,5 @@
 <?php
+
 namespace ch\timesplinter\customtags;
 
 use ch\timesplinter\core\FrameworkLoggerFactory;
@@ -48,7 +49,7 @@ class ForTag extends TemplateTag implements TagNode {
 		
 		$phpVar = '$' . str_replace('.', '->', $dataKey);
 		
-		self::str_replace_node($node->childNodes);
+		$this->str_replace_node($node->childNodes);
 
 		$nodeForStart = new TextNode($tplEngine->getDomReader());
 		$nodeForStart->content = "<?php\n";
@@ -149,17 +150,14 @@ class ForTag extends TemplateTag implements TagNode {
 			if($node->nodeType !== HtmlNode::ELEMENT_NODE)
 				continue;
 			
-			foreach($node->attributes as $attr) {
+			foreach($node->attributes as $attr)
 				$attr->value = preg_replace_callback($pattern2, array($this,'replaceEcho'), $attr->value);
-			}
 			
-			if($node->tagExtension !== null) {
+			if($node->tagExtension !== null)
 				$node->tagExtension = preg_replace_callback($pattern1, array($this,'replaceVar'), $node->tagExtension);
-			}
 			
-			if(count($node->childNodes) > 0) {
-				self::str_replace_node($node->childNodes);
-			}
+			if(count($node->childNodes) > 0)
+				$this->str_replace_node($node->childNodes);
 		}
 		
 		return $nodeList;
