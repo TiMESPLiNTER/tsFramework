@@ -87,7 +87,7 @@ class TemplateEngine {
 			throw new TemplateEngineException('That\'s no valid template-file');
 
 		try {
-			self::copyNodes($nodeList);
+			$this->copyNodes($nodeList);
 		} catch(DOMException $e) {
 			throw new TemplateEngineException('Error while processing the template file: ' . $e->getMessage());
 		}
@@ -105,18 +105,18 @@ class TemplateEngine {
 
 				if($countAttrs > 0) {
 					for($i = 0; $i < $countAttrs; $i++)
-						$attrs[$i]->value = self::replInlineTag($attrs[$i]->value);
+						$attrs[$i]->value = $this->replInlineTag($attrs[$i]->value);
 				}
 			} else {
 				
 				if($node instanceof TextNode || $node instanceof CommentNode || $node instanceof CDataSectionNode)
-					$node->content = self::replInlineTag($node->content);
+					$node->content = $this->replInlineTag($node->content);
 				
 				continue;
 			}
 			
 			if(count($node->childNodes) > 0)
-				self::copyNodes($node->childNodes);
+				$this->copyNodes($node->childNodes);
 
 			if($node->namespace !== $this->tplNsPrefix)
 				continue;
@@ -220,7 +220,7 @@ class TemplateEngine {
 	 * @return boolean Is file cached or not
 	 */
 	private function isTplFileCached($filePath) {
-		if(file_exists($filePath) === false)
+		if(stream_resolve_include_path($filePath) === false)
 			throw new TemplateEngineException('Could not find template file: ' . $filePath);
 
 		/** @var TemplateCacheEntry */
@@ -243,6 +243,9 @@ class TemplateEngine {
 	/**
 	 * Returns the final HTML-code or includes the cached file (if caching is
 	 * enabled)
+	 * @param $tplFile
+	 * @param array $tplVars
+	 * @throws \Exception
 	 * @return type
 	 */
 	public function getResultAsHtml($tplFile, $tplVars = array()) {
@@ -265,7 +268,7 @@ class TemplateEngine {
 	private function cache($tplFile) {
 		$cacheFileName = null;
 		
-		if(file_exists($tplFile) === false)
+		if(stream_resolve_include_path($tplFile) === false)
 			throw new TemplateEngineException('Template file \'' . $tplFile . '\' does not exists');
 		
 		/** @var TemplateCacheEntry */
@@ -276,7 +279,7 @@ class TemplateEngine {
 		$changeTimeReal = ($changeTime !== false) ? $changeTime : @filectime($tplFile);
 		
 		// Render tpl
-		$content = file_exists($tplFile) ? file_get_contents($tplFile):null;
+		$content = file_get_contents($tplFile);
 		$this->htmlDoc = new HtmlDoc($content, $this->tplNsPrefix);
 		$this->htmlDoc->addSelfClosingTag('tst:text');
 		$this->htmlDoc->addSelfClosingTag('tst:lang');
@@ -300,7 +303,7 @@ class TemplateEngine {
 
 		$cacheFileName = $this->templateCache->getCachePath() . $cacheId . self::CACHE_SUBFIX;
 		
-		if(file_exists($cacheFileName) === true && is_writable($cacheFileName) === false)
+		if(stream_resolve_include_path($cacheFileName) === true && is_writable($cacheFileName) === false)
 			throw new TemplateEngineException('Cache file is not writeable: ' . $cacheFileName);
 
 		$fp = @fopen($cacheFileName, 'w');
@@ -348,6 +351,7 @@ class TemplateEngine {
 	 * @param string $key
 	 * @param mixed $value
 	 * @param boolean $overwrite
+	 * @throws TemplateEngineException
 	 */
 	public function addData($key, $value, $overwrite = false) {
 		if($this->dataPool->offsetExists($key) === true && $overwrite === false) {
@@ -382,12 +386,6 @@ class TemplateEngine {
 	public function getTplNsPrefix() {
 		return $this->tplNsPrefix;
 	}
-
-	/*
-	  public function registerCallback($callbackEntry) {
-	  $this->callbackMethods[] = $callbackEntry;
-	  }
-	 */
 
 	public function getTemplateCache() {
 		return $this->templateCache;
@@ -441,8 +439,6 @@ class TemplateEngine {
 			}
 
 			$selPHPStr = "\$this->getData('" . $firstPart . "')" . ((count($selParts) > 0)?'->' . implode('->', $selParts):null);
-		} else {
-			$selPHPStr = "\$this->getData('" . $selectorStr . "')";
 		}
 
 		$returnVal = ($echo)?'<?php echo ' . $selPHPStr . '; ?>':$selPHPStr;

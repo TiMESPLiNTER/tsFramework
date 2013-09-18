@@ -1,4 +1,5 @@
 <?php
+
 namespace ch\timesplinter\customtags;
 
 use 
@@ -13,9 +14,9 @@ use
 /**
  * TextTag
  *
- * @author Pascal Münst <dev@timesplinter.ch>
- * @copyright Copyright (c) 2012, METANET AG, www.metanet.ch
- * @version 1.0
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2012, TiMESPLiNTER Webdevelopment
+ * @version 1.0.0
  */
 class TextTag extends TemplateTag implements TagNode, TagInline {
 	public function __construct() {
@@ -23,7 +24,7 @@ class TextTag extends TemplateTag implements TagNode, TagInline {
 	}
 
 	public function replaceNode(TemplateEngine $tplEngine, ElementNode $node) {
-		$replValue = self::replace($tplEngine, $node->getAttribute('value')->value);
+		$replValue = $this->replace($tplEngine, $node->getAttribute('value')->value);
 
 		$replNode = new TextNode($tplEngine->getDomReader());
 		$replNode->content = $replValue;
@@ -32,11 +33,11 @@ class TextTag extends TemplateTag implements TagNode, TagInline {
 	}
 
 	public function replaceInline(TemplateEngine $tplEngine, $params) {
-		return self::replace($tplEngine, $params['value']);
+		return $this->replace($tplEngine, $params['value']);
 	}
 
 	public function replace(TemplateEngine $tplEngine, $params) {
-		$paramsArr = explode('.', $params);
+		/*$paramsArr = explode('.', $params);
 		$firstParam = $paramsArr[0];
 		array_shift($paramsArr);
 		
@@ -52,15 +53,14 @@ class TextTag extends TemplateTag implements TagNode, TagInline {
 
 				$restParams = (count($paramsArr) > 0)?'->' . implode('->', $getters):null;
 
-				return '<?php $textData = self::getData(\'' . $firstParam . '\'); echo $textData' . $restParams . '; ?>';
+				return '<?php $textData = $this->getData(\'' . $firstParam . '\'); echo $textData' . $restParams . '; ?>';
 			}
 		} else {
 			$restParams = (count($paramsArr) > 0)?'[\'' . implode('\'][\'', $paramsArr) . '\']':null;
 		}
 
-		return '<?php $textData = self::getData(\'' . $firstParam . '\'); echo isset($textData' . $restParams . ')?$textData' . $restParams . ':null; ?>';
-		
-
+		return '<?php $textData = $this->getData(\'' . $firstParam . '\'); echo isset($textData' . $restParams . ')?$textData' . $restParams . ':null; ?>';*/
+		return '<?php echo ' . $tplEngine->getSelectorAsPHPStr($params) . '; ?>';
 	}
 }
 
