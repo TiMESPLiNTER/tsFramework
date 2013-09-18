@@ -42,13 +42,10 @@ class IfTag extends TemplateTag implements TagNode {
 
 		$compareValParts = explode('.', $compareAttr);
 
-		if(in_array($parentTagName, $varTags) === true)
-			$compareVal = "(isset(\$" . $compareValParts[0] . ")?\$" . $compareValParts[0] . ":\$this->getData('" . $compareValParts[0] . "'))";
-		else
-			$compareVal = '$this->getData(\'' . $compareValParts[0] . '\')';
+		$firstVar = array_shift($compareValParts);
+		$compareValAfter = (count($compareValParts) > 0)?'->' . implode('->', $compareValParts):null;
 
-		array_shift($compareValParts);
-		$compareVal .= (count($compareValParts) > 0)?'->' . implode('->', $compareValParts):null;
+
 
 		if(strlen($againstAttr) === 0) {
 			$againstAttr = "''";
@@ -90,7 +87,14 @@ class IfTag extends TemplateTag implements TagNode {
 				break;
 		}
 
-		$phpCode = '<?php if(' . $compareVal . ' ' . $operatorStr . ' ' . $againstAttr . ') { ?>';
+		$phpCode = '<?php ';
+
+		if(in_array($parentTagName, $varTags) === true)
+			$phpCode .= "\$__cprv = (isset(\$" . $firstVar . ")?\$" . $firstVar . ":\$this->getData('" . $firstVar . "')); ";
+		else
+			$phpCode .= '$__cprv = $this->getData(\'' . $firstVar . '\'); ';
+
+		$phpCode .= 'if($__cprv' . $compareValAfter . ' ' . $operatorStr . ' ' . $againstAttr . ') { ?>';
 		$phpCode .= $tagNode->getInnerHtml();
 
 		if($tplEngine->isFollowedBy($tagNode, 'else') === false)
