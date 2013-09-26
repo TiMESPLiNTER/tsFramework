@@ -166,8 +166,17 @@ class HttpResponse {
 				header($key . ': ' . $value);
 		}
 
-		foreach($this->cookies as $name => $opts) {
-			setcookie($name, $opts['value'], $opts['expire'], $opts['path'], $opts['domain'], $opts['secure'], $opts['httpOnly']);
+		foreach($this->cookies as $cookie) {
+			/** @var Cookie $cookie */
+			setcookie(
+				$cookie->getName(),
+				$cookie->getValue(),
+				$cookie->getExpire(),
+				$cookie->getPath(),
+				$cookie->getDomain(),
+				$cookie->getSecure(),
+				$cookie->getHttpOnly()
+			);
 		}
 		
 		if($this->content === null)
