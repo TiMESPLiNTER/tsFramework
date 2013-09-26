@@ -157,7 +157,7 @@ class HttpRequest {
 		if(isset($this->requestVars[$name]) === false)
 			return null;
 
-		return ($filters === null)?$this->requestVars[$name]:$this->sanitize($this->requestVars[$name]);
+		return ($filters === null)?$this->requestVars[$name]:$this->sanitize($this->requestVars[$name], $filters);
 	}
 
 	/**
@@ -170,7 +170,7 @@ class HttpRequest {
 		if(isset($this->cookies[$name]) === false)
 			return null;
 
-		return ($filters === null)?$this->cookies[$name]:$this->sanitize($this->cookies[$name]);
+		return ($filters === null)?$this->cookies[$name]:$this->sanitize($this->cookies[$name], $filters);
 	}
 
 	/**
