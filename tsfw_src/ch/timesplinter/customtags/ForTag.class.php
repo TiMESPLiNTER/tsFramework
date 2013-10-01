@@ -47,13 +47,13 @@ class ForTag extends TemplateTag implements TagNode {
 		$lastClass = ($lastClassAttr !== null)?$lastClassAttr->value:null;
 		$forUID = uniqid();
 		
-		$phpVar = '$' . str_replace('.', '->', $dataKey);
-		
+		$phpVar = $tplEngine->getSelectorAsPHPStr($dataKey);
+
 		$this->str_replace_node($node->childNodes);
 
 		$nodeForStart = new TextNode($tplEngine->getDomReader());
 		$nodeForStart->content = "<?php\n";
-		$nodeForStart->content .= "/* for: start */ \$tmpArr = (isset({$phpVar}) === false)?\$this->getData('" . $dataKey . "'):{$phpVar};\n";
+		$nodeForStart->content .= "/* for: start */ \$tmpArr = {$phpVar};\n";
 		$nodeForStart->content .= "if(\$tmpArr === null) \$tmpArr = array();\n";
 		$nodeForStart->content .= "\$arr_{$forUID} = array_values((is_object(\$tmpArr) === false)?\$tmpArr:(array)\$tmpArr);\n";
 		$nodeForStart->content .= "\$arrCount_{$forUID} = count(\$arr_{$forUID});\n";
