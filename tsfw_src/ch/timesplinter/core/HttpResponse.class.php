@@ -78,6 +78,7 @@ class HttpResponse {
 
 	private $httpStatusCode;
 	private $headers;
+	private $cookies;
 	private $content;
 	private $stream;
 	private $streamContext;
@@ -89,11 +90,13 @@ class HttpResponse {
 	 * @param array $headers
 	 * @param boolean $stream
 	 * @param mixed $streamContext
+	 * @internal param int $httpResponseCode
 	 * @return HttpResponse
 	 */
 	public function __construct($httpStatusCode = 200, $content = null, $headers = array('Content-Type' => 'text/html; charset=UTF-8'), $stream = false, $streamContext = null) {
 		$this->httpStatusCode = $httpStatusCode;
 		$this->headers = $headers;
+		$this->cookies = array();
 		$this->content = $content;
 		$this->stream = $stream;
 		$this->streamContext = $streamContext;
@@ -109,6 +112,32 @@ class HttpResponse {
 	
 	public function setHeaders($headers) {
 		$this->headers = $headers;
+	}
+
+	public function removeHeader($key) {
+		header_remove($key);
+	}
+
+	public function removeAllHeaders() {
+		header_remove();
+	}
+
+	public function addCookie(Cookie $cookie) {
+		$this->cookies[$cookie->getName()] = $cookie;
+	}
+
+	public function setCookies(array $cookies) {
+		$this->cookies = array();
+
+		foreach($cookies as $cookie)
+			$this->cookies[$cookie->getName()] = $cookie;
+	}
+
+	public function removeCookie($name) {
+		if(array_key_exists($name, $_COOKIE) === true)
+			unset($_COOKIE[$name]);
+
+		$this->addCookie(new Cookie($name, null, time()-3600));
 	}
 	
 	public function getContent() {
@@ -135,6 +164,19 @@ class HttpResponse {
 				header_remove($key);
 			else
 				header($key . ': ' . $value);
+		}
+
+		foreach($this->cookies as $cookie) {
+			/** @var Cookie $cookie */
+			setcookie(
+				$cookie->getName(),
+				$cookie->getValue(),
+				$cookie->getExpire(),
+				$cookie->getPath(),
+				$cookie->getDomain(),
+				$cookie->getSecure(),
+				$cookie->getHttpOnly()
+			);
 		}
 		
 		if($this->content === null)

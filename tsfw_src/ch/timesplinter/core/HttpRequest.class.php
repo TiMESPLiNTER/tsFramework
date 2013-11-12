@@ -30,9 +30,11 @@ class HttpRequest {
 	private $remoteAddress;
 
 	private $requestVars;
+	private $cookies;
 	
 	public function __construct() {
 		$this->requestVars = array_merge($_GET, $_POST);
+		$this->cookies = $_COOKIE;
 	}
 	
 	public function setProtocol($protocol) {
@@ -130,36 +132,55 @@ class HttpRequest {
 	/**
 	 * Returns the value of a variable with key $name from either $_GET or $_POST
 	 * @param string $name The name of the GET or POST variable
-	 * @param string|array $filters Functions to filter the input value
+	 * @param string|array|null $filters Function names or valid callbacks to filter the input value
 	 * @return mixed|null Returns the value of the variable or null if it does not exist
 	 */
 	public function getVar($name, $filters = null) {
 		if(isset($this->requestVars[$name]) === false)
 			return null;
 
-		if($filters === null)
-			return $this->requestVars[$name];
-
-		$varValue = $this->requestVars[$name];
-
-		if(is_string($filters) === true)
-			return call_user_func($filters, $varValue);
-
-		if(is_array($filters)=== true) {
-			foreach($filters as $f)
-				$varValue = call_user_func($f, $varValue);
-
-			return $varValue;
-		}
-
-		return $varValue;
+		return ($filters === null)?$this->requestVars[$name]:$this->sanitize($this->requestVars[$name], $filters);
 	}
 
+	/**
+	 * Returns the value of a cookie with key $name
+	 * @param $name The name of the cookie
+	 * @param string|array|null $filters Function names or valid callbacks to filter the input value
+	 * @return mixed|null Returns the value of the cookie or null if it does not exist
+	 */
+	public function getCookieValue($name, $filters = null) {
+		if(isset($this->cookies[$name]) === false)
+			return null;
+
+		return ($filters === null)?$this->cookies[$name]:$this->sanitize($this->cookies[$name], $filters);
+	}
+
+	/**
+	 * Returns the informations about a file
+	 * @param $name The name of the file field
+	 * @return array|null Returns the informations about the file or null if it does not exist
+	 */
 	public function getFile($name) {
 		if(isset($_FILES[$name]) === false)
 			return null;
 
 		return $_FILES[$name];
+	}
+
+	private function sanitize($value, $filters) {
+		if(is_string($filters) === true)
+			return call_user_func($filters, $value);
+
+		if(is_array($filters) === true) {
+			$valueFiltered = $value;
+
+			foreach($filters as $f)
+				$valueFiltered = call_user_func($f, $valueFiltered);
+
+			return $valueFiltered;
+		}
+
+		return $value;
 	}
 }
 

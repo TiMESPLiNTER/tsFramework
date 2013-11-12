@@ -34,10 +34,15 @@ class Settings {
 		if(file_exists($this->cacheFile) === false)
 			return;
 
+		$cacheFileContent = file_get_contents($this->cacheFile);
+
+		if(strlen($cacheFileContent) === 0)
+			return;
+
 		$settingsCache = null;
 		$settingsCacheFiles = null;
 
-		$cachedData = unserialize(file_get_contents($this->cacheFile));
+		$cachedData = unserialize($cacheFileContent);
 
 		$this->settings = $cachedData['settings'];
 		$this->cachedFiletime = $cachedData['cachetime'];
