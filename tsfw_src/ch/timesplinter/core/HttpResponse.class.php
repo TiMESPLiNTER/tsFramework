@@ -81,10 +81,10 @@ class HttpResponse {
 	private $content;
 	private $stream;
 	private $streamContext;
-	
+
 	/**
-	 * 
-	 * @param int $httpResponseCode
+	 *
+	 * @param int $httpStatusCode
 	 * @param string $content
 	 * @param array $headers
 	 * @param boolean $stream

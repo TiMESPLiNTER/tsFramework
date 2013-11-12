@@ -17,7 +17,7 @@ use \ArrayObject;
  * @change 2013-05-28 Possibility to use listeners to react on events like select, update, insert, execute and prepare
  */
 abstract class DB extends PDO {
-	const TYPE_MYSQL = 1;
+	const TYPE_MYSQL = 'mysql';
 	const TYPE_POSTGRESQL = 2;
 	const TYPE_MSSQL = 3;
 

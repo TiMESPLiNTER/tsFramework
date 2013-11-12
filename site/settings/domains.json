@@ -1,20 +1,11 @@
 {
 	"domains": {
-		"tsfw.timesplinter.ch": {
-			"localization": "browser",
-			"timezone": "Europe/Zurich", /* locale, geolocate or valid timezone */
-			"environment": "live",
-			"template": "default",
-			"startroute": "/home"
-		},
-		
-		"tsfw.localhost": {
-			/*"localization": "browser",*/
-            "localization": "uri",
+		/*"tsfw.localhost": {
+			 "localization": "browser",
 			"timezone": "Europe/Zurich",
 			"environment": "dev",
 			"template": "default",
-			"startroute": "/home"
-		}
+			"startroute": "/"
+		}*/
 	}
 }

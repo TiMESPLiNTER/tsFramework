@@ -23,7 +23,6 @@ class HttpRequest {
 	private $query;
 	private $uri;
 		
-	private $params;
 	private $requestMethod;
 	private $requestTime;
 	private $languages;
@@ -33,7 +32,6 @@ class HttpRequest {
 	private $requestVars;
 	
 	public function __construct() {
-		$this->params = array();
 		$this->requestVars = array_merge($_GET, $_POST);
 	}
 	
@@ -58,7 +56,7 @@ class HttpRequest {
 	}
 	
 	public function setPort($port) {
-		$this->prot = $port;
+		$this->port = $port;
 	}
 	
 	public function getPath() {
@@ -76,22 +74,6 @@ class HttpRequest {
 	public function setQuery($query) {
 		$this->query = $query;
 	}
-	
-	public function getParams() {
-		return $this->params;
-	}
-	
-	public function getParam($key, $cleaned = true) {
-		if(isset($this->params[$key]))
-			return ($cleaned === true)?strip_tags($this->params[$key]):$this->params[$key];
-		
-		return null;
-	}
-	
-	public function setParams($params) {
-		$this->params = $params;
-	}
-
 	
 	public function setURI($uri) {
 		$this->uri = $uri;

@@ -434,7 +434,7 @@ class TemplateEngine {
 			// TODO: Make this recursive through all $selParts array entries
 			$getProperty = new \ReflectionProperty($varData, $selParts[0]);
 
-			if($getProperty->isPrivate()) {
+			if($getProperty->isPrivate() || $getProperty->isProtected()) {
 				$selParts[0] = 'get' . ucfirst($selParts[0]) . '()';
 			}
 

@@ -32,18 +32,29 @@ class Core {
 	private $httpRequest;
 	/** @var \HttpResponse */
 	private $httpResponse;
+	/** @var Route */
+	private $route;
 
 	private $environment;
 	private $currentDomain;
+	private $fwRoot;
+	private $siteRoot;
 
-	public function __construct() {
+	public function __construct($fwRoot, $siteRoot) {
+		$this->fwRoot = $fwRoot;
+		$this->siteRoot = $siteRoot;
+
 		$this->httpRequest = $this->createHttpRequest();
 
-		$this->settings = new Settings(SETTINGS_DIR, array(
-			'fw_dir' => FW_DIR,
-			'site_root' => SITE_ROOT,
-			'domain' => $this->httpRequest->getHost()
-		));
+		$this->settings = new Settings(
+			$siteRoot . 'settings' . DIRECTORY_SEPARATOR,
+			$siteRoot . 'cache' . DIRECTORY_SEPARATOR,
+			array(
+				'fw_dir' => $fwRoot,
+				'site_root' => $siteRoot,
+				'domain' => $this->httpRequest->getHost()
+			)
+		);
 
 		/*
 		 * TODO: if we request a file that doesn't exist from a domain that is not registered in settings of the fw
@@ -52,12 +63,12 @@ class Core {
 
 		$this->environment = $this->getEnvironmentFromRequest($this->httpRequest);
 		$this->currentDomain = isset($this->settings->core->domains->{$this->httpRequest->getHost()})
-			?$this->settings->core->domains->{$this->httpRequest->getHost()}:null;
+			?$this->settings->core->domains->{$this->httpRequest->getHost()}:$this->settings->defaults->domain;
 
 		if($this->environment === null)
 			RequestHandler::redirect($this->settings->defaults->domain);
 
-		FrameworkLoggerFactory::setEnvironment($this->environment);
+		FrameworkLoggerFactory::setDefaults($this->environment, $fwRoot, $siteRoot);
 
         $this->errorHandler = new ErrorHandler($this);
         $this->errorHandler->register();
@@ -76,12 +87,13 @@ class Core {
 	}
 
 	/**
-	 *
+	 * Creates a HttpRequest object for the current request
 	 * @return HttpRequest
 	 */
 	private function createHttpRequest() {
 		$protocol = (isset($_SERVER['HTTPS']) === true && $_SERVER['HTTPS'] === 'on') ? HttpRequest::PROTOCOL_HTTPS : HttpRequest::PROTOCOL_HTTP;
-		$uri = $_SERVER['REQUEST_URI'];
+		$uri = StringUtils::startsWith($_SERVER['REQUEST_URI'], '/index.php')?StringUtils::afterFirst($_SERVER['REQUEST_URI'], '/index.php'):$_SERVER['REQUEST_URI'];
+		//var_dump($uri); exit;
 		$path = StringUtils::beforeLast($uri, '?');
 
 		$languages = array();
@@ -99,7 +111,6 @@ class Core {
 		$httpRequest = new HttpRequest();
 
 		$httpRequest->setHost($_SERVER['SERVER_NAME']);
-		//$httpRequest->setParams($params);
 		$httpRequest->setPath($path);
 		$httpRequest->setPort($_SERVER['SERVER_PORT']);
 		$httpRequest->setProtocol($protocol);
@@ -126,48 +137,22 @@ class Core {
 
         $this->localeHandler->localize($this->httpRequest);
 
-		$currentDomain = DomainUtils::getDomainInfo($this->settings->core->domains, $this->httpRequest->getHost());
-
-		if($currentDomain === null) {
-			if(isset($this->settings->defaults->domain))
-				RequestHandler::redirect('http://' . $this->settings->defaults->domain);
-
-			throw new HttpException('No default domain set in settings', 500);
-		}
-
 		if($this->httpRequest->getPath() === '/') {
 			// Load the default page as "virtual" httpRequest for the base url (no uri)
-			$routeId = (string)$currentDomain->startroute;
+			$routeId = (string)$this->currentDomain->startroute;
 
 			if($this->httpRequest->getPath() !== $routeId)
 				RequestHandler::redirect($routeId);
 		}
 
-		$matchedRoute = RouteUtils::matchRoutes($this->settings->core->routes, $this->httpRequest->getPath());
+		$matchedRoutes = RouteUtils::matchRoutesAgainstPath($this->settings->core->routes, $this->httpRequest);
 
-		if($matchedRoute === null)
+		if($matchedRoutes === null)
 			throw new HttpException('No route did match for: ' . $this->httpRequest->getPath(), 404);
-
-		if(isset($matchedRoute['GET']) === false || count($matchedRoute['GET']) <= 0)
-			throw new HttpException('Not GET entry found for matched path: ' . $this->httpRequest->getPath(), 404);
-
-		preg_match($matchedRoute['GET']->pattern, $this->httpRequest->getPath(), $res);
-		array_shift($res);
-
-		$this->httpRequest->setParams($res);
 
 		$this->pluginManager->invokePluginHook('beforeResponseBuilt');
 
-		try {
-			$this->httpResponse = $this->processPage($matchedRoute);
-		} catch(HttpException $e) {
-			if($this->settings->core->environments->{$this->environment}->debug === false)
-				return $this->errorHandler->displayHttpError($e->getCode(), $this->httpRequest, $e->getMessage());
-
-			throw $e;
-		} catch(\Exception $e) {
-			throw $e;
-		}
+		$this->httpResponse = $this->processPage($matchedRoutes);
 
 		$this->pluginManager->invokePluginHook('afterResponseBuilt');
 
@@ -194,55 +179,30 @@ class Core {
 	/**
 	 *
 	 * @param array $routes
+	 * @throws CoreException
+	 * @throws HttpException|\Exception
 	 * @return \HttpResponse The response of the controller method
-     * @throws CoreException
 	 */
 	public function processPage($routes) {
+		$httpRequestMethod = $this->httpRequest->getRequestMethod();
 
-		$requestSSLRequired = false;
-		$requestSSLForbidden = false;
-		$controllers = array();
+		if(isset($routes[$httpRequestMethod]) === false)
+			throw new HttpException('Method ' . $httpRequestMethod . ' is not allowed for this path. Use ' . implode(', ', array_keys($routes)) . ' instead', 405);
 
-		foreach($routes as $r) {
-			if($r->sslRequired === true)
-				$requestSSLRequired = true;
+		$this->route = $routes[$httpRequestMethod];
 
-			if($r->sslForbidden === true)
-				$requestSSLForbidden = true;
-
-			$className = $r->controllerClass;
-
-			if(!isset($controllers[$className])) {
-				$controller = new $className($this, $this->httpRequest, $r);
-				$controllers[$className] = $controller;
-			}
-		}
-
-		if($requestSSLRequired === true && $this->httpRequest->getProtocol() !== HttpRequest::PROTOCOL_HTTPS)
+		if($this->route->sslRequired === true && $this->httpRequest->getProtocol() !== HttpRequest::PROTOCOL_HTTPS)
 			RequestHandler::redirect($this->httpRequest->getURL(HttpRequest::PROTOCOL_HTTPS));
-		elseif($requestSSLForbidden === true && $this->httpRequest->getProtocol() !== HttpRequest::PROTOCOL_HTTP)
+		elseif($this->route->sslForbidden === true && $this->httpRequest->getProtocol() !== HttpRequest::PROTOCOL_HTTP)
 			RequestHandler::redirect($this->httpRequest->getURL(HttpRequest::PROTOCOL_HTTP));
 
-		//$this->localeHandler->localize($this->httpRequest);
+		$response = null;
 
-		/** @var $c FrameworkController */
-		$route = ($this->httpRequest->getRequestMethod() === 'POST' && isset($routes['POST']))?$routes['POST']:$routes['GET'];
-
-		try {
-			if($controllers[$route->controllerClass] instanceof HttpResponse) {
-				$response = $controllers[$route->controllerClass];
-			} else {
-				$response = call_user_func(array($controllers[$route->controllerClass],$route->controllerMethod));
-			}
-		} catch(HttpException $e) {
-			if($controllers[$route->controllerClass] instanceof HandleHttpError)
-				$response = $controllers[$route->controllerClass]->displayHttpError($e);
-			else
-				throw $e;
-		}
+		$controller = new $this->route->controllerClass($this, $this->httpRequest, $this->route);
+		$response = call_user_func(array($controller, $this->route->controllerMethod));
 
 		if(($response instanceof HttpResponse) === false)
-			throw new CoreException('Return value of the controller method "' . $route->controllerClass . '->' . $route->controllerMethod . '" is not an object of type HttpResponse but of ' . (is_object($response)?get_class($response):'a php native type'));
+			throw new CoreException('Return value of the controller method "' . $this->route->controllerClass . '->' . $this->route->controllerMethod . '" is not an object of type HttpResponse but of ' . (is_object($response)?get_class($response):'a php native type'));
 
 		return $response;
 	}
@@ -273,6 +233,13 @@ class Core {
 	 */
 	public function getHttpRequest() {
 		return $this->httpRequest;
+	}
+
+	/**
+	 * @return \ch\timesplinter\core\Route
+	 */
+	public function getRoute() {
+		return $this->route;
 	}
 
 	/**
@@ -316,6 +283,22 @@ class Core {
 
 	public function getPluginManager() {
 		return $this->pluginManager;
+	}
+
+	/**
+	 * Returnts the path to the root directory of the framework
+	 * @return string The framework root path
+	 */
+	public function getFwRoot()	{
+		return $this->fwRoot;
+	}
+
+	/**
+	 * Returnts the path to the root directory of the site
+	 * @return string The site root path
+	 */
+	public function getSiteRoot() {
+		return $this->siteRoot;
 	}
 }
 

@@ -19,7 +19,7 @@ class DateTimeUtils {
 		$prevLocale = null;
 
 		if($locale !== null) {
-			$prevLocale = setlocale(LC_TIME);
+			$prevLocale = setlocale(LC_TIME, null);
 			setlocale(LC_TIME, $locale);
 		}
 

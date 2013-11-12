@@ -15,10 +15,14 @@ class LocaleHandler {
 	private $core;
 	private $locale;
 	private $timezone;
+
+	private $currentTextdomain;
 	
 	public function __construct(Core $core) {
 		$this->core = $core;
 		$this->locale = null;
+
+		$this->currentTextdomain = null;
 	}
 
 	/**
@@ -27,12 +31,7 @@ class LocaleHandler {
 	 */
 	public function localize(HttpRequest $httpRequest) {
 		/** @var Domain */
-		$localesAvailable = $this->core->getSettings()->locales;
-		$currentDomain = DomainUtils::getDomainInfo($this->core->getSettings()->core->domains, $httpRequest->getHost());
-
-		//var_dump($currentDomain, $localesAvailable);
-
-		$domainLocale = ($currentDomain !== null)?$currentDomain->localization:$this->core->getSettings()->defaults->localization;
+		$domainLocale = $this->core->getCurrentDomain()->localization;
 
 		$locales = ($domainLocale === 'browser')?$this->detectBrowserLocalization($httpRequest->getLanguages()):array($domainLocale => 1.0);
 
@@ -77,6 +76,24 @@ class LocaleHandler {
 		}
 		
 		return $langs;
+	}
+
+	public function bindTextdomain($textdomain, $location) {
+		bindtextdomain($textdomain, $location);
+	}
+
+	public function gettext($message, $textdomain = null) {
+		if($textdomain !== null && $this->currentTextdomain !== $textdomain)
+			$this->currentTextdomain = textdomain($textdomain);
+
+		return gettext($message);
+	}
+
+	public function ngettext($msgid1, $msgid2, $n, $textdomain = null) {
+		if($textdomain !== null && $this->currentTextdomain !== $textdomain)
+			$this->currentTextdomain = textdomain($textdomain);
+
+		return ngettext($msgid1, $msgid2, $n);
 	}
 
 	public function getLocale() {

@@ -22,6 +22,10 @@ class StringUtilsTest extends PHPUnit_Framework_TestCase {
 		$this->assertSame(\ch\timesplinter\common\StringUtils::between('foobar', 'fo', 'ar'), 'ob', 'Test 1');
 		$this->assertSame(\ch\timesplinter\common\StringUtils::between('foobar', 'fooba', ''), null, 'Test 2');
 	}
+
+	public function testInsertBeforeLast() {
+		$this->assertSame(\ch\timesplinter\common\StringUtils::insertBeforeLast('foo bar', 'bar', 'test '), 'foo test bar', 'Test 1');
+	}
 }
 
 /* EOF */

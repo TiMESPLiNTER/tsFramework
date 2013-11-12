@@ -52,7 +52,7 @@ class URILocalizer extends FrameworkPlugin {
             return;
         }
 
-        $resRoutes = RouteUtils::matchRoutes($this->core->getSettings()->core->routes, $newURI);
+        $resRoutes = RouteUtils::matchRoutesAgainstPath($this->core->getSettings()->core->routes, $newURI);
         $defaultLocale = $this->core->getSettings()->{'plugin.urilocalization'}->default_uri_locale;
 
         if(isset($resRoutes['GET']) && count($resRoutes['GET']) > 0) {

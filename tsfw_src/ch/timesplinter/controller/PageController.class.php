@@ -25,30 +25,27 @@ abstract class PageController extends FrameworkController {
 		parent::__construct($core, $httpRequest, $route);
 		
 		$this->activeHtmlIds = array();
+
+		$cacheDir = $core->getSiteRoot() . 'cache' . DIRECTORY_SEPARATOR . 'pages' . DIRECTORY_SEPARATOR . $this->currentDomain->template . DIRECTORY_SEPARATOR;
+		$tplCache = new TemplateCache($cacheDir, 'cache.template');
+		$this->tplEngine = new TemplateEngine($tplCache, 'tst');
 	}
 	
 	/**
 	 * Parses a template file
 	 * @param string $tplFile
-	 * @param array $vars
+	 * @param array $tplVars
 	 * @return string The parsed template
 	 */	
-	public function render($tplFile, $vars = array()) {
-		//$currentDomain = DomainUtils::getDomainInfo($this->core->getSettings()->core->domains, $this->httpRequest->getHost());
-		//var_dump($this->core->getSettings()->getAllValues()); exit;
-		$tplDir = SITE_ROOT . 'templates' . DIRECTORY_SEPARATOR . $this->currentDomain->template . DIRECTORY_SEPARATOR;
+	public function render($tplFile, $tplVars = array()) {
+		$tplDir = $this->core->getSiteRoot() . 'templates' . DIRECTORY_SEPARATOR . $this->currentDomain->template . DIRECTORY_SEPARATOR;
 		$templateFile = $tplDir . 'template.html';
 		$tplFilePath = $tplDir . 'pages' . DIRECTORY_SEPARATOR . $tplFile . '.html';
-		
-		$cacheDir = CACHE_DIR . 'pages' . DIRECTORY_SEPARATOR . $this->currentDomain->template . DIRECTORY_SEPARATOR;
-		$tplCache = new TemplateCache($cacheDir, 'cache.template');
-		$this->tplEngine = new TemplateEngine($tplCache, 'tst');
 
-		$this->tplEngine->setAllData($vars);
-		$vars['this'] = $tplFilePath;
-		$vars['_site'] = ($this->route !== null)?(string)$this->route->id:null;
-		
-		return preg_replace_callback('/\s+id="nav-(.+?)"/', array($this,'setCSSActive'), $this->tplEngine->getResultAsHtml($templateFile, $vars));
+		$tplVars['this'] = $tplFilePath;
+		$tplVars['_site'] = ($this->route !== null)?(string)$this->route->id:null;
+
+		return preg_replace_callback('/\s+id="nav-(.+?)"/', array($this,'setCSSActive'), $this->tplEngine->getResultAsHtml($templateFile, $tplVars));
 	}
 	
 	protected function generateHttpResponse($httpStatusCode = 200, $html = null, $headers = array()) {

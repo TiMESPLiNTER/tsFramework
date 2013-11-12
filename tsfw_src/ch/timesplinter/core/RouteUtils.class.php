@@ -10,14 +10,17 @@ use \stdClass;
  * @author pascal91
  */
 class RouteUtils {
-	public static function matchRoutes(stdClass $routes, $uri) {
+	public static function matchRoutesAgainstPath(stdClass $routes, HttpRequest $httpRequest) {
 		$routeEntries = null;
 		
 		foreach($routes as $routeID => $r) {
 			$routeObj = self::createRouteObject($routeID, $r);
 			
-			if(preg_match($routeObj->pattern, $uri) === 0)
+			if(preg_match($routeObj->pattern, $httpRequest->getPath(), $params) === 0)
 				continue;
+
+			array_shift($params);
+			$routeObj->setParams($params);
 
 			$routeEntries[$routeObj->method] = self::createRouteObject($routeID, $r);
 		}
@@ -28,19 +31,8 @@ class RouteUtils {
 		return $routeEntries;
 	}
 	
-	public static function getRouteById(SimpleXMLElement $routes, $matches) {
-		$routeEntry = $routes->xpath("//route[@id='" . $matches . "']");
-		
-		if(!isset($routeEntry[0]))
-			return null;
-		
-		return self::createRouteObject($routeEntry[0]);
-	}
-	
 	private static function createRouteObject($routeID, stdClass $routeEntry) {
 		$route = new Route;
-		
-		//$pattern = str_replace(array('/'), array('\/'), $routeEntry->pattern);
 		
 		$route->method = Route::METHOD_UNKNOWN;
 		$route->sslRequired = isset($routeEntry->sslRequired)?$routeEntry->sslRequired:false;
@@ -48,11 +40,7 @@ class RouteUtils {
 
 		$routeEntryMethod = $routeEntry->method;
 		
-		if($routeEntryMethod === 'GET')
-			$route->method = Route::METHOD_GET;
-		elseif($routeEntryMethod === 'POST')
-			$route->method = Route::METHOD_POST;
-		
+		$route->method = $routeEntryMethod;
 		$route->pattern = '@^' . $routeEntry->pattern . '$@';
 		
 		$ctrlParts = explode(':',$routeEntry->controller);
@@ -60,7 +48,7 @@ class RouteUtils {
 		$methodName = array_pop($ctrlParts);
 		
 		$route->id = $routeID;
-		$route->controllerClass = implode('\\',$ctrlParts);
+		$route->controllerClass = implode('\\', $ctrlParts);
 		$route->controllerMethod = $methodName;
 		
 		return $route;

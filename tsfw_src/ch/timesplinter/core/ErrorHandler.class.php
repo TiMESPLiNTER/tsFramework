@@ -24,34 +24,6 @@ class ErrorHandler {
 		set_exception_handler(array($this, 'handleException'));
 	}
 	
-	public function displayHttpError($errorCode, $httpRequest, $errorStr = null) {
-        $language = $this->core->getLocaleHandler()->getLanguage();
-        $messages = $this->core->getSettings()->errorhandling->messages;
-
-		if($errorStr !== null) {
-	        if($language === false)
-	            $language = 'en';
-
-	        $errorStr = isset($messages->$errorCode)?$messages->$errorCode->$language:$messages->default->$language;
-		}
-
-		$errorControllerMethod = isset($this->core->getSettings()->errorhandling->controller->$errorCode)?$errorCode:'default';
-		$errorHandlerController = $this->core->getSettings()->errorhandling->controller->$errorControllerMethod;
-
-		$controller = FrameworkUtils::stringToClassName($errorHandlerController);
-
-		$errorRoute = new Route();
-		$errorRoute->id = 'error';
-
-		$pc = new $controller->className($this->core, $httpRequest, $errorRoute);
-		
-		return $pc->{$controller->methodName}(array(
-			'siteTitle' => 'Error ' . $errorCode,
-			'error_code' => $errorCode,
-			'error_msg' => $errorStr
-		), $errorCode);
-	}
-	
 	/**
 	 * 
 	 * @param type $error_number
@@ -69,24 +41,38 @@ class ErrorHandler {
 	 * @param Exception $e
 	 */
 	public function handleException(Exception $e) {
-		$content = null;
-		
-		if($e instanceof FrameworkException) {
-			$content = $e->handleException($this->core, $this->core->getHttpRequest());
+		if(isset($this->core->getSettings()->errorhandling->controller) === true) {
+			$controller = FrameworkUtils::stringToClassName($this->core->getSettings()->errorhandling->controller);
+
+			$pc = new $controller->className($this->core, $this->core->getHttpRequest(), new Route());
+
+			$httpResponse = call_user_func(array($pc, $controller->methodName), $e);
 		} else {
-			$content = '<pre>';
+			$content = null;
 
-			$content .= '<b>Uncaught exception' . "\n" . '==================</b>' . "\n";
-			$content .= 'Type: ' . get_class($e) . "\n";
-			$content .= 'Message: ' . $e->getMessage() . ' (Code: ' . $e->getCode() . ')' . "\n";
-			$content .= 'Thrown in: ' . $e->getFile() . ' (Line: ' . $e->getLine() . ")\n\n";
+			$environment = $this->core->getCurrentDomain()->environment;
+			$httpErrroCode = ($e instanceof HttpException)?$e->getCode():500;
+			$exceptionStr = null;
 
-			$content .= $e->getTraceAsString();
-			
-			$content .= '</pre>';
+			if($this->core->getSettings()->core->environments->$environment->debug === true) {
+				$exceptionStr = "\n<pre>";
+
+				$exceptionStr .= '<b>Uncaught exception' . "\n" . '==================</b>' . "\n";
+				$exceptionStr .= 'Type: ' . get_class($e) . "\n";
+				$exceptionStr .= 'Message: ' . $e->getMessage() . ' (Code: ' . $e->getCode() . ')' . "\n";
+				$exceptionStr .= 'Thrown in: ' . $e->getFile() . ' (Line: ' . $e->getLine() . ")\n\n";
+
+				$exceptionStr .= $e->getTraceAsString();
+
+				$exceptionStr .= '</pre>';
+			}
+
+			$errorStr = $httpErrroCode . ' ' . HttpResponse::getHttpStatusString($httpErrroCode);
+			$content = "<!doctype html>\n<html>\n<head>\n<title>" . $errorStr . "</title>\n</head>\n<body>\n<h1>" . $errorStr . "</h1>" . $exceptionStr . "\n</body>\n</html>";
+
+			$httpResponse = new HttpResponse($httpErrroCode, $content);
 		}
-		
-		$httpResponse = new HttpResponse((($e->getCode() !== 0)?$e->getCode():500), $content);
+
 		$httpResponse->send();
 
 		exit;

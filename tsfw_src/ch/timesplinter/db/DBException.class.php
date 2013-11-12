@@ -3,6 +3,7 @@
 namespace ch\timesplinter\db;
 
 use \Exception;
+use ch\timesplinter\core\ExceptionHandling;
 
 /**
  *
@@ -11,7 +12,7 @@ use \Exception;
  * @copyright Copyright (c) 2012, TiMESPLiNTER
  * @version 1.0.0
  */
-class DBException extends Exception {
+class DBException extends \PDOException {
 
 	private $queryString;
 	private $queryParams;

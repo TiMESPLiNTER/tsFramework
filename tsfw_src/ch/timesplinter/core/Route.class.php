@@ -24,7 +24,26 @@ class Route {
 	public $method;
 	public $controllerClass;
 	public $controllerMethod;
-	public $params;
+	private $params;
+
+	public function __construct($params = array()) {
+		$this->params = $params;
+	}
+
+	public function getParams() {
+		return $this->params;
+	}
+
+	public function getParam($key, $cleaned = true) {
+		if(isset($this->params[$key]) === true)
+			return ($cleaned === true)?strip_tags($this->params[$key]):$this->params[$key];
+
+		return null;
+	}
+
+	public function setParams($params) {
+		$this->params = $params;
+	}
 }
 
 /* EOF */

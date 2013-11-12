@@ -26,7 +26,7 @@ abstract class FrameworkController {
 		$this->route = $route;
 		
 		$host = $this->httpRequest->getHost();
-		$this->currentDomain = isset($this->core->getSettings()->core->domains->$host)?$this->core->getSettings()->core->domains->$host:null;
+		$this->currentDomain = $this->core->getCurrentDomain();
 	}
 }
 

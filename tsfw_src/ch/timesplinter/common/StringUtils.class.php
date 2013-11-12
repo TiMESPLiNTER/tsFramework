@@ -82,6 +82,10 @@ class StringUtils {
         return ($afterStr !== false)?$afterStr:'';
     }
 
+	public static function insertBeforeLast($str, $beforeLast, $newStr) {
+		return self::beforeLast($str, $beforeLast) . $newStr . $beforeLast . self::afterLast($str, $beforeLast);
+	}
+
 	/**
 	 * @param string $str
 	 * @param string $startStr

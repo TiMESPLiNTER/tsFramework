@@ -13,6 +13,8 @@ use ch\timesplinter\logger\LoggerFactory;
 class FrameworkLoggerFactory {
 	private static $loggers;
 	private static $environmet;
+	private static $fwRoot;
+	private static $siteRoot;
 
 	/**
 	 * @param mixed $classContext The context the logger should be for
@@ -21,10 +23,14 @@ class FrameworkLoggerFactory {
 	 */
 	public static function getLogger($classContext, $name = null) {
 		if(self::$loggers === null) {
-			$settings = new Settings(SETTINGS_DIR, array(
-				'fw_dir' => FW_DIR,
-				'site_root' => SITE_ROOT
-			));
+			$settings = new Settings(
+				self::$siteRoot . 'settings' . DIRECTORY_SEPARATOR,
+				self::$siteRoot . 'cache' . DIRECTORY_SEPARATOR,
+				array(
+				'fw_dir' => self::$fwRoot,
+				'site_root' => self::$siteRoot
+				)
+			);
 
 			self::$loggers = $settings->loggers->{self::$environmet};
 		}
@@ -38,8 +44,10 @@ class FrameworkLoggerFactory {
 		return new BroadcastLogger($classContext, ($name === null)?$createdLoggers:$createdLoggers[$name]);
 	}
 
-	public static function setEnvironment($environment) {
+	public static function setDefaults($environment, $fwRoot, $siteRoot) {
 		self::$environmet = $environment;
+		self::$fwRoot = $fwRoot;
+		self::$siteRoot = $siteRoot;
 	}
 }
 

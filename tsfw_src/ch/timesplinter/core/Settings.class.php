@@ -15,13 +15,13 @@ class Settings {
 	private $cachedFiletime;
 	private $resourcesChecked;
 	
-	public function __construct($settingsPath, array $replace = array()) {
+	public function __construct($settingsPath, $cachePath, array $replace = array()) {
 		$this->settingsPath = $settingsPath;
 		$this->settings = new stdClass;
         $this->replace = array();
 		$this->resourcesChecked = array();
 
-		$this->cacheFile = CACHE_DIR . 'settings.cache';
+		$this->cacheFile = $cachePath . 'settings.cache';
 		$this->cacheChanged = false;
 		$this->loadSettingsFromCache();
 
