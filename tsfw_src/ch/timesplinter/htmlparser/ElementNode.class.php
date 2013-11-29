@@ -51,6 +51,10 @@ class ElementNode extends HtmlNode {
 		$this->attributes[] = $attr;
 		$this->attributesNamed[$attr->key] = $attr;
 	}
+
+	public function doesAttributeExist($key) {
+		return isset($this->attributesNamed[$key]);
+	}
 	
 	public function removeAttribute($key) {
 		if(isset($this->attributesNamed[$key]) === true)

@@ -28,7 +28,9 @@ class SessionHandler {
 		if ($this->started === true)
 			return;
 
-		session_start();
+		if(session_start() === false) {
+			throw new CoreException('Could not start session');
+		}
 
 		$remoteAddr = (isset($_SERVER['REMOTE_ADDR'])) ? $_SERVER['REMOTE_ADDR'] : null;
 		$userAgent = (isset($_SERVER['HTTP_USER_AGENT'])) ? $_SERVER['HTTP_USER_AGENT'] : null;

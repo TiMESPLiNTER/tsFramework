@@ -37,7 +37,7 @@ class FrameworkUtils {
 	 * @param bool $methodIncluded
 	 * @return \stdClass Contains two properties: $className - The class name, $methodName - The method name
 	 */
-	public static function stringToClassName($str, $seperator = ':', $methodIncluded = true) {
+	public static function stringToClassName($str, $methodIncluded = true, $seperator = ':') {
         $classParts = explode($seperator, $str);
 
         $returnValue = new \stdClass();

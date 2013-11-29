@@ -3,6 +3,7 @@ namespace ch\timesplinter\core;
 
 use \SimpleXMLElement;
 use \stdClass;
+use \ch\timesplinter\core\HttpRequest;
 
 /**
  * Description of RouteUtils
@@ -23,6 +24,8 @@ class RouteUtils {
 			$routeObj->setParams($params);
 
 			$routeEntries[$routeObj->method] = self::createRouteObject($routeID, $r);
+			$routeEntries['HEAD'] = self::createRouteObject($routeID, $r);
+
 		}
 		
 		if(count($routeEntries) === null)

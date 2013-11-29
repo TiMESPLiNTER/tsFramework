@@ -30,13 +30,19 @@ abstract class Logger {
 	protected $classContext;
 	protected $loglevels;
 
+	protected $mailLoglevels;
+	protected $mailAddress;
+
 	public function __construt($classContext, $loglevels) {
 		$this->classContext = (is_object($classContext)) ? get_class($classContext) : $classContext;
         $this->loglevels = $loglevels;
+
+		$this->mailAddress = null;
+		$this->mailLoglevels = null;
 	}
 
-	private function checkLevel($level) {
-		if(strpos($this->loglevels, $level) !== false)
+	private function checkLevel($levels, $msgLevel) {
+		if(strpos($levels, $msgLevel) !== false)
 			return true;
 
 		return false;
@@ -44,17 +50,37 @@ abstract class Logger {
 
 	protected abstract function writeMessage($level, $msg, $vars = null);
 
+	private function mailMessage($level, $msg) {
+		if($this->mailAddress === null || $this->mailLoglevels === null)
+			return;
+
+		if($this->checkLevel($this->mailLoglevels, $level) === false)
+			return;
+
+		$headers = array(
+			'Subject: An error occured on ' . $_SERVER['SERVER_NAME'],
+			'From: error@' . $_SERVER['SERVER_NAME']
+		);
+
+		error_log('[' . $level . '] ' . $msg . PHP_EOL . PHP_EOL . 'For more information view the log', 1,
+			$this->mailAddress,
+			implode(PHP_EOL, $headers)
+		);
+	}
+
 	/**
 	 * Logs an error with optional exception
 	 * @param string $msg
 	 * @param Exception $e
 	 */
 	public function error($msg, Exception $e = null) {
-		if($this->checkLevel(self::LEVEL_ERROR) !== true)
-			return;
-
 		if($e !== null)
 			$msg .= "\r\n\t" . get_class($e) . ': (' . $e->getCode() . ') "' . $e->getMessage() . "\"\r\n\tthrown in file: " . $e->getFile() . ' (Line: ' . $e->getLine() . ')' . "\r\n\n\t" . str_replace("\n", "\n\t", $e->getTraceAsString());
+
+		$this->mailMessage(self::LEVEL_ERROR, $msg);
+
+		if($this->checkLevel($this->loglevels, self::LEVEL_ERROR) !== true)
+			return;
 
 		$this->writeMessage(self::LEVEL_ERROR, $msg);
 	}
@@ -64,7 +90,9 @@ abstract class Logger {
 	 * @param type $msg
 	 */
 	public function warn($msg) {
-		if($this->checkLevel(self::LEVEL_WARN) !== true)
+		$this->mailMessage(self::LEVEL_WARN, $msg);
+
+		if($this->checkLevel($this->loglevels, self::LEVEL_WARN) !== true)
 			return;
 
 		$this->writeMessage(self::LEVEL_WARN, $msg);
@@ -76,7 +104,9 @@ abstract class Logger {
 	 * @return type
 	 */
 	public function info($msg) {
-		if($this->checkLevel(self::LEVEL_INFO) !== true)
+		$this->mailMessage(self::LEVEL_INFO, $msg);
+
+		if($this->checkLevel($this->loglevels, self::LEVEL_INFO) !== true)
 			return;
 
 		$this->writeMessage(self::LEVEL_INFO, $msg);
@@ -88,7 +118,9 @@ abstract class Logger {
 	 * @param array $vars
 	 */
 	public function debug($msg, $vars = array()) {
-		if($this->checkLevel(self::LEVEL_DEBUG) !== true)
+		$this->mailMessage(self::LEVEL_DEBUG, $msg);
+
+		if($this->checkLevel($this->loglevels, self::LEVEL_DEBUG) !== true)
 			return;
 
 		if(!is_array($vars))
@@ -125,6 +157,14 @@ abstract class Logger {
 
 	public function setLoglevels($loglevels) {
 		$this->loglevels = $loglevels;
+	}
+
+	public function setMailLoglevels($mailLoglevels) {
+		$this->mailLoglevels = $mailLoglevels;
+	}
+
+	public function setMailAddress($mailAddress) {
+		$this->mailAddress = $mailAddress;
 	}
 
 	public static function var_name($var) {

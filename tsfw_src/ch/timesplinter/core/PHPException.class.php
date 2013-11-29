@@ -1,5 +1,7 @@
 <?php
 namespace ch\timesplinter\core;
+use ch\timesplinter\logger\LoggerFactory;
+use ch\timesplinter\mailer\MailFactory;
 
 /**
  * Description of PHPException
@@ -17,6 +19,15 @@ class PHPException extends FrameworkException {
 	}
 
 	public function handleException(Core $core, HttpRequest $httpRequest) {
+		if($core->getCurrentDomain()->environment->debug === false) {
+			$logger = FrameworkLoggerFactory::getLogger($this);
+			$logger->error('PHP error occured', $this);
+
+			$response = new HttpResponse(500, '<!doctype><html><head><title>Internal server error</title></head><body>An internal error occured. We were notified and working on a solution.</body></html>');
+			$response->send();
+			exit;
+		}
+
 		$phpErrors = array(
 			 E_ERROR => array('name' => 'E_ERROR', 'title' => 'fatal run-time error')
 			,E_WARNING => array('name' => 'E_WARNING', 'title' => 'run-time warning')

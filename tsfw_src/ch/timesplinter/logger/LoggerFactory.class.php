@@ -46,6 +46,15 @@ class LoggerFactory {
 				break;
 		}
 
+		if(
+			isset($loggerSettings->email_address) === true &&
+			isset($loggerSettings->email_level) === true &&
+			strlen($loggerSettings->email_level) > 0
+		) {
+			$loggerInstance->setMailAddress($loggerSettings->email_address);
+			$loggerInstance->setMailLoglevels($loggerSettings->email_level);
+		}
+
 		return $loggerInstance;
 	}
 }
