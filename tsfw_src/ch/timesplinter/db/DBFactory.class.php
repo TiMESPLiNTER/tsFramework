@@ -17,6 +17,8 @@ use \Swift_Mime_HeaderSet;
  * @version 1.1.0
  */
 class DBFactory {
+	const DB_MYSQL = 'mysql';
+	const DB_POSTGRESQL = 'postgresql';
 
 	private static $settings = null;
 
