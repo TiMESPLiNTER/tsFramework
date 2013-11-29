@@ -21,11 +21,13 @@ class CheckboxOptionsTag extends TemplateTag implements TagNode {
 
 	public function replaceNode(TemplateEngine $tplEngine, ElementNode $node) {
 		// DATA
+		TemplateEngine::checkRequiredAttrs($node, array('options', 'checked'));
+
 		$compareArr = $tplEngine->getSelectorAsPHPStr($node->getAttribute('checked')->value);
-		$dataKey = $tplEngine->getSelectorAsPHPStr($node->getAttribute('options')->value);
+		$dataKey = $node->getAttribute('options')->value;
 		$fldName = $node->getAttribute('name')->value . '[]';
 
-		$textContent = '<?php echo "<ul>";  foreach(' . $dataKey . ' as $key => $val) {
+		$textContent = '<?php echo "<ul>";  foreach($this->getDataFromSelector(\'' . $dataKey . '\') as $key => $val) {
 			$checked = in_array($key, ((array)' . $compareArr . '))?\' checked\':null;
 			echo \'<li><label><input type="checkbox" value="\'.$key.\'" name="' . $fldName . '"\'.$checked.\'> \'.$val.\'</label></li>\' . "\n";
 		} echo "</ul>"; ?>';

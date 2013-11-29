@@ -46,14 +46,19 @@ class ForTag extends TemplateTag implements TagNode {
 		$lastClassAttr = $node->getAttribute('classlast');
 		$lastClass = ($lastClassAttr !== null)?$lastClassAttr->value:null;
 		$forUID = uniqid();
-		
-		$phpVar = $tplEngine->getSelectorAsPHPStr($dataKey);
+
+		/*try {
+			$phpVarSel = $tplEngine->getSelectorAsPHPStr($dataKey);
+		} catch(\Exception $e) {
+			$phpVarSel = '$' . str_replace('.', '->', $dataKey);
+		}*/
 
 		$this->str_replace_node($node->childNodes);
 
 		$nodeForStart = new TextNode($tplEngine->getDomReader());
 		$nodeForStart->content = "<?php\n";
-		$nodeForStart->content .= "/* for: start */ \$tmpArr = {$phpVar};\n";
+		//$nodeForStart->content .= "/* for: start */ \$tmpArr = (isset({$phpVar}) === false)?\$this->getData('" . $dataKey . "'):{$phpVar};\n";
+		$nodeForStart->content .= "/* for: start */ \$tmpArr = \$this->getDataFromSelector('{$dataKey}');\n";
 		$nodeForStart->content .= "if(\$tmpArr === null) \$tmpArr = array();\n";
 		$nodeForStart->content .= "\$arr_{$forUID} = array_values((is_object(\$tmpArr) === false)?\$tmpArr:(array)\$tmpArr);\n";
 		$nodeForStart->content .= "\$arrCount_{$forUID} = count(\$arr_{$forUID});\n";
@@ -62,18 +67,19 @@ class ForTag extends TemplateTag implements TagNode {
 		$nodeForStart->content .= "for(\$i_{$forUID} = 0; \$i_{$forUID} < \$arrCount_{$forUID}; \$i_{$forUID} = \$i_{$forUID}+{$step}) {\n";
 		
 		if($step === 1) {
-			$nodeForStart->content .= "\t\${$asVar} = \$arr_{$forUID}[\$i_{$forUID}];\n";
+			$nodeForStart->content .= "\t\$this->addData('{$asVar}', \$arr_{$forUID}[\$i_{$forUID}], true);\n";
+			//$nodeForStart->content .= "\t\${$asVar} = \$arr_{$forUID}[\$i_{$forUID}];\n";
 		} else {
 			for($i = 0; $i < $step; $i++) {
-				$nodeForStart->content .= "\t\${$asVar}" . ($i+1) . " = (isset(\$arr_{$forUID}[\$i_{$forUID}+{$i}]) === true)?\$arr_{$forUID}[\$i_{$forUID}+{$i}]:null;\n";
+				$nodeForStart->content .= "\t\$this->addData('" . $asVar . ($i+1) . "', (isset(\$arr_{$forUID}[\$i_{$forUID}+{$i}]) === true)?\$arr_{$forUID}[\$i_{$forUID}+{$i}]:null, true);\n";
 			}
 		}
 
-		$nodeForStart->content .= "\t\$_count = \$i_{$forUID};\n";
+		$nodeForStart->content .= "\t\$this->addData('_count', \$i_{$forUID}, true);\n";
 		$nodeForStart->content .= "?>";
 		
 		$nodeForEnd = new TextNode($tplEngine->getDomReader());
-		$nodeForEnd->content =  '<?php } /* for: end */ ?>';
+		$nodeForEnd->content =  '<?php } $this->unsetData(\'' . $asVar . '\'); $this->unsetData(\'_count\'); /* for: end */ ?>';
 
 		$node->parentNode->insertBefore($nodeForStart, $node);
 
@@ -81,7 +87,7 @@ class ForTag extends TemplateTag implements TagNode {
 		$nodeInnerHtml = $node->getInnerHtml();
 
 		if(preg_match($forPattern, $nodeInnerHtml, $resVal)) {
-			$nodeInnerHtml = $resVal[1] . $resVal[2] . "<?php \$_count = \$i_{$forUID}; ?>" . $resVal[3];
+			$nodeInnerHtml = $resVal[1] . $resVal[2] . "<?php \$this->addData('_count', \$i_{$forUID}, true); ?>" . $resVal[3];
 		}
 
 		// No fist/last class magic

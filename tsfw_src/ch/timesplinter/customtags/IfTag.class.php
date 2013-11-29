@@ -21,10 +21,7 @@ use ch\timesplinter\common\StringUtils;
  * @package CustomTags
  */
 class IfTag extends TemplateTag implements TagNode {
-	private $logger;
-
 	public function __construct() {
-		$this->logger = FrameworkLoggerFactory::getLogger($this);
 		parent::__construct('if', true);
 	}
 
@@ -32,7 +29,6 @@ class IfTag extends TemplateTag implements TagNode {
 		$compareAttr = $tagNode->getAttribute('compare')->value;
 		$operatorAttr = $tagNode->getAttribute('operator')->value;
 		$againstAttr = $tagNode->getAttribute('against')->value;
-		$this->logger->debug(print_r($tagNode->parentNode->nodeType, true));
 
 		// Check required attrs
 		TemplateEngine::checkRequiredAttrs($tagNode, array('compare', 'operator', 'against'));
@@ -44,8 +40,6 @@ class IfTag extends TemplateTag implements TagNode {
 
 		$firstVar = array_shift($compareValParts);
 		$compareValAfter = (count($compareValParts) > 0)?'->' . implode('->', $compareValParts):null;
-
-
 
 		if(strlen($againstAttr) === 0) {
 			$againstAttr = "''";
@@ -65,6 +59,8 @@ class IfTag extends TemplateTag implements TagNode {
 				foreach($arr as $a) {
 					$againstAttr[] = trim($a);
 				}
+			} else {
+				$againstAttr = "'" . $againstAttr . "'";
 			}
 		}
 
@@ -89,12 +85,7 @@ class IfTag extends TemplateTag implements TagNode {
 
 		$phpCode = '<?php ';
 
-		if(in_array($parentTagName, $varTags) === true)
-			$phpCode .= "\$__cprv = (isset(\$" . $firstVar . ")?\$" . $firstVar . ":\$this->getData('" . $firstVar . "')); ";
-		else
-			$phpCode .= '$__cprv = $this->getData(\'' . $firstVar . '\'); ';
-
-		$phpCode .= 'if($__cprv' . $compareValAfter . ' ' . $operatorStr . ' ' . $againstAttr . ') { ?>';
+		$phpCode .= 'if($this->getDataFromSelector(\'' . $compareAttr . '\') ' . $operatorStr . ' ' . $againstAttr . ') { ?>';
 		$phpCode .= $tagNode->getInnerHtml();
 
 		if($tplEngine->isFollowedBy($tagNode, 'else') === false)

@@ -24,21 +24,19 @@ class OptionsTag extends TemplateTag implements TagNode {
 		TemplateEngine::checkRequiredAttrs($node, array('options'));
 
 		// DATA
-		$compareValue = ($node->getAttribute('selected')->value !== null)?$tplEngine->getSelectorAsPHPStr($node->getAttribute('selected')->value):null;
+		$compareValue = ($node->getAttribute('selected')->value !== null)?$node->getAttribute('selected')->value:null;
 
-		$dataKey = $tplEngine->getSelectorAsPHPStr($node->getAttribute('options')->value);
+		$dataKey = $node->getAttribute('options')->value;
 
 		$compareStr = '$selected = null;';
 
 		if($compareValue !== null) {
-			if(is_object($tplEngine->getSelectorValue($node->getAttribute('selected')->value))) {
-				$compareStr = '$selected = in_array($key, (array)' . $compareValue . ')?\' selected\':null;';
-			} else {
-				$compareStr = '$selected = ($key == ' . $compareValue . ')?\' selected\':null;';
-			}
+			//$selVal = $tplEngine->getSelectorValue($node->getAttribute('selected')->value);
+			$compareStr = '$compVal = $this->getDataFromSelector(\'' . $compareValue . '\');';
+			$compareStr .= '$selected = ((is_array($compVal) && in_array($key, $compVal)) || (is_string($compVal) && $key == $compVal))?\' selected\':null;';
 		}
 
-		$textContent = '<?php foreach(' . $dataKey . ' as $key => $val) {
+		$textContent = '<?php foreach($this->getDataFromSelector(\'' . $dataKey . '\') as $key => $val) {
 			' . $compareStr . '
 			echo \'<option value="\'.$key.\'"\'.$selected.\'>\'.$val.\'</option>\' . "\n";
 		} ?>';

@@ -21,14 +21,14 @@ class CheckboxTag extends TemplateTag implements TagNode {
 	public function replaceNode(TemplateEngine $tplEngine, ElementNode $node) {
 		// DATA
 		$sels = $node->getAttribute('selection')->value;
-		$selsStr = $tplEngine->getSelectorAsPHPStr($sels);
+		$selsStr = '$this->getDataFromSelector(\'' . $sels . '\')';
 		$value = $node->getAttribute('value')->value;
 		$node->removeAttribute('selection');
 		
 		$node->namespace = null;
 		$node->tagName = 'input';
 		if($sels !== null)
-			$node->tagExtension = " <?php echo ((is_array({$selsStr}) && in_array({$value}, {$selsStr})) || ({$selsStr} == {$value}))?' checked':null; ?>";
+			$node->tagExtension = " <?php echo ((is_array({$selsStr}) && in_array({$value}, {$selsStr})) || ({$selsStr} == '{$value}'))?' checked':null; ?>";
 		$node->addAttribute(new HtmlAttribute('type', 'checkbox'));
 		
 		/*$node->parentNode->insertBefore($newNode, $node);

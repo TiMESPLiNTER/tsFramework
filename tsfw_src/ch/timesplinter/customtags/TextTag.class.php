@@ -60,7 +60,7 @@ class TextTag extends TemplateTag implements TagNode, TagInline {
 		}
 
 		return '<?php $textData = $this->getData(\'' . $firstParam . '\'); echo isset($textData' . $restParams . ')?$textData' . $restParams . ':null; ?>';*/
-		return '<?php echo ' . $tplEngine->getSelectorAsPHPStr($params) . '; ?>';
+		return '<?php echo $this->getDataFromSelector(\'' . $params . '\'); ?>';
 	}
 }
 

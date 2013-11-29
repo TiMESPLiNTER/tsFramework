@@ -30,8 +30,12 @@ class ForgroupTag extends TemplateTag implements TagNode {
 		TemplateEngine::checkRequiredAttrs($node, array('var'));
 		
 		$replNode = new TextNode($tplEngine->getDomReader());
-		
-		$replNode->content = "<?php if(isset(\${$this->var}{$this->no}) === true) { ?>";
+
+		$varName = $this->var . $this->no;
+
+		$replNode->content = "<?php \$tmpGrpVal = \$this->getDataFromSelector('{$varName}', true);\n";
+		$replNode->content .= " if(\$tmpGrpVal !== null) {\n";
+		$replNode->content .= "\$this->addData('{$this->var}', \$tmpGrpVal, true); ?>";
 		$replNode->content .= self::prepareHtml($node->getInnerHtml());
 		$replNode->content .= "<?php } ?>";
 		
