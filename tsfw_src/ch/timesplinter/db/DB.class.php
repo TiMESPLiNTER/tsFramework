@@ -191,6 +191,14 @@ abstract class DB extends PDO {
 	}
 
 	/**
+	 * Returns all the current registered listeners
+	 * @return ArrayObject List of registered listeners
+	 */
+	public function getListeners() {
+		return $this->listeners;
+	}
+
+	/**
 	 * Triggers a call of a specific method from all registered listener classes if the listeners are not set to mute
 	 * @param $method The listener method that should be called
 	 * @param array $params The parameters for the listener method
