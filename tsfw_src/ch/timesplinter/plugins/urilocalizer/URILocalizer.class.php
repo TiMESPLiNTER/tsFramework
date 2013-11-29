@@ -55,9 +55,8 @@ class URILocalizer extends FrameworkPlugin {
         $resRoutes = RouteUtils::matchRoutesAgainstPath($this->core->getSettings()->core->routes, $newURI);
         $defaultLocale = $this->core->getSettings()->{'plugin.urilocalization'}->default_uri_locale;
 
-        if(isset($resRoutes['GET']) && count($resRoutes['GET']) > 0) {
+        if(isset($resRoutes['GET']) && count($resRoutes['GET']) > 0)
             RequestHandler::redirect('/' . $defaultLocale . $newURI);
-        }
 
         RequestHandler::redirect('/' . $defaultLocale . $httpRequest->getURI());
     }

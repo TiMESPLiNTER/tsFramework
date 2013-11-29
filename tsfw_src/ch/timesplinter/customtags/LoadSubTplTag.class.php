@@ -26,14 +26,7 @@ class LoadSubTplTag extends TemplateTag implements TagNode {
 
 		$tplFile = null;
 
-		$tplFile = (preg_match('/^\{(.+)\}$/', $dataKey, $res) !== false)?'$this->getData(\'' . $res[1] . '\')':'\'' . $dataKey . '\'';
-
-		/* $newTpl = new TemplateEngine($dataKey,$tplEngine->getTplNsPrefix());
-		  $newTpl->setCacheDir($tplEngine->getCacheDir());
-		  $newTpl->setAllData($tplEngine->getAllData());
-
-		  $newTpl->parse();
-		  $newTpl->cache(); */
+		$tplFile = (preg_match('/^\{(.+)\}$/', $dataKey, $res) === 1)?'$this->getData(\'' . $res[1] . '\')':'\'' . $dataKey . '\'';
 
 		/** @var TextNode */
 		$newNode = new TextNode($tplEngine->getDomReader());
@@ -53,10 +46,11 @@ class LoadSubTplTag extends TemplateTag implements TagNode {
 	 * @param string $file The full filepath to include (OR magic {this})
 	 */
 	public static function requireFile($file, TemplateEngine $tplEngine) {
-		/*$tplEngineNew = new TemplateEngine($tplEngine->getTemplateCache(), $tplEngine->getTplNsPrefix());
-		$tplEngineNew->setAllData($tplEngine->getAllData());*/
+		$tplPath = explode(DIRECTORY_SEPARATOR, $tplEngine->getCurrentTemplateFile());
+		array_pop($tplPath);
+		$tplPathStr = DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $tplPath) . DIRECTORY_SEPARATOR;
 
-		echo $tplEngine->getResultAsHtml($file, $tplEngine->getAllData());
+		echo $tplEngine->getResultAsHtml($tplPathStr . $file, $tplEngine->getAllData());
 	}
 
 }

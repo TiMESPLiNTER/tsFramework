@@ -15,6 +15,8 @@ use ch\timesplinter\core\FrameworkLogger;
  * @author pascal91
  */
 class Core {
+	const CACHE_DIR = 'cache';
+
 	private $logger;
 	/** @var Settings */
 	private $settings;
@@ -39,16 +41,18 @@ class Core {
 	private $currentDomain;
 	private $fwRoot;
 	private $siteRoot;
+	private $siteCacheDir;
 
 	public function __construct($fwRoot, $siteRoot) {
 		$this->fwRoot = $fwRoot;
 		$this->siteRoot = $siteRoot;
+		$this->siteCacheDir = $siteRoot . 'cache' . DIRECTORY_SEPARATOR;
 
 		$this->httpRequest = $this->createHttpRequest();
 
 		$this->settings = new Settings(
 			$siteRoot . 'settings' . DIRECTORY_SEPARATOR,
-			$siteRoot . 'cache' . DIRECTORY_SEPARATOR,
+			$this->siteCacheDir,
 			array(
 				'fw_dir' => $fwRoot,
 				'site_root' => $siteRoot,
@@ -294,11 +298,15 @@ class Core {
 	}
 
 	/**
-	 * Returnts the path to the root directory of the site
+	 * Returns the path to the root directory of the site
 	 * @return string The site root path
 	 */
 	public function getSiteRoot() {
 		return $this->siteRoot;
+	}
+
+	public function getSiteCacheDir() {
+		return $this->siteCacheDir;
 	}
 }
 

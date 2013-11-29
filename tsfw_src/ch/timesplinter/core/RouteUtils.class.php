@@ -16,15 +16,15 @@ class RouteUtils {
 		
 		foreach($routes as $routeID => $r) {
 			$routeObj = self::createRouteObject($routeID, $r);
-			
+
 			if(preg_match($routeObj->pattern, $httpRequest->getPath(), $params) === 0)
 				continue;
 
 			array_shift($params);
 			$routeObj->setParams($params);
 
-			$routeEntries[$routeObj->method] = self::createRouteObject($routeID, $r);
-			$routeEntries['HEAD'] = self::createRouteObject($routeID, $r);
+			$routeEntries[$routeObj->method] = $routeObj;
+			$routeEntries['HEAD'] = $routeObj;
 
 		}
 		

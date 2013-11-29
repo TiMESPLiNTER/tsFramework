@@ -1,7 +1,7 @@
 {
 	"routes": {
 		"home": {
-			"pattern": "/home",
+			"pattern": "/",
 			"controller": "ch:timesplinter:controller:StaticPageController:getPage",
 			"method": "GET"
 
@@ -10,6 +10,12 @@
         "basic-usage": {
             "pattern": "/basic-usage",
             "controller": "ch:timesplinter:controller:StaticPageController:getPage",
+            "method": "GET"
+        },
+		
+		"advanced": {
+            "pattern": "/advanced",
+            "controller": "ch:timesplinter:controller:TestController:getTplEngineTest",
             "method": "GET"
         }
 	}

@@ -25,6 +25,7 @@ class TemplateEngine {
 	private $htmlDoc;
 	private $tplNsPrefix;
 	private $dataPool;
+	private $dataTable;
 	private $customTags;
 //	private $callbackMethods;
 
@@ -32,10 +33,13 @@ class TemplateEngine {
 
 	/** @var TemplateCache */
 	private $templateCache;
+	private $currentTemplateFile;
 
 	/** @var TemplateTag */
 	private $lastTplTag;
 	private $logger;
+
+	private $getterMethodPrefixes;
 
 	/**
 	 * 
@@ -52,6 +56,9 @@ class TemplateEngine {
 		$this->customTags = array_merge($this->getDefaultCustomTags(), $customTags);
 
 		$this->dataPool = new ArrayObject();
+		$this->dataTable = new ArrayObject();
+
+		$this->getterMethodPrefixes = array('get', 'is', 'has');
 	}
 
 	private function getDefaultCustomTags() {
@@ -108,8 +115,7 @@ class TemplateEngine {
 						$attrs[$i]->value = $this->replInlineTag($attrs[$i]->value);
 				}
 			} else {
-				
-				if($node instanceof TextNode || $node instanceof CommentNode || $node instanceof CDataSectionNode)
+				if($node instanceof TextNode || /*$node instanceof CommentNode ||*/ $node instanceof CDataSectionNode)
 					$node->content = $this->replInlineTag($node->content);
 				
 				continue;
@@ -249,7 +255,9 @@ class TemplateEngine {
 	 * @return type
 	 */
 	public function getResultAsHtml($tplFile, $tplVars = array()) {
+		$this->currentTemplateFile = $tplFile;
 		$this->dataPool = new ArrayObject($tplVars);
+		$this->dataTable = new ArrayObject();
 		$cacheID = $this->parse($tplFile);
 
 		try {
@@ -362,6 +370,13 @@ class TemplateEngine {
 		$this->dataPool->offsetSet($key, $value);
 	}
 
+	public function unsetData($key) {
+		if($this->dataPool->offsetExists($key) === false)
+			return;
+
+		$this->dataPool->offsetUnset($key);
+	}
+
 	/**
 	 * Returns a registered data entry with the given key
 	 * @param string $key The key of the data element
@@ -372,6 +387,10 @@ class TemplateEngine {
 			return null;
 
 		return $this->dataPool->offsetGet($key);
+	}
+
+	public function getDataFromSelector($selector) {
+		return $this->getSelectorValue($selector);
 	}
 
 	public function setAllData($dataPool) {
@@ -398,6 +417,13 @@ class TemplateEngine {
 	public function getLastTplTag() {
 		return $this->lastTplTag;
 	}
+
+	/**
+	 * @return string The template file path which gets parsed at the moment
+	 */
+	public function getCurrentTemplateFile() {
+		return $this->currentTemplateFile;
+	}
 	
 	public static function checkRequiredAttrs($contextTag, $attrs) {
 		foreach($attrs as $a) {
@@ -412,87 +438,197 @@ class TemplateEngine {
 		return true;
 	}
 
-
+	/**
+	 * @param $selectorStr
+	 * @param bool $echo
+	 * @return string
+	 * @throws TemplateEngineException
+	 */
 	public function getSelectorAsPHPStr($selectorStr, $echo = false) {
 		if(StringUtils::startsWith($selectorStr, '${') === true)
 			return $selectorStr;
 
 		$selParts = explode('.', $selectorStr);
 		$firstPart = array_shift($selParts);
+		$currentSel = $firstPart;
 
-		if($this->dataPool->offsetExists($firstPart) === false) {
-			throw new TemplateEngineException('The data with offset "' . $firstPart . '" does not exist.');
-		}
+		if($this->dataPool->offsetExists($firstPart) === false)
+			throw new TemplateEngineException('The data with offset "' . $currentSel . '" does not exist.');
 
 		$varData = $this->dataPool->offsetGet($firstPart);
+		$varSelector = '$this->getData(\'' . $firstPart . '\')';
 
-		$selPHPStr = "\$this->getData('" . $selectorStr . "')";
+		foreach($selParts as $part) {
+			if(is_object($varData) === true && ($varData instanceof ArrayObject) === false) {
 
-		if(is_array($varData) === true) {
-			$selPHPStr = "((object)\$this->getData('" . $firstPart . "'))" . ((count($selParts) > 0)?'->' . implode('->', $selParts):null);
-		} elseif(is_object($varData) === true) {
-			// TODO: Make this recursive through all $selParts array entries
-			$getProperty = new \ReflectionProperty($varData, $selParts[0]);
+				if(property_exists($varData, $part) === true) {
+					$getProperty = new \ReflectionProperty($varData, $part);
 
-			if($getProperty->isPrivate()) {
-				$selParts[0] = 'get' . ucfirst($selParts[0]) . '()';
+					$varData = ($getProperty->isPrivate() || $getProperty->isProtected())
+						?call_user_func(array($varData, 'get' . ucfirst($part)))
+						:$varData->$part;
+
+					$varSelector .= '->' . (($getProperty->isPrivate() || $getProperty->isProtected())
+						?'get' . ucfirst($part) . '()'
+						:$part);
+
+					continue;
+				}
+
+				$varData = call_user_func(array($varData, 'get' . ucfirst($part)));
+				$varSelector .= '->get' . ucfirst($part) . '()';
+
+			} elseif(is_array($varData) === true) {
+				if(array_key_exists($part, $varData) === false)
+					throw new TemplateEngineException('Array key "' . $part . '" does not exist in array "' . $currentSel . '"');
+
+				$varData = $varData[$part];
+				$varSelector .= '[' . $part . ']';
+			} elseif(($varData instanceof ArrayObject) === true) {
+				/** @var ArrayObject $varData */
+				if($varData->offsetExists($part) === false)
+					throw new TemplateEngineException('Array key "' . $part . '" does not exist in ArrayObject "' . $currentSel . '"');
+
+				$varData = $varData->offsetGet($part);
+				$varSelector .= '->offsetGet(' . $part . ')';
+			} else {
+				throw new TemplateEngineException('The data with offset "' . $currentSel . '" is not an object nor an array.');
 			}
 
-			$selPHPStr = "\$this->getData('" . $firstPart . "')" . ((count($selParts) > 0)?'->' . implode('->', $selParts):null);
+			$currentSel .= '.' . $part;
 		}
 
-		$returnVal = ($echo)?'<?php echo ' . $selPHPStr . '; ?>':$selPHPStr;
-
-		return $returnVal;
+		return ($echo)?'<?php echo ' . $varSelector . '; ?>':$varSelector;
 	}
 
-	public function getSelectorValue($selectorStr) {
+	/**
+	 * @param $selectorStr
+	 * @return mixed
+	 * @throws TemplateEngineException
+	 */
+	/*private function getSelectorValue($selectorStr) {
 		$selParts = explode('.', $selectorStr);
 		$firstPart = array_shift($selParts);
-		$properties = null;
+		$currentSel = $firstPart;
 
-		if($this->dataPool->offsetExists($firstPart) === false) {
-			throw new TemplateEngineException('The data with offset "' . $firstPart . '" does not exist.');
-		}
+		if($this->dataPool->offsetExists($firstPart) === false)
+			throw new TemplateEngineException('The data with offset "' . $currentSel . '" does not exist.');
 
 		$varData = $this->dataPool->offsetGet($firstPart);
 
-		if(is_array($varData) === true) {
-			$varData = ((object)$firstPart);
+		foreach($selParts as $part) {
+			$newSelector = $currentSel . '.' . $part;
 
+			// Try to find value in hashmap, thats faster then parse again
+			if($this->dataTable->offsetExists($newSelector)) {
+				$varData = $this->dataTable->offsetGet($newSelector);
+				$currentSel = $newSelector;
 
-			if(count($selParts) > 0) {
-				$selectorOther = implode('->', $selParts);
-				return $varData->{$selectorOther};
+				continue;
 			}
 
-			return $varData;
-		}
+			if(is_object($varData) === true) {
+				$getProperty = new \ReflectionProperty($varData, $part);
 
-		if(is_object($varData) === true) {
-			$getProperty = new \ReflectionProperty($varData, $selParts[0]);
+				$varData = ($getProperty->isPrivate() || $getProperty->isProtected())
+					?call_user_func(array($varData, 'get' . ucfirst($part)))
+					:$varData->$part;
 
-			if($getProperty->isPrivate()) {
-				$selParts[0] = 'get' . ucfirst($selParts[0]) . '()';
+			} elseif(is_array($varData) === true) {
+				if(array_key_exists($part, $varData))
+					throw new TemplateEngineException('Array key "' . $part . '" does not exist in array "' . $currentSel . '"');
+
+				$varData = $varData[$part];
+			} else {
+				throw new TemplateEngineException('The data with offset "' . $currentSel . '" is not an object nor an array.');
 			}
 
-			$selPHPStr = $firstPart;
-			$properties = ((count($selParts) > 0)?implode('->', $selParts):null);
-		} else {
-			$selPHPStr = $selectorStr;
+			$currentSel = $newSelector;
+
+			$this->dataTable->offsetSet($currentSel, $varData);
 		}
 
-		$returnVal = call_user_func(array($this, 'getData'), $selPHPStr);
+		return $varData;
+	}*/
 
-		if($properties !== null) {
-			return $returnVal->{$properties};
+	private function getSelectorValue($selectorStr, $returnNull = false) {
+		$selParts = explode('.', $selectorStr);
+		$firstPart = array_shift($selParts);
+		$currentSel = $firstPart;
+
+		if($this->dataPool->offsetExists($firstPart) === false) {
+			if($returnNull === false)
+				throw new TemplateEngineException('The data with offset "' . $currentSel . '" does not exist.');
+
+			return null;
 		}
 
-		return $returnVal;
-	}
+		$varData = $this->dataPool->offsetGet($firstPart);
+		//$tableKey =
 
-	public static function getVar($selector) {
+		foreach($selParts as $part) {
+			$nextSel = $currentSel . '.' . $part;
 
+			// Try to find value in hashmap, thats faster then parse again
+			/*if($this->dataTable->offsetExists($nextSel)) {
+				$varData = $this->dataTable->offsetGet($nextSel);
+
+				continue;
+			}*/
+
+			if(is_object($varData) === true && ($varData instanceof ArrayObject) === false) {
+				if(property_exists($varData, $part) === true) {
+					$getProperty = new \ReflectionProperty($varData, $part);
+
+					if($getProperty->isPublic() === true) {
+						$varData = $varData->$part;
+					} else {
+						$getterMethodName = null;
+
+						foreach($this->getterMethodPrefixes as $mp) {
+							$getterMethodName = $mp . ucfirst($part);
+
+							if(method_exists($varData, $getterMethodName) === true)
+								break;
+
+							$getterMethodName = null;
+						}
+
+						if($getterMethodName === null)
+							throw new TemplateEngineException('Could not access private property "' . $part . '". Please provide a getter method');
+
+						$varData = call_user_func(array($varData, $getterMethodName));
+					}
+
+					/* OLD ONE (more performant) $varData = ($getProperty->isPrivate() || $getProperty->isProtected())
+						?call_user_func(array($varData, 'get' . ucfirst($part)))
+						:$varData->$part;*/
+				} elseif(method_exists($varData, $part) === true) {
+					$varData = call_user_func(array($varData, ucfirst($part)));
+				} else {
+					throw new TemplateEngineException('Don\'t know how to handle selector part "' . $part . '"');
+				}
+
+			} elseif(($varData instanceof ArrayObject) === true) {
+				/** @var ArrayObject $varData */
+				if($varData->offsetExists($part) === false)
+					throw new TemplateEngineException('Array key "' . $part . '" does not exist in ArrayObject "' . $currentSel . '"');
+
+				$varData = $varData->offsetGet($part);
+			} elseif(is_array($varData) === true) {
+				if(array_key_exists($part, $varData) === false)
+					throw new TemplateEngineException('Array key "' . $part . '" does not exist in array "' . $currentSel . '"');
+
+				$varData = $varData[$part];
+			} else {
+				throw new TemplateEngineException('The data with offset "' . $currentSel . '" is not an object nor an array.');
+			}
+
+			$currentSel = $nextSel;
+			$this->dataTable->offsetSet($currentSel, $varData);
+		}
+
+		return $varData;
 	}
 }
 
