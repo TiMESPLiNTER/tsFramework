@@ -202,8 +202,13 @@ class Core {
 
 		$response = null;
 
-		$controller = new $this->route->controllerClass($this, $this->httpRequest, $this->route);
-		$response = call_user_func(array($controller, $this->route->controllerMethod));
+		$controllerInstance = new $this->route->controllerClass($this, $this->httpRequest, $this->route);
+		$responseCallback = array($controllerInstance, $this->route->controllerMethod);
+
+		if(is_callable($responseCallback, false) === false)
+			throw new CoreException('Could not call: ' . $this->route->controllerClass . '->' . $this->route->controllerMethod . '. This is no valid callback! Maybe you attempt to call a static method or you propably misspelled the "controller:method" name');
+
+		$response = call_user_func($responseCallback);
 
 		if(($response instanceof HttpResponse) === false)
 			throw new CoreException('Return value of the controller method "' . $this->route->controllerClass . '->' . $this->route->controllerMethod . '" is not an object of type HttpResponse but of ' . (is_object($response)?get_class($response):'a php native type'));

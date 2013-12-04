@@ -31,6 +31,8 @@ class HttpRequest {
 
 	private $requestVars;
 	private $cookies;
+
+	private $defaultSanitizers;
 	
 	public function __construct() {
 		$this->requestVars = array_merge($_GET, $_POST);
@@ -130,29 +132,43 @@ class HttpRequest {
 	}
 
 	/**
+	 * Set the default function(s) and / or callback(s) to sanitize values from getVar()
+	 * @param string|array $defaultSanitizers The function(s) and / or callback(s)
+	 */
+	public function setDefaultSanitizers($defaultSanitizers) {
+		$this->defaultSanitizers = $defaultSanitizers;
+	}
+
+	/**
 	 * Returns the value of a variable with key $name from either $_GET or $_POST
 	 * @param string $name The name of the GET or POST variable
-	 * @param string|array|null $filters Function names or valid callbacks to filter the input value
+	 * @param string|array|null $sanitizers Function names or valid callbacks to filter the input value
 	 * @return mixed|null Returns the value of the variable or null if it does not exist
 	 */
-	public function getVar($name, $filters = null) {
+	public function getVar($name, $sanitizers = null) {
 		if(isset($this->requestVars[$name]) === false)
 			return null;
 
-		return ($filters === null)?$this->requestVars[$name]:$this->sanitize($this->requestVars[$name], $filters);
+		if($sanitizers !== null)
+			return $this->sanitize($this->requestVars[$name], $sanitizers);
+
+		if($this->defaultSanitizers !== null)
+			return $this->sanitize($this->requestVars[$name], $this->defaultSanitizers);
+
+		return $this->requestVars[$name];
 	}
 
 	/**
 	 * Returns the value of a cookie with key $name
 	 * @param $name The name of the cookie
-	 * @param string|array|null $filters Function names or valid callbacks to filter the input value
+	 * @param string|array|null $sanitizers Function names or valid callbacks to filter the input value
 	 * @return mixed|null Returns the value of the cookie or null if it does not exist
 	 */
-	public function getCookieValue($name, $filters = null) {
+	public function getCookieValue($name, $sanitizers = null) {
 		if(isset($this->cookies[$name]) === false)
 			return null;
 
-		return ($filters === null)?$this->cookies[$name]:$this->sanitize($this->cookies[$name], $filters);
+		return ($sanitizers === null)?$this->cookies[$name]:$this->sanitize($this->cookies[$name], $sanitizers);
 	}
 
 	/**
@@ -167,14 +183,24 @@ class HttpRequest {
 		return $_FILES[$name];
 	}
 
-	private function sanitize($value, $filters) {
-		if(is_string($filters) === true)
-			return call_user_func($filters, $value);
+	/**
+	 * Sanitizes a value with the given functions and callbacks
+	 * @param string|int|null $value The value to sanitize
+	 * @param string|array $sanitizers The functions to sanitize the string. A simple function as string or a callback
+	 * as array or an array with simple functions and callback arrays
+	 * @return string|int|null The sanitized value
+	 */
+	private function sanitize($value, $sanitizers) {
+		if(is_string($sanitizers) === true)
+			return call_user_func($sanitizers, $value);
 
-		if(is_array($filters) === true) {
+		if(is_array($sanitizers) === true) {
 			$valueFiltered = $value;
 
-			foreach($filters as $f)
+			if(count($sanitizers) === 2 && is_callable($sanitizers) === true)
+				return call_user_func($sanitizers, $valueFiltered);
+
+			foreach($sanitizers as $f)
 				$valueFiltered = call_user_func($f, $valueFiltered);
 
 			return $valueFiltered;
