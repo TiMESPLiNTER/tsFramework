@@ -44,11 +44,12 @@ class LoadSubTplTag extends TemplateTag implements TagNode {
 	 * static properties from this class and is called from the cached template
 	 * files.
 	 * @param string $file The full filepath to include (OR magic {this})
+	 * @param \ch\timesplinter\template\TemplateEngine $tplEngine
 	 */
 	public static function requireFile($file, TemplateEngine $tplEngine) {
 		$tplPath = explode(DIRECTORY_SEPARATOR, $tplEngine->getCurrentTemplateFile());
 		array_pop($tplPath);
-		$tplPathStr = DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $tplPath) . DIRECTORY_SEPARATOR;
+		$tplPathStr = implode(DIRECTORY_SEPARATOR, $tplPath) . DIRECTORY_SEPARATOR;
 
 		echo $tplEngine->getResultAsHtml($tplPathStr . $file, $tplEngine->getAllData());
 	}

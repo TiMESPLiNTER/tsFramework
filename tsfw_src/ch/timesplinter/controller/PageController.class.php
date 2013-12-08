@@ -40,7 +40,7 @@ abstract class PageController extends FrameworkController {
 	public function render($tplFile, $tplVars = array()) {
 		$tplDir = $this->core->getSiteRoot() . 'templates' . DIRECTORY_SEPARATOR . $this->currentDomain->template . DIRECTORY_SEPARATOR;
 		$templateFile = $tplDir . 'template.html';
-		$tplFilePath = $tplDir . 'pages' . DIRECTORY_SEPARATOR . $tplFile . '.html';
+		$tplFilePath = 'pages' . DIRECTORY_SEPARATOR . $tplFile . '.html';
 
 		$tplVars['this'] = $tplFilePath;
 		$tplVars['_site'] = ($this->route !== null)?(string)$this->route->id:null;
