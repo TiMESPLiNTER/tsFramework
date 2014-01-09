@@ -105,7 +105,7 @@ abstract class DB extends PDO {
 
 			$this->triggerListeners('onExecute', array($this, $stmnt));
 		} catch(\PDOException $e) {
-			throw new DBException('PDO could not execute query: ' . $e->getMessage(), 301, $stmnt->queryString);
+			throw new DBException('PDO could not execute query: ' . $e->getMessage(), $e->getCode(), $stmnt->queryString);
 		}
 	}
 
@@ -117,7 +117,7 @@ abstract class DB extends PDO {
 
 			parent::beginTransaction();
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not begin transaction: ' . $e->getMessage(), 302);
+			throw new DBException('PDO could not begin transaction: ' . $e->getMessage(), $e->getCode());
 		}
 	}
 
@@ -135,7 +135,7 @@ abstract class DB extends PDO {
 
 			$this->transactionName = null;
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not commit transaction: ' . $e->getMessage(), 303);
+			throw new DBException('PDO could not commit transaction: ' . $e->getMessage(), $e->getCode());
 		}
 	}
 

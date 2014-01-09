@@ -41,7 +41,7 @@ class DBMySQL extends DB {
 
 			$this->triggerListeners('onConnect', array($this, $this->dbConnect));
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not connect to the database ' . $dbConnect->getDatabase() . '@' . $dbConnect->getHost(), 401);
+			throw new DBException('PDO could not connect to the database ' . $dbConnect->getDatabase() . '@' . $dbConnect->getHost(), $e->getCode());
 		}
 	}
 
@@ -57,7 +57,7 @@ class DBMySQL extends DB {
 
 			return $stmnt;
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not prepare query: ' . $e->getMessage(), 402, $sql);
+			throw new DBException('PDO could not prepare query: ' . $e->getMessage(), $e->getCode(), $sql);
 		}
 	}
 
@@ -77,7 +77,7 @@ class DBMySQL extends DB {
 
 			return $stmnt->fetchAll(PDO::FETCH_OBJ);
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not execute select query: ' . $e->getMessage(), 403, $stmnt->queryString, $params);
+			throw new DBException('PDO could not execute select query: ' . $e->getMessage(), $e->getCode(), $stmnt->queryString, $params);
 		}
 	}
 
@@ -98,7 +98,7 @@ class DBMySQL extends DB {
 
 			return $stmnt->fetchAll(PDO::FETCH_CLASS, $className);
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not execute select query: ' . $e->getMessage(), 404, $stmnt->queryString, $params);
+			throw new DBException('PDO could not execute select query: ' . $e->getMessage(), $e->getCode(), $stmnt->queryString, $params);
 		}
 	}
 
@@ -120,7 +120,7 @@ class DBMySQL extends DB {
 
 			return $this->lastInsertId();
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not execute insert query: ' . $e->getMessage(), 405, $stmnt->queryString, $params);
+			throw new DBException('PDO could not execute insert query: ' . $e->getMessage(), $e->getCode(), $stmnt->queryString, $params);
 		}
 	}
 
@@ -142,7 +142,7 @@ class DBMySQL extends DB {
 
 			return $stmnt->rowCount();
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not execute update query: ' . $e->getMessage(), 406, $stmnt->queryString, $params);
+			throw new DBException('PDO could not execute update query: ' . $e->getMessage(), $e->getCode(), $stmnt->queryString, $params);
 		}
 	}
 
@@ -164,7 +164,7 @@ class DBMySQL extends DB {
 
 			return $stmnt->rowCount();
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not execute delete query: ' . $e->getMessage(), 407, $stmnt->queryString, $params);
+			throw new DBException('PDO could not execute delete query: ' . $e->getMessage(), $e->getCode(), $stmnt->queryString, $params);
 		}
 	}
 
