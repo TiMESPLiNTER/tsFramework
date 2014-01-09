@@ -53,11 +53,10 @@ class LocaleHandler {
 
 			$localeNames = $this->core->getSettings()->locales->$l->names;
 
-			foreach($localeNames as $ln) {
-				if(setlocale(LC_ALL, $ln) !== false) {
-					return $l;
-				}
-			}
+			if(setlocale(LC_ALL, $this->core->getSettings()->locales->$l->names) === false)
+				continue;
+
+			return $l;
 		}
 
 		return false;
