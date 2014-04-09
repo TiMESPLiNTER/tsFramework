@@ -3,9 +3,10 @@ namespace ch\timesplinter\common;
 
 /**
  * Some useful functions for string operations
+ * @package ch\timesplinter\common
+ *
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2013 by TiMESPLiNTER Webdevelopment
- * @version 1.0.0
  */
 class StringUtils {
 	/**
@@ -144,27 +145,44 @@ class StringUtils {
 	/**
 	 * @param string $str The string to urlify
 	 * @param int $maxLength The max length of the urlified string. 0 is no length limit.
+	 * @param string $printableCharReplacement Replacement char for incompatible printable chars
 	 * @return string The urlified string
 	 */
-	public static function urlify($str, $maxLength = 0) {
+	public static function urlify($str, $maxLength = 0, $printableCharReplacement = '-') {
 		$charMap = array(
-			' ' => '-', '.' => '', ':' => '', ',' => '', '?' => '', '!' => '', '´' => '', '"' => '',
-			'(' => '', ')' => '', '[' => '', ']' => '', '{' => '', '}' => '', '\'' => '',
-
-			// German
-			'ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue',
-
-			// Francais
-			'é' => 'e', 'è' => 'e', 'ê' => 'e', 'à' => 'a', 'â' => 'a', 'ç' => 'c', 'ï' => '', 'î' => '',
-
-			// Espanol
-			'ñ' => 'n', 'ó' => 'o', 'ú' => 'u', '¿' => '', '¡' => ''
+			'!' => null, '"' => null,
+			'#' => $printableCharReplacement . 'no' . $printableCharReplacement,
+			'$' => $printableCharReplacement . 'dollar' . $printableCharReplacement,
+			'%' => $printableCharReplacement . 'percentage' . $printableCharReplacement,
+			'&' => $printableCharReplacement . 'and'. $printableCharReplacement,
+			'\'' => null,
+			'(' => $printableCharReplacement,
+			')' => $printableCharReplacement,
+			'*' => null,
+			'+' => $printableCharReplacement . 'plus' . $printableCharReplacement,
+			',' => null, '/' => $printableCharReplacement,
+			':' => $printableCharReplacement,
+			';' => $printableCharReplacement,
+			'<' => null,
+			'=' => $printableCharReplacement . 'equals' . $printableCharReplacement,
+			'>' => null, '?' => null,
+			'@' => $printableCharReplacement . 'at' . $printableCharReplacement,
+			'[' => $printableCharReplacement,
+			']' => $printableCharReplacement,
+			'\\' => null, '^' => null, '`' => null,
+			'{' => $printableCharReplacement,
+			'}' => $printableCharReplacement,
+			'|' => $printableCharReplacement,
+			'~' => $printableCharReplacement,
+			"\t" => null, "\n" => null, "\r" => null
 		);
 
-		$urlifiedStr = str_replace(array_keys($charMap), $charMap, strtolower(trim($str)));
+		$asciiStr = iconv('ASCII', 'UTF-8', iconv('UTF-8', 'ASCII//TRANSLIT', trim($str)));
+
+		$urlifiedStr = str_replace(array_keys($charMap), $charMap, $asciiStr);
 
 		// Replace multiple dashes
-		$urlifiedStr = preg_replace('/[-]{2,}/', '-', $urlifiedStr);
+		$urlifiedStr = preg_replace('/[' . $printableCharReplacement . ']{2,}/', $printableCharReplacement, $urlifiedStr);
 
 		if($maxLength === 0)
 			return $urlifiedStr;

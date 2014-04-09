@@ -24,7 +24,7 @@ class DBFactory {
 
 	/**
 	 *
-	 * @param type $dbType
+	 * @param string $dbType
 	 * @param DBConnect $dbConnect
 	 * @return DB The DB object
 	 * @throws DBException

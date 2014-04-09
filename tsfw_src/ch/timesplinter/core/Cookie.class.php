@@ -3,9 +3,11 @@
 namespace ch\timesplinter\core;
 
 /**
+ * Class Cookie
+ * @package ch\timesplinter\core
+ *
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2013, TiMESPLiNTER Webdevelopment
- * @version 1.0.0
  */
 class Cookie {
 	private $name;

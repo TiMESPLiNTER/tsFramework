@@ -1,10 +1,12 @@
 <?php
+
 namespace ch\timesplinter\core;
 
 /**
- * Description of Observer
+ * Class Observer
  *
- * @author pascal91
+ * @author Pascal Münst
+ * @copyright (c) 2012, Pascal Münst
  */
 interface Observer {
 	public function update(Observable $observable, $arg);

@@ -1,6 +1,6 @@
 {
 	"domains": {
-		/*"tsfw.localhost": {
+		/*"example.com": {
 			 "localization": "browser",
 			"timezone": "Europe/Zurich",
 			"environment": "dev",

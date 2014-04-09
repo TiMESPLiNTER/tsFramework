@@ -3,11 +3,11 @@
 namespace ch\timesplinter\autoloader;
 
 /**
- * automatically loads requested classes if they exist in classes (sub-)directory
+ * Automatically loads requested classes if they exist in classes (sub-)directory
+ * @package ch\timesplinter\autoloader
  *
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2012, TiMESPLiNTER
- * @version	1.0.0
  */
 class Autoloader {
 	const MODE_UNDERSCORE = 'underscore';
@@ -18,9 +18,11 @@ class Autoloader {
 	private $cacheFile;
 
 	private $loadPaths;
+	private $usedPackages;
 
 	public function __construct($cacheFilePath = null) {
 		$this->loadPaths = array();
+		$this->usedPackages = array();
 		$this->cachedClasses = array();
 		$this->cachedClassesChanged = false;
 		$this->cacheFile = $cacheFilePath;
@@ -69,6 +71,8 @@ class Autoloader {
 	 * Autoloads a class from the cache file or the file system
 	 * @param $class_name string Name of the class to be loaded
 	 * @throws AutoloaderException
+	 * @throws \Exception
+	 * @return bool
 	 */
 	private function doAutoload($class_name) {
 		/*if(class_exists($class_name, false) === true)
@@ -111,13 +115,14 @@ class Autoloader {
 				}
 
 				$this->doInclude($includePath, $class_name);
+
 				return true;
 			}
 		}
 
 		//echo $classPath , '<br>';
 		//throw new AutoloaderException('Could not load class: ' . $class_name);
-		throw new \Exception('Could not find class ' . $class_name . '. Searched in: ' . implode(", \n", $searchedPaths));
+		//throw new \Exception('Could not find class ' . $class_name . '. Searched in: ' . implode(", \n", $searchedPaths));
 
 		return false;
 	}

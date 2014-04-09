@@ -86,13 +86,14 @@ abstract class DB extends PDO {
 	 * @return DBConnect
 	 */
 	abstract public function getDbConnect();
-	
+
 	/**
-	 * This method does the same as execute() of a PDOStatement but it fixes a 
-	 * known issue of php that e.x. floats in some locale-settings contains a 
-	 * comma instead of a point as decimal seperator. It sets LC_NUMERIC to 
+	 * This method does the same as execute() of a PDOStatement but it fixes a
+	 * known issue of php that e.x. floats in some locale-settings contains a
+	 * comma instead of a point as decimal seperator. It sets LC_NUMERIC to
 	 * us_US, executes the query and sets the LC_NUMERIC back to the old locale.
 	 * @param PDOStatement $stmnt The statement to execute
+	 * @throws DBException
 	 */
 	public function execute(PDOStatement $stmnt) {
 		try {
@@ -105,7 +106,7 @@ abstract class DB extends PDO {
 
 			$this->triggerListeners('onExecute', array($this, $stmnt));
 		} catch(\PDOException $e) {
-			throw new DBException('PDO could not execute query: ' . $e->getMessage(), $e->getCode(), $stmnt->queryString);
+			throw new DBException($e->errorInfo[2], $e->errorInfo[1], $stmnt->queryString);
 		}
 	}
 

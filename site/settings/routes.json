@@ -2,21 +2,23 @@
 	"routes": {
 		"home": {
 			"pattern": "/",
-			"controller": "ch:timesplinter:controller:StaticPageController:getPage",
-			"method": "GET"
-
+			"methods": {
+				"GET": "ch:timesplinter:controller:StaticPageController:getPage"
+			}
 		},
 
         "basic-usage": {
             "pattern": "/basic-usage",
-            "controller": "ch:timesplinter:controller:StaticPageController:getPage",
-            "method": "GET"
+            "methods": {
+	            "GET": "ch:timesplinter:controller:StaticPageController:getPage"
+            }
         },
 		
 		"advanced": {
             "pattern": "/advanced",
-            "controller": "ch:timesplinter:controller:TestController:getTplEngineTest",
-            "method": "GET"
+            "methods": {
+	            "GET": "ch:timesplinter:controller:TestController:getTplEngineTest"
+            }
         }
 	}
 }

@@ -7,14 +7,20 @@ use ch\timesplinter\core\JSONException;
 use \Exception;
 
 /**
- * Description of JsonUtils
+ * Class JsonUtils
+ * @package ch\timesplinter\common
  *
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2013 by TiMESPLiNTER Webdevelopment
- * @version 1.0.0
  */
 class JsonUtils {
-
+	/**
+	 * @param string $json Encoded JSON string
+	 * @param bool $toAssoc
+	 * @param bool $minified
+	 * @return mixed
+	 * @throws \ch\timesplinter\core\JSONException
+	 */
 	public static function decode($json, $toAssoc = false, $minified = true)  {
 		if($minified === false) {
 			$json = self::minify($json);
@@ -47,6 +53,13 @@ class JsonUtils {
         return $result;
     }
 
+	/**
+	 * @param string $filePath Path to file with encoded JSON
+	 * @param bool $toAssoc
+	 * @param bool $minified
+	 * @return mixed
+	 * @throws \ch\timesplinter\core\JSONException
+	 */
 	public static function decodeFile($filePath, $toAssoc = false, $minified = true) {
 		if(file_exists($filePath) === false)
 			throw new JSONException('JSON-File does not exist: ' . $filePath);
@@ -116,7 +129,6 @@ class JsonUtils {
 		$new_str[] = $rc;
 		return implode(null, $new_str);
 	}
-
 }
 
 /* EOF */

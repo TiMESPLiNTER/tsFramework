@@ -5,7 +5,7 @@
 	"domain": {
 		"localization": "browser",
 		"timezone": "Europe/Zurich", /* locale, geolocate or valid timezone */
-		"environment": "live",
+		"environment": "dev",
 		"template": "default",
 		"startroute": "/"
 	}

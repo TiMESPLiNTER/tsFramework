@@ -1,8 +1,6 @@
 <?php
 namespace ch\timesplinter\auth;
 
-use ch\timesplinter\auth\AuthHandler;
-
 /**
  * This class implements a AuthHandler based on the HTTP_AUTH_DIGEST method
  * username and passwords are stored in a text file. 
@@ -10,10 +8,10 @@ use ch\timesplinter\auth\AuthHandler;
  * IMPORTANT: Please place the username/password-file outside of the www-root 
  * (for your own safety!). If this is not possible please make sure the file is
  * at least not accessable over external requests to your server!
+ * @package ch\timesplinter\auth
  *
- * @author Pascal Münst (Actra AG)
- * @copyright Copyright (c) 2011, Actra AG
- * @version
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2012, TiMESPLiNTER Webdevelopment
  */
 class AuthHandlerHttp extends AuthHandler {
 	/** @var ErrorHandler */
@@ -61,7 +59,7 @@ class AuthHandlerHttp extends AuthHandler {
 		return $this->loggedIn;
 	}
 
-	public function checkLogin($username, $password) {
+	public function checkLogin($email, $password) {
 		// Analysieren der Variable PHP_AUTH_DIGEST
 		$daten = self::http_digest_parse($_SERVER['PHP_AUTH_DIGEST']);
 				
@@ -120,4 +118,4 @@ class AuthHandlerHttp extends AuthHandler {
 	}
 }
 
-?>
+/* EOF */

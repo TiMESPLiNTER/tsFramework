@@ -64,6 +64,7 @@ class TemplateEngine {
 	private function getDefaultCustomTags() {
 		return array(
 			'text' => 'ch\timesplinter\customtags\TextTag',
+			'print' => 'ch\timesplinter\customtags\PrintTag',
 			'checkboxOptions' => 'ch\timesplinter\customtags\CheckboxOptionsTag',
 			'checkbox' => 'ch\timesplinter\customtags\CheckboxTag',
 			'date' => 'ch\timesplinter\customtags\DateTag',
@@ -583,7 +584,7 @@ class TemplateEngine {
 					if($getProperty->isPublic() === true) {
 						$varData = $varData->$part;
 					} else {
-						$getterMethodName = null;
+						/*$getterMethodName = null;
 
 						foreach($this->getterMethodPrefixes as $mp) {
 							$getterMethodName = $mp . ucfirst($part);
@@ -596,6 +597,9 @@ class TemplateEngine {
 
 						if($getterMethodName === null)
 							throw new TemplateEngineException('Could not access private property "' . $part . '". Please provide a getter method');
+							*/
+						if(($getterMethodName = $this->doesGetterMethodExists($varData, $part)) === false)
+							throw new TemplateEngineException('Could not access private property "' . $part . '". Please provide a getter method');
 
 						$varData = call_user_func(array($varData, $getterMethodName));
 					}
@@ -604,7 +608,9 @@ class TemplateEngine {
 						?call_user_func(array($varData, 'get' . ucfirst($part)))
 						:$varData->$part;*/
 				} elseif(method_exists($varData, $part) === true) {
-					$varData = call_user_func(array($varData, ucfirst($part)));
+					$varData = call_user_func(array($varData, $part)); //uc_first()
+				} elseif(($getterMethodName = $this->doesGetterMethodExists($varData, $part)) !== false) {
+					$varData = call_user_func(array($varData, $getterMethodName)); //uc_first()
 				} else {
 					throw new TemplateEngineException('Don\'t know how to handle selector part "' . $part . '"');
 				}
@@ -629,6 +635,21 @@ class TemplateEngine {
 		}
 
 		return $varData;
+	}
+
+	private function doesGetterMethodExists($context, $part) {
+		$getterMethodName = null;
+
+		foreach($this->getterMethodPrefixes as $mp) {
+			$getterMethodName = $mp . ucfirst($part);
+
+			if(method_exists($context, $getterMethodName) === true && is_callable(array($context, $getterMethodName)) === true)
+				return $getterMethodName;
+
+			$getterMethodName = null;
+		}
+
+		return false;
 	}
 }
 

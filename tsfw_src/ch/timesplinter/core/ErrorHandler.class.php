@@ -7,10 +7,10 @@ use \Exception;
 
 /**
  * Description of ErrorHandler
+ * @package ch\timesplinter\core
  *
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2013, TiMESPLiNTER
- * @version 1.0.0
  */
 class ErrorHandler {
 	private $core;
@@ -25,17 +25,17 @@ class ErrorHandler {
 	}
 	
 	/**
-	 * 
-	 * @param type $error_number
-	 * @param type $error
-	 * @param type $error_file
-	 * @param type $error_line
+	 * Coverts thrown PHP error into an exception
+	 * @param int $error_number
+	 * @param string $error
+	 * @param string $error_file
+	 * @param int $error_line
 	 * @throws PHPException
 	 */
 	public function handlePHPError($error_number,$error,$error_file,$error_line) {
 		throw new PHPException($error_number, $error, $error_file, $error_line);
 	}
-	
+
 	/**
 	 * Default stub for print an exception
 	 * @param Exception $e
@@ -51,7 +51,7 @@ class ErrorHandler {
 			$content = null;
 
 			$environment = $this->core->getCurrentDomain()->environment;
-			$httpErrroCode = ($e instanceof HttpException)?$e->getCode():500;
+			$httpErrorCode = ($e instanceof HttpException)?$e->getCode():500;
 			$exceptionStr = null;
 
 			if($this->core->getSettings()->core->environments->$environment->debug === true) {
@@ -67,10 +67,10 @@ class ErrorHandler {
 				$exceptionStr .= '</pre>';
 			}
 
-			$errorStr = $httpErrroCode . ' ' . HttpResponse::getHttpStatusString($httpErrroCode);
+			$errorStr = $httpErrorCode . ' ' . HttpResponse::getHttpStatusString($httpErrorCode);
 			$content = "<!doctype html>\n<html>\n<head>\n<title>" . $errorStr . "</title>\n</head>\n<body>\n<h1>" . $errorStr . "</h1>" . $exceptionStr . "\n</body>\n</html>";
 
-			$httpResponse = new HttpResponse($httpErrroCode, $content);
+			$httpResponse = new HttpResponse($httpErrorCode, $content);
 		}
 
 		$httpResponse->send();

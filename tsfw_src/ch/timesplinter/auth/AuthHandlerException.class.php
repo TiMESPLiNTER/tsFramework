@@ -1,15 +1,16 @@
 <?php
+
 namespace ch\timesplinter\auth;
 
 /**
- * Description of AuthHandlerException
+ * Class AuthHandlerException
+ * @package ch\timesplinter\auth
  *
- * @author Pascal Münst (Actra AG)
- * @copyright
- * @version
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2012, TiMESPLiNTER Webdevelopment
  */
 class AuthHandlerException extends Exception {
 	
 }
 
-?>
+/* EOF */

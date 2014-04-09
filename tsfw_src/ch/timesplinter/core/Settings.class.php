@@ -12,7 +12,7 @@ class Settings {
 	private $cacheFile;
 	private $cacheChanged;
 	private $cachedSettingsFiles;
-	private $cachedFiletime;
+	private $cachedFileTime;
 	private $resourcesChecked;
 	
 	public function __construct($settingsPath, $cachePath, array $replace = array()) {
@@ -45,7 +45,7 @@ class Settings {
 		$cachedData = unserialize($cacheFileContent);
 
 		$this->settings = $cachedData['settings'];
-		$this->cachedFiletime = $cachedData['cachetime'];
+		$this->cachedFileTime = $cachedData['cachetime'];
 
 		$this->cachedSettingsFiles = $cachedData['files'];
 	}
@@ -122,7 +122,7 @@ class Settings {
 
 	public function __get($property) {
 		/* property not exist OR cache file is older than the json file here */
-		if(!isset($this->settings->$property) || filemtime($this->settingsPath . $property . '.json') > $this->cachedFiletime) {
+		if(!isset($this->settings->$property) || filemtime($this->settingsPath . $property . '.json') > $this->cachedFileTime) {
 			$this->settings->$property = $this->loadSettingsFromFile($property . '.json');
 			$this->cacheChanged = true;
 		}
@@ -131,7 +131,7 @@ class Settings {
 			$this->resourcesChecked[] = $property;
 
 			foreach($this->settings->$property->{'@resources'} as $rsc) {
-				if(filemtime($this->settingsPath . $rsc) > $this->cachedFiletime) {
+				if(filemtime($this->settingsPath . $rsc) > $this->cachedFileTime) {
 					$this->settings->$property = $this->loadSettingsFromFile($property . '.json');
 					$this->cacheChanged = true;
 

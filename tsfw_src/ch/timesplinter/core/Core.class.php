@@ -10,9 +10,11 @@ use \DateTime;
 use ch\timesplinter\core\FrameworkLogger;
 
 /**
- * Description of Core
+ * Class Core
+ * @package ch\timesplinter\core
  *
- * @author pascal91
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright 2012, TiMESPLiNTER Webdevelopment
  */
 class Core {
 	const CACHE_DIR = 'cache';
@@ -79,7 +81,7 @@ class Core {
 
 
 		$this->localeHandler = new LocaleHandler($this);
-		$this->sessionHandler = new SessionHandler($this);
+		$this->sessionHandler = new SessionHandler();
 		$this->logger = FrameworkLoggerFactory::getLogger($this);
 
 		$autoloaders = spl_autoload_functions();
@@ -190,10 +192,10 @@ class Core {
 	public function processPage($routes) {
 		$httpRequestMethod = $this->httpRequest->getRequestMethod();
 
-		if(isset($routes[$httpRequestMethod]) === false)
-			throw new HttpException('Method ' . $httpRequestMethod . ' is not allowed for this path. Use ' . implode(', ', array_keys($routes)) . ' instead', 405);
+		$this->route = RouteUtils::getFirstRouteWhichHasMethod($routes, $httpRequestMethod);
 
-		$this->route = $routes[$httpRequestMethod];
+		if($this->route === null)
+			throw new HttpException('Method ' . $httpRequestMethod . ' is not allowed for this path. Use ' . implode(', ', array_keys($routes)) . ' instead', 405);
 
 		if($this->route->sslRequired === true && $this->httpRequest->getProtocol() !== HttpRequest::PROTOCOL_HTTPS)
 			RequestHandler::redirect($this->httpRequest->getURL(HttpRequest::PROTOCOL_HTTPS));
@@ -201,17 +203,32 @@ class Core {
 			RequestHandler::redirect($this->httpRequest->getURL(HttpRequest::PROTOCOL_HTTP));
 
 		$response = null;
+		$routeMethod = $this->route->methods[$httpRequestMethod];
 
-		$controllerInstance = new $this->route->controllerClass($this, $this->httpRequest, $this->route);
-		$responseCallback = array($controllerInstance, $this->route->controllerMethod);
+		if(class_exists($routeMethod->controllerClass) === false)
+			throw new CoreException('Could not find class: ' . $routeMethod->controllerClass);
+
+		$controllerInstance = new $routeMethod->controllerClass($this, $this->httpRequest, $this->route);
+		$responseCallback = array($controllerInstance, $routeMethod->controllerMethod);
 
 		if(is_callable($responseCallback, false) === false)
-			throw new CoreException('Could not call: ' . $this->route->controllerClass . '->' . $this->route->controllerMethod . '. This is no valid callback! Maybe you attempt to call a static method or you propably misspelled the "controller:method" name');
+			throw new CoreException('Could not call: ' . $routeMethod->controllerClass . '->' . $routeMethod->controllerMethod . '. This is no valid callback! Maybe you attempt to call a static method or you propably misspelled the "controller:method" name');
 
-		$response = call_user_func($responseCallback);
+		try {
+			$response = call_user_func($responseCallback);
+		} catch(\Exception $e) {
+			if(($controllerInstance instanceof HandleHttpError) === false)
+				throw $e;
+
+			$httpStatusCode = ($e instanceof HttpException)?$e->getCode():500;
+
+			/** @var HttpResponse $response */
+			$response = $controllerInstance->displayHttpError($e, $httpStatusCode);
+			$response->setHttpResponseCode($httpStatusCode);
+		}
 
 		if(($response instanceof HttpResponse) === false)
-			throw new CoreException('Return value of the controller method "' . $this->route->controllerClass . '->' . $this->route->controllerMethod . '" is not an object of type HttpResponse but of ' . (is_object($response)?get_class($response):'a php native type'));
+			throw new CoreException('Return value of the controller method "' . $routeMethod->controllerClass . '->' . $routeMethod->controllerMethod . '" is not an object of type HttpResponse but of ' . (is_object($response)?get_class($response):'a php native type'));
 
 		return $response;
 	}

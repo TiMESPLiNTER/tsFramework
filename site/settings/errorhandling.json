@@ -5,7 +5,7 @@
 	"report_level": 32767,
 
     /* here you can add controllers for each error code */
-    "controller":  "ch:timesplinter:controller:StaticPageController:getErrorPage",
+    /*"controller":  "ch:timesplinter:controller:StaticPageController:getErrorPage",*/
 
     "messages": {
         "404": {

@@ -2,11 +2,10 @@
 namespace ch\timesplinter\core;
 
 /**
- * Description of HttpResponse
+ * Class HttpResponse
  *
- * @author Pascal Münst <dev@timesplinter.ch>
- * @copyright (c) 2012, Pascal Münst
- * @version 1.0
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright (c) 2012, TiMESPLiNTER Webdevelopment
  */
 class HttpResponse {
 	private static $STATUS_CODES = array(

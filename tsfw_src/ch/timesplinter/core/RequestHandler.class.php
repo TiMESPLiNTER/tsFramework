@@ -5,15 +5,10 @@ namespace ch\timesplinter\core;
 /**
  * Description of RequestHandler
  *
- * @author Pascal Münst
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2013, TiMESPLiNTER Webdevelopment
  */
 class RequestHandler {
-	private $logger;
-	
-    public function __construct() {
-		$this->logger = LoggerFactory::getLoggerByName('dev', $this);
-    }
-	
     public static function redirect($uri) {
 		$headers = array(
 			 'Location' => $uri
@@ -22,6 +17,20 @@ class RequestHandler {
 		$httpResponse = new HttpResponse(301, null, $headers);
 		$httpResponse->send();
 		
+		exit;
+	}
+
+	public static function redirectHttpRequestToSSL(HttpRequest $httpRequest) {
+		if($httpRequest->getProtocol() === HttpRequest::PROTOCOL_HTTPS)
+			return;
+
+		$headers = array(
+			'Location' => 'https://' . $httpRequest->getHost() . $httpRequest->getURI()
+		);
+
+		$httpResponse = new HttpResponse(301, null, $headers);
+		$httpResponse->send();
+
 		exit;
 	}
 }

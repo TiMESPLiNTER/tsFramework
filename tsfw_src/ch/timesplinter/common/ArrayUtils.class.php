@@ -1,15 +1,14 @@
 <?php
 
-/**
- * Some useful functions for array operations
- * @author Pascal Muenst <dev@timesplinter.ch>
- * @copyright Copyright (c) 2013, TiMESPLiNTER Webdevelopment
- * @version 1.0.0
- */
-
 namespace ch\timesplinter\common;
 
-
+/**
+ * Some useful functions for array operations
+ * @package ch\timesplinter\common
+ *
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2013, TiMESPLiNTER Webdevelopment
+ */
 class ArrayUtils {
 	public static function getLevelFromArray($array, $levelFrom, $levelCount = 1) {
 		$newArray = array();

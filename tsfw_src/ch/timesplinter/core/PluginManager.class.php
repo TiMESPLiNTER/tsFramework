@@ -26,18 +26,19 @@ class PluginManager {
 
 	/**
 	 * Invokes a specific plugin hook
-	 * @param string $hookname The name of the hook to invoke
-	 * @param mixed $parameter,... Paramters for the hook
+	 * @param string $hookName The name of the hook to invoke
 	 */
-	public function invokePluginHook($hookname) {
+	public function invokePluginHook($hookName) {
 		$args = func_get_args();
 		array_shift($args);
 
 		foreach($this->plugins as $plugin) {
-			if(method_exists($plugin, $hookname) === false)
+			if(method_exists($plugin, $hookName) === false)
 				continue;
 
-			call_user_func_array(array($plugin, $hookname), $args);
+			call_user_func_array(array($plugin, $hookName), $args);
 		}
 	}
 }
+
+/* EOF */

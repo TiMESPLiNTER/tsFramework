@@ -27,6 +27,34 @@ abstract class FrameworkController {
 		
 		$this->currentDomain = $this->core->getCurrentDomain();
 	}
+
+	/**
+	 * @return \ch\timesplinter\core\Core
+	 */
+	public function getCore() {
+		return $this->core;
+	}
+
+	/**
+	 * @return \ch\timesplinter\core\HttpRequest
+	 */
+	public function getHttpRequest() {
+		return $this->httpRequest;
+	}
+
+	/**
+	 * @return \ch\timesplinter\core\Route
+	 */
+	public function getRoute() {
+		return $this->route;
+	}
+
+	/**
+	 * @return null|string
+	 */
+	public function getCurrentDomain() {
+		return $this->currentDomain;
+	}
 }
 
 /* EOF */

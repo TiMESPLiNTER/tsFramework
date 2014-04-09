@@ -3,41 +3,38 @@
 namespace ch\timesplinter\core;
 
 /**
- * session handler
+ * Class SessionHandler
+ * @package ch\timesplinter\core
  *
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2013, TiMESPLiNTER Webdevelopment
- * @version 1.0.0
  */
 class SessionHandler {
-	private $core; 
-	
 	private $started;
 	private $name;
 	private $ID;
 
-	function __construct(Core $core) {
-		$this->core = $core;
-		
+	function __construct() {
 		$this->started = false;
 		$this->name = null;
 		$this->ID = null;
 	}
 
+	/**
+	 * @throws CoreException
+	 */
 	public function start() {
 		if ($this->started === true)
 			return;
 
-		if(session_start() === false) {
+		if(session_start() === false)
 			throw new CoreException('Could not start session');
-		}
 
-		$remoteAddr = (isset($_SERVER['REMOTE_ADDR'])) ? $_SERVER['REMOTE_ADDR'] : null;
+		$remoteAddress = (isset($_SERVER['REMOTE_ADDR'])) ? $_SERVER['REMOTE_ADDR'] : null;
 		$userAgent = (isset($_SERVER['HTTP_USER_AGENT'])) ? $_SERVER['HTTP_USER_AGENT'] : null;
 
-		if (!isset($_SESSION['TRUSTED_REMOTE_ADDR']) || $_SESSION['TRUSTED_REMOTE_ADDR'] !== $remoteAddr || !isset($_SESSION['PREV_USERAGENT']) || $_SESSION['PREV_USERAGENT'] !== $userAgent) {
+		if (!isset($_SESSION['TRUSTED_REMOTE_ADDR']) || $_SESSION['TRUSTED_REMOTE_ADDR'] !== $remoteAddress || !isset($_SESSION['PREV_USERAGENT']) || $_SESSION['PREV_USERAGENT'] !== $userAgent)
 			$this->regenerateID();
-		}
 
 		$this->started = true;
 	}

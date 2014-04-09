@@ -21,10 +21,8 @@ class Route {
 	public $pattern;
 	public $sslRequired;
 	public $sslForbidden;
-	public $method;
-	public $controllerClass;
-	public $controllerMethod;
-	private $params;
+	public $methods;
+	protected $params;
 
 	public function __construct($params = array()) {
 		$this->params = $params;

@@ -45,7 +45,7 @@ p, h1, h2, h3, h4, h5, h6 {margin: 0 0 1em;}
 
 .wrapper-main {
 	margin: 0 auto;
-	width: 860px;
+	width: 940px;
 }
 
 .header {
@@ -236,42 +236,13 @@ h1 a:hover {
 }
 
 code {
-    display: block;
-    white-space: pre;
-    font-size: 12px;
-    background: #eee;
-    padding: 10px;
-    border-left: 4px solid #bbb;
-    margin: 0 0 15px 0;
-}
-
-.error-big {
-    float: left;
-    font-size: 100px;
-    line-height: 70px;
-    border-right: 1px solid #ccc;
-    margin: 0 0 20px 0;
-    padding: 10px 25px 15px 0;
-    color: #aaa;
-    text-shadow: 0 1px 0 #f4f4f4;
-}
-
-.error-big span {
-    display: block;
-    font-size: 52px;
-    text-transform: uppercase;
-    line-height: 52px;
-}
-
-.error-content {
-    float: left;
-    border-left: 1px solid #ccc;
-    padding: 10px 0 0 25px;
-    margin: 0 0 0 -1px;
-}
-
-.error-site {
-    margin: -10px 0 0 0;
+	display: block;
+	white-space: pre;
+	font-size: 12px;
+	background: #eee;
+	padding: 10px;
+	border-left: 4px solid #bbb;
+	margin: 0 0 15px 0;
 }
 
 /* clearfix */

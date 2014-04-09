@@ -1,185 +1,118 @@
 <?php
+
 namespace ch\timesplinter\auth;
 
 use ch\timesplinter\auth\AuthHandler;
-use ch\timesplinter\db\DBException;
 use ch\timesplinter\core\SessionHandler;
 use ch\timesplinter\db\DB;
+use ch\timesplinter\db\DBException;
+
 /**
- * Required packages: backend
+ * Class AuthHandlerDB
+ * @package ch\timesplinter\auth
  *
- * @author Pascal Münst
- * @copyright 2011 Actra AG
- * @version 1.0
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2012, TiMESPLiNTER Webdevelopment
  */
 class AuthHandlerDB extends AuthHandler {
 	const HASH_TYPE = 'sha256';
 	const LOGIN_SITE = '/login.html';
-	const DEFAULT_SITE_AFTER_LOGIN = '/home.html?n=uebersicht';
+	const DEFAULT_SITE_AFTER_LOGIN = '/';
 
 	protected $userId;
 	/* @var $db DB */
 	protected $db;
 	/** @var SessionHandler $sessionHandler */
 	protected $sessionHandler;
-	
+
+	protected $onLoginSuccessCallback;
+
 	public function __construct(DB $db, SessionHandler $sessionHandler) {
 		parent::__construct();
 
 		$this->db = $db;
 		$this->sessionHandler = $sessionHandler;
 		$this->userId = (isset($_SESSION['userid']))?$_SESSION['userid']:0;
-		
-		if($this->loggedIn === true)
-			$this->loadUserPopo();
 	}
 	
 	public static function encryptPassword($password, $salt) {	
 		return hash(self::HASH_TYPE, $salt . $password);
 	}
 	
-	public function checkLogin($username, $password, $callbackOnSuccess = null) {
-		try {
-			$stmntLogin = $this->db->prepare("
-				SELECT ID
-					,email
-					,password
-					,active
-					,salt
-					,registered
-					,confirmed
-					,wronglogins
-					,lastlogin
-					,token
-				FROM login 
-				WHERE email = ? 
-				AND confirmed IS NOT NULL
-			");
-			$loginRes = $this->db->select($stmntLogin, array($username));
-			
-			if(count($loginRes) <= 0)
-				return false;
-			
-			$this->loginPopo = $loginRes[0];
-			
-			if($this->loginPopo->wronglogins >= 5)
-				return false;
-			
-			$inputPwHash = $this->encryptPassword($password, $this->loginPopo->salt);
-			
-			if($inputPwHash !== $this->loginPopo->password) {
-				// Woring login update
-				++$this->loginPopo->wronglogins;
-				
-				$stmntUpdateWrongLogins = $this->db->prepare("UPDATE login SET wronglogins = ? WHERE ID = ?");
-				$this->db->update($stmntUpdateWrongLogins, array(
-					 $this->loginPopo->wronglogins
-					,$this->loginPopo->ID
-				));
-				
-				return false;
-			}
-			
-			if($this->loginPopo->active != 1)
-				return false;
-			
-			$this->loginPopo->rightgroups = $this->loadRightGroups($this->loginPopo->ID);
-			
-			// Security!
-			$this->sessionHandler->regenerateID();
-		
-			// Alles i.O.
-			$this->loggedIn = $_SESSION['loggedin'] = true;
-			$this->userId = $_SESSION['userid'] = $this->loginPopo->ID;
-
-			// Save old last login date
-			$_SESSION['lastlogin'] = $this->loginPopo->lastlogin;
-
-			// Update new lastlogin
-			$lastLoginUpdateStmnt = $this->db->prepare("UPDATE login SET lastlogin = NOW() WHERE ID = ?");
-			$this->db->update($lastLoginUpdateStmnt, array($this->userId));
-
-			// Reset wrong login counter
-			//$this->loginPopo->wronglogins = 0;
-			//$this->loginPopo->lastlogin = date('Y-m-d H:i:s');
-			$stmntUpdateLogin = $this->db->prepare("UPDATE login SET wronglogins = 0 AND lastlogin = NOW() WHERE ID = ?");
-			$this->db->update($stmntUpdateLogin, array($this->loginPopo->ID));
-			
-			if($callbackOnSuccess !== null && is_array($callbackOnSuccess) === true) {
-				call_user_func_array($callbackOnSuccess, array($this));
-			}
-			
-			// Go to the page the user came from
-			return true;
-		} catch(DBException $e) {
-			$this->logger->error('Bad db query while login', $e);
-			return false;
-		}
-		
-		return false;
-	}
-	
-	private function loadRightGroups($userID) {
-		// Load grps
-		$stmntLoginGroups = $this->db->prepare("
-			SELECT loginIDFK
-				   ,rightgroupIDFK
-				   ,datefrom
-				   ,dateto
-				   ,groupkey
-				   ,groupname
-				   ,root
-			FROM login_has_rightgroup lr
-			LEFT JOIN rightgroup r ON r.ID = lr.rightgroupIDFK
-			WHERE loginIDFK = ? 
-			  AND datefrom <= NOW() 
-			  AND (dateto >= NOW() OR dateto IS NULL)
+	public function checkLogin($email, $password) {
+		$stmntLogin = $this->db->prepare("
+			SELECT ID
+				,email
+				,password
+				,active
+				,salt
+				,registered
+				,confirmed
+				,wronglogins
+				,lastlogin
+				,token
+			FROM login
+			WHERE email = ?
+			AND confirmed IS NOT NULL
 		");
-		
-		return $this->db->select($stmntLoginGroups, array($userID));
-	}
+		$loginRes = $this->db->select($stmntLogin, array($email));
 
-	/**
-	 * If a group as "root" setted to "1" then it's admin and has every rightgroup
-	 * @param string $userGroup Key of the usergroup
-	 * @return bool
-	 */
-	public function hasRightgroup($userGroup) {
-		if($this->loginPopo === null)
-			return ($userGroup == 'visitor');
-		
-		if($userGroup == 'user' && $this->loggedIn === true)
-			return true;
-		
-		$groupEntries = $this->loginPopo->rightgroups;
-		
-		if($userGroup === 'visitor' && count($groupEntries) === 0)
-			return true;
-		
-		foreach($groupEntries as $rg) {
-			if($userGroup === $rg->groupkey || $rg->root == 1)
-				return true;
-		}
-		
-		return false;
-	}
-
-	public function hasRootAccess() {
-		if($this->loginPopo === null)
+		if(count($loginRes) <= 0)
 			return false;
 
-		foreach($this->loginPopo->rightgroups as $rg) {
-			if($rg->root == 1)
-				return true;
+		$this->loginPopo = $loginRes[0];
+
+		if($this->loginPopo->wronglogins >= 5)
+			return false;
+
+		$inputPwHash = $this->encryptPassword($password, $this->loginPopo->salt);
+
+		if($inputPwHash !== $this->loginPopo->password) {
+			// Wrong login update
+			++$this->loginPopo->wronglogins;
+
+			$stmntUpdateWrongLogins = $this->db->prepare("UPDATE login SET wronglogins = ? WHERE ID = ?");
+			$this->db->update($stmntUpdateWrongLogins, array(
+				 $this->loginPopo->wronglogins
+				,$this->loginPopo->ID
+			));
+
+			return false;
 		}
 
-		return false;
+		if($this->loginPopo->active != 1)
+			return false;
+
+		// Security!
+		$this->sessionHandler->regenerateID();
+
+		// Alles i.O.
+		$this->loggedIn = $_SESSION['loggedin'] = true;
+		$this->userId = $_SESSION['userid'] = $this->loginPopo->ID;
+
+		// Save old last login date
+		$_SESSION['lastlogin'] = $this->loginPopo->lastlogin;
+
+		// Update new lastlogin
+		$lastLoginUpdateStmnt = $this->db->prepare("UPDATE login SET lastlogin = NOW() WHERE ID = ?");
+		$this->db->update($lastLoginUpdateStmnt, array($this->userId));
+
+		// Reset wrong login counter
+		//$this->loginPopo->wronglogins = 0;
+		//$this->loginPopo->lastlogin = date('Y-m-d H:i:s');
+		$stmntUpdateLogin = $this->db->prepare("UPDATE login SET wronglogins = 0 AND lastlogin = NOW() WHERE ID = ?");
+		$this->db->update($stmntUpdateLogin, array($this->loginPopo->ID));
+
+		if($this->onLoginSuccessCallback !== null)
+			call_user_func_array($this->onLoginSuccessCallback, array($this));
+
+		// Go to the page the user came from
+		return true;
 	}
-		
+
 	protected function loadUserPopo() {
 		$stmntLogin = $this->db->prepare(
 				"SELECT ID
-					   ,username
 					   ,email
 					   ,password
 					   ,active
@@ -209,15 +142,17 @@ class AuthHandlerDB extends AuthHandler {
 		}
 				
 		$this->loginPopo = $loginRes[0];
-		$this->loginPopo->rightgroups = $this->loadRightGroups($this->loginPopo->ID);
+
 		// Restore old last login date from current session
 		$this->loginPopo->lastlogin = array_key_exists('lastlogin', $_SESSION)?$_SESSION['lastlogin']:null;
+
+		if($this->onUserDataLoadCallback !== null)
+			call_user_func_array($this->onUserDataLoadCallback, array($this->loginPopo));
 	}
 	
 	public function signUp($login) {
 		$stmntSingup = $this->db->prepare("
 			INSERT INTO login SET
-				username = ?,
 				email = ?,
 				password = ?,
 				registeredby = ?,
@@ -236,7 +171,6 @@ class AuthHandlerDB extends AuthHandler {
 			$this->db->beginTransaction();
 			
 			$userID = $this->db->insert($stmntSingup, array(
-				isset($login->username)?$login->username:null,
 				$login->email,
 				isset($login->password)?$this->encryptPassword($login->password, $salt):null,
 				isset($login->registeredBy)?$login->registeredBy:null,
@@ -294,6 +228,8 @@ class AuthHandlerDB extends AuthHandler {
 
 		$this->loggedIn = false;
 		$this->loginPopo = null;
+
+		return true;
 	}
 
 	/**
@@ -309,7 +245,8 @@ class AuthHandlerDB extends AuthHandler {
 	}
 
 	/**
-	 * @param $email The email address of the account the token should be generated
+	 * @param $userID
+	 * @internal param \ch\timesplinter\auth\The $email email address of the account the token should be generated
 	 * @return string The token
 	 */
 	public function generateToken($userID) {
@@ -335,8 +272,26 @@ class AuthHandlerDB extends AuthHandler {
 		return (count($resTokenCheck) > 0);
 	}
 
+	public function resetPassword($userId, $password) {
+		$stmntResetPassword = $this->db->prepare("
+			UPDATE login SET password = ?, salt = ?, token = NULL, wronglogins = 0 WHERE ID = ?
+		");
+
+		$salt = $this->generateSalt();
+
+		$resResetPassword = $this->db->update($stmntResetPassword, array(
+			$this->encryptPassword($password, $salt), $salt, $userId
+		));
+
+		return ($resResetPassword > 0);
+	}
+
 	public function getUserID() {
 		return $this->userId;
+	}
+
+	public function addOnLoginSuccessCallback(array $onLoginSuccessCallback) {
+		$this->onLoginSuccessCallback = $onLoginSuccessCallback;
 	}
 }
 

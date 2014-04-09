@@ -12,7 +12,7 @@ use \ch\timesplinter\core\HttpRequest;
  */
 class RouteUtils {
 	public static function matchRoutesAgainstPath(stdClass $routes, HttpRequest $httpRequest) {
-		$routeEntries = null;
+		$routeEntries = array();
 		
 		foreach($routes as $routeID => $r) {
 			$routeObj = self::createRouteObject($routeID, $r);
@@ -23,12 +23,13 @@ class RouteUtils {
 			array_shift($params);
 			$routeObj->setParams($params);
 
-			$routeEntries[$routeObj->method] = $routeObj;
-			$routeEntries['HEAD'] = $routeObj;
+			if(!isset($routeObj->methods['HEAD']) && isset($routeObj->methods['GET']))
+				$routeObj->methods['HEAD'] = $routeObj->methods['GET'];
 
+			$routeEntries[$routeObj->id] = $routeObj;
 		}
-		
-		if(count($routeEntries) === null)
+
+		if(count($routeEntries) === 0)
 			return null;
 		
 		return $routeEntries;
@@ -36,25 +37,37 @@ class RouteUtils {
 	
 	private static function createRouteObject($routeID, stdClass $routeEntry) {
 		$route = new Route;
-		
-		$route->method = Route::METHOD_UNKNOWN;
+
 		$route->sslRequired = isset($routeEntry->sslRequired)?$routeEntry->sslRequired:false;
 		$route->sslForbidden = isset($routeEntry->sslForbidden)?$routeEntry->sslForbidden:false;
+		$route->methods = array();
 
-		$routeEntryMethod = $routeEntry->method;
-		
-		$route->method = $routeEntryMethod;
+		foreach($routeEntry->methods as $method => $controller) {
+			$routeMethodTmp = new RouteMethod();
+
+			$ctrlParts = explode(':', $controller);
+			$methodName = array_pop($ctrlParts);
+
+			$routeMethodTmp->controllerClass = implode('\\', $ctrlParts);
+			$routeMethodTmp->controllerMethod = $methodName;
+			$routeMethodTmp->method = $method;
+
+			$route->methods[$method] = $routeMethodTmp;
+		}
+
 		$route->pattern = '@^' . $routeEntry->pattern . '$@';
-		
-		$ctrlParts = explode(':',$routeEntry->controller);
-		
-		$methodName = array_pop($ctrlParts);
-		
 		$route->id = $routeID;
-		$route->controllerClass = implode('\\', $ctrlParts);
-		$route->controllerMethod = $methodName;
 		
 		return $route;
+	}
+
+	public static function getFirstRouteWhichHasMethod($routes, $method) {
+		foreach($routes as $r) {
+			if(isset($r->methods[$method]) === true)
+				return $r;
+		}
+
+		return null;
 	}
 }
 

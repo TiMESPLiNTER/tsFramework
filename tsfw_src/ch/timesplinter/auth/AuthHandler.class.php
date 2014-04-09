@@ -1,15 +1,16 @@
 <?php
+
 namespace ch\timesplinter\auth;
 
 use ch\timesplinter\core\FrameworkLoggerFactory;
 use ch\timesplinter\logger\LoggerFactory;
 
 /**
- * Required packages: core, logger
+ * Class AuthHandler
+ * @package ch\timesplinter\auth
  *
- * @author Pascal Münst (Actra AG)
- * @copyright
- * @version
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2012, TiMESPLiNTER Webdevelopment
  */
 abstract class AuthHandler {
 	const TYPE_HTTP = 'http';
@@ -20,6 +21,8 @@ abstract class AuthHandler {
 	protected $loginPopo;
 	/** @var Logger */
 	protected $logger;
+
+	protected $onUserDataLoadCallback;
 	
 	public function __construct() {
 		$this->logger = FrameworkLoggerFactory::getLogger($this);
@@ -29,10 +32,10 @@ abstract class AuthHandler {
 	/**
 	 * Checks the given login paramters against the login information stored
 	 * in DB or txt
-	 * @param string $username
+	 * @param string $email
 	 * @param string $password
 	 */
-	abstract function checkLogin($username,$password);
+	abstract function checkLogin($email,$password);
 	
 	abstract function logout();
 	
@@ -45,18 +48,18 @@ abstract class AuthHandler {
 	}
 	
 	/**
-	 * Checks if the current user is in the group $userGroup
-	 * @param string userGroup
-	 * @return boolean 
-	 */
-	abstract function hasRightgroup($userGroup);
-	
-	/**
 	 *
 	 * @return UserPopo
 	 */
 	public function getUserData() {
+		if($this->loggedIn === true)
+			$this->loadUserPopo();
+
 		return $this->loginPopo;
+	}
+
+	public function addOnUserDataLoadCallback(array $onUserDataLoadCallback) {
+		$this->onUserDataLoadCallback = $onUserDataLoadCallback;
 	}
 }
 

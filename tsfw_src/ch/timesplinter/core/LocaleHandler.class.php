@@ -7,8 +7,10 @@ use ch\timesplinter\core\HttpRequest;
 
 /**
  * Description of LocaleHandler
+ * @package ch\timesplinter\core
  *
- * @author pascal91
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) TiMESPLiNTER Webdevelopment
  */
 class LocaleHandler {
 	/** @var Core $core */
@@ -16,13 +18,12 @@ class LocaleHandler {
 	private $locale;
 	private $timezone;
 
-	private $currentTextdomain;
+	private $currentTextDomain;
 	
 	public function __construct(Core $core) {
 		$this->core = $core;
 		$this->locale = null;
-
-		$this->currentTextdomain = null;
+		$this->currentTextDomain = null;
 	}
 
 	/**
@@ -50,8 +51,6 @@ class LocaleHandler {
 		foreach($locales as $l) {
 			if(!isset($this->core->getSettings()->locales->$l))
 				continue;
-
-			$localeNames = $this->core->getSettings()->locales->$l->names;
 
 			if(setlocale(LC_ALL, $this->core->getSettings()->locales->$l->names) === false)
 				continue;
@@ -82,15 +81,15 @@ class LocaleHandler {
 	}
 
 	public function gettext($message, $textdomain = null) {
-		if($textdomain !== null && $this->currentTextdomain !== $textdomain)
-			$this->currentTextdomain = textdomain($textdomain);
+		if($textdomain !== null && $this->currentTextDomain !== $textdomain)
+			$this->currentTextDomain = textdomain($textdomain);
 
 		return gettext($message);
 	}
 
 	public function ngettext($msgid1, $msgid2, $n, $textdomain = null) {
-		if($textdomain !== null && $this->currentTextdomain !== $textdomain)
-			$this->currentTextdomain = textdomain($textdomain);
+		if($textdomain !== null && $this->currentTextDomain !== $textdomain)
+			$this->currentTextDomain = textdomain($textdomain);
 
 		return ngettext($msgid1, $msgid2, $n);
 	}

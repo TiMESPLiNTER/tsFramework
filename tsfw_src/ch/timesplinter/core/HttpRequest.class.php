@@ -173,14 +173,42 @@ class HttpRequest {
 
 	/**
 	 * Returns the informations about a file
-	 * @param $name The name of the file field
-	 * @return array|null Returns the informations about the file or null if it does not exist
+	 * @param string $name The name of the file field
+	 * @return array|null Returns the information about the file or null if it does not exist
 	 */
 	public function getFile($name) {
 		if(isset($_FILES[$name]) === false)
 			return null;
 
 		return $_FILES[$name];
+	}
+
+	/**
+	 * Returns a normalized array with file information where each entry of the array
+	 * is a set of all information known about one file if the FILES field has an array markup
+	 * like field_name[]
+	 * @param string $name The name of the file field
+	 * @return array Returns an array with the information about the files
+	 */
+	public function getFiles($name) {
+		$filesArr = $this->getFile($name);
+
+		$files = array();
+		$filesCount = count($filesArr['name']);
+
+		for($i = 0; $i < $filesCount; ++$i) {
+			$file = array(
+				'name' => $filesArr['name'][$i],
+				'type' => $filesArr['type'][$i],
+				'tmp_name' => $filesArr['tmp_name'][$i],
+				'error' => $filesArr['error'][$i],
+				'size' => $filesArr['size'][$i],
+			);
+
+			$files[] = $file;
+		}
+
+		return $files;
 	}
 
 	/**

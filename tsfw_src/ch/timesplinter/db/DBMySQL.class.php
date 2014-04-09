@@ -41,7 +41,7 @@ class DBMySQL extends DB {
 
 			$this->triggerListeners('onConnect', array($this, $this->dbConnect));
 		} catch(PDOException $e) {
-			throw new DBException('PDO could not connect to the database ' . $dbConnect->getDatabase() . '@' . $dbConnect->getHost(), $e->getCode());
+			throw new DBException('PDO could not connect to database: ' . $e->getMessage(), $e->getCode());
 		}
 	}
 

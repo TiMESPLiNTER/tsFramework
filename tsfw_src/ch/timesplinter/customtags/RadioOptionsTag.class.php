@@ -1,38 +1,34 @@
 <?php
+
 namespace ch\timesplinter\customtags;
 
+use ch\timesplinter\htmlparser\ElementNode;
+use ch\timesplinter\htmlparser\TextNode;
+use ch\timesplinter\template\TagNode;
+use ch\timesplinter\template\TemplateEngine;
+use ch\timesplinter\template\TemplateTag;
+
 /**
- *
- *
- * @author				entwicklung@metanet.ch
- * @copyright	Copyright (c) 2012, METANET AG, www.metanet.ch
- * @version			1
+ * Class RadioOptionsTag
+ * @package ch\timesplinter\customtags
  */
 class RadioOptionsTag extends TemplateTag implements TagNode {
-
-	private $tagName = 'radioOptions';
-
 	public function __construct() {
-		parent::__construct(false);
+		parent::__construct('radioOptions', false);
 	}
 
 	public function replaceNode(TemplateEngine $tplEngine, ElementNode $node) {
 		// DATA
+		TemplateEngine::checkRequiredAttrs($node, array('options', 'selected'));
+
+		//$compareArr = $tplEngine->getDataFromSelector($node->getAttribute('checked')->value);
 		$dataKey = $node->getAttribute('options')->value;
-		$asVar = $node->getAttribute('selvar')->value;
-		//$dataArr = $tplEngine->getData($dataKey);
+		$fldName = $node->getAttribute('name')->value;
 
-		$cachedHtml = ltrim($node->getInnerHtml());
-
-
-		// place selected
-		$cachedHtml = preg_replace('/(.*<input.*type="radio".*?)(>.*)/', '$1<?php echo $selected; ?>$2', $cachedHtml);
-
-		$entryVals = array('{key}' => '<?php echo $key; ?>', '{label}' => '<?php echo $label; ?>');
-
-		$cachedHtml = str_replace(array_keys($entryVals), $entryVals, $cachedHtml);
-
-		$textContent = '<?php foreach($this->getData(\'' . $dataKey . '\') as $key => $label) { $selected = ($this->getData(\'' . $asVar . '\') == $key)?\' checked="checked"\':null; ?>' . $cachedHtml . '<?php } ?>';
+		$textContent = '<?php echo "<ul>";  foreach($this->getDataFromSelector(\'' . $dataKey . '\') as $key => $val) {
+			$checked = ($key == $this->getDataFromSelector(\'' . $node->getAttribute('selected')->value . '\'))?\' checked\':null;
+			echo \'<li><label><input type="radio" value="\'.$key.\'" name="' . $fldName . '"\'.$checked.\'> \'.$val.\'</label></li>\' . "\n";
+		} echo "</ul>"; ?>';
 
 		$newNode = new TextNode($tplEngine->getDomReader());
 		$newNode->content = $textContent;
@@ -40,11 +36,6 @@ class RadioOptionsTag extends TemplateTag implements TagNode {
 		$node->parentNode->insertBefore($newNode, $node);
 		$node->parentNode->removeNode($node);
 	}
-
-	public function getTagName() {
-		return $this->tagName;
-	}
-
 }
 
-?>
+/* EOF */

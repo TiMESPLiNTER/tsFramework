@@ -2,14 +2,16 @@
 namespace ch\timesplinter\core;
 
 /**
- * Description of Domain
+ * Class Domain
+ * @package ch\timesplinter\core
  *
- * @author pascal91
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) TiMESPLiNTER Webdevelopment
  */
 class Domain {
 	public $locale;
 	public $environment;
-	public $startpage;
+	public $startPage;
 	public $template;
 	public $timezone;
 }
