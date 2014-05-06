@@ -11,12 +11,19 @@ class PluginManager {
 	private $core;
 	private $plugins;
 
+	/**
+	 * @param Core $core A Core instance
+	 */
 	public function __construct(Core $core) {
 		$this->core = $core;
 		$this->plugins = array();
 	}
 
-	public function loadPlugins($plugins) {
+	/**
+	 * Load all plugins from an array
+	 * @param array $plugins The array containing the plugins to load
+	 */
+	public function loadPlugins(array $plugins) {
 		foreach($plugins as $plugin) {
 			$pluginClass = str_replace(':','\\',$plugin);
 
