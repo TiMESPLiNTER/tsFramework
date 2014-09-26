@@ -1,8 +1,7 @@
 <?php
+
 namespace ch\timesplinter\core;
 
-use ch\timesplinter\core\Core;
-use ch\timesplinter\controller\StaticPageController;
 use \Exception;
 
 /**
@@ -22,6 +21,7 @@ class ErrorHandler {
 	public function register() {
 		set_error_handler(array($this, 'handlePHPError'));
 		set_exception_handler(array($this, 'handleException'));
+		register_shutdown_function(array($this, 'handleFatalError'));
 	}
 	
 	/**
@@ -32,8 +32,22 @@ class ErrorHandler {
 	 * @param int $error_line
 	 * @throws PHPException
 	 */
-	public function handlePHPError($error_number,$error,$error_file,$error_line) {
+	public function handlePHPError($error_number, $error, $error_file, $error_line)
+	{
+		// error was suppressed with the @-operator
+		if(0 === error_reporting())
+			return false;
+		
 		throw new PHPException($error_number, $error, $error_file, $error_line);
+	}
+
+	public function handleFatalError() {
+		$error = error_get_last();
+
+		if ($error['type'] !== E_ERROR)
+			return;
+
+		throw new PHPException($error['type'], $error['message'], $error['file'], $error['line']);
 	}
 
 	/**
