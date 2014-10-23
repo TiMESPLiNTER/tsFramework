@@ -13,8 +13,8 @@ use ch\timesplinter\htmlparser\ElementNode;
 use ch\timesplinter\htmlparser\TextNode;
 
 /**
- * @author Pascal Münst <entwicklung@metanet.ch>
- * @copyright Copyright (c) 2012, METANET AG, www.metanet.ch
+ * @author Pascal Münst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2012, TiMESPLiNTER Webdevelopment
  */
 class ForTag extends TemplateTag implements TagNode
 {
