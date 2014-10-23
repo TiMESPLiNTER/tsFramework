@@ -60,9 +60,9 @@ class HtmlDoc {
 
 		if($this->namespace !== null) {
 			//$pattern = '/(?:<!--.+?-->|<!\[CDATA\[.+?\]\]>|<(\/)?(' . $this->namespace . '\:[\w]+?)(?:\\s+(.+?))?(\/)?\\s*(?<![-\?])>)/ims';
-			$pattern = '/(?:<!--.+?-->|<!\[CDATA\[.+?\]\]>|<(\/)?(' . $this->namespace . '\:[\w]+?)((?:\s+[^=]+="[^"]*")*)?\s*(\/)?\s*(?<![-\?])>)/ims';
+			$pattern = '/(?:<!--.+?-->|<!\[CDATA\[.+?\]\]>|<(\/)?(' . $this->namespace . '\:\w+?)((?:\s+[^=]+="[^"]+")*?)?(\s*\/)?\s*>)/ims';
 		} else {
-			$pattern = '/(?:<!--.+?-->|<!\[CDATA\[.+?\]\]>|<(\/)?([\w]+?)(?:\\s+(.+?))?(\/)?\\s*(?<![-\?])>)/ims';
+			$pattern = '/(?:<!--.+?-->|<!\[CDATA\[.+?\]\]>|<(\/)?(\w+?)((?:\s+[^=]+="[^"]+")*?)?(\s*\/)?\s*>)/ims';
 		}
 		
 		preg_match($pattern, $this->htmlContent, $res, PREG_OFFSET_CAPTURE, $this->contentPos);
