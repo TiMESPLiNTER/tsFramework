@@ -62,7 +62,7 @@ class RouteUtils
 		return $route;
 	}
 
-	protected static function getFirstRouteWhichHasMethod($routes, $method)
+	public static function getFirstRouteWhichHasMethod($routes, $method)
 	{
 		foreach($routes as $r) {
 			if(isset($r->methods[$method]) === true)
