@@ -105,11 +105,12 @@ class Core
 	{
 		$protocol = (isset($_SERVER['HTTPS']) === true && $_SERVER['HTTPS'] === 'on') ? HttpRequest::PROTOCOL_HTTPS : HttpRequest::PROTOCOL_HTTP;
 		$uri = StringUtils::startsWith($_SERVER['REQUEST_URI'], '/index.php')?StringUtils::afterFirst($_SERVER['REQUEST_URI'], '/index.php'):$_SERVER['REQUEST_URI'];
-		//var_dump($uri); exit;
-		$path = StringUtils::beforeLast($uri, '?');
+		
+		$subFolder = StringUtils::afterFirst(getcwd(), $_SERVER['DOCUMENT_ROOT']);
+		$cleanPath = StringUtils::between($uri, $subFolder, '?');
 
 		$languages = array();
-		$langsRates = explode(',', isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])?$_SERVER['HTTP_ACCEPT_LANGUAGE']:null);
+		$langsRates = explode(',', isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : null);
 
 		foreach($langsRates as $lr) {
 			$lrParts = explode(';', $lr);
@@ -123,7 +124,7 @@ class Core
 		$httpRequest = new HttpRequest();
 
 		$httpRequest->setHost($_SERVER['SERVER_NAME']);
-		$httpRequest->setPath($path);
+		$httpRequest->setPath($cleanPath);
 		$httpRequest->setPort($_SERVER['SERVER_PORT']);
 		$httpRequest->setProtocol($protocol);
 		$httpRequest->setQuery($_SERVER['QUERY_STRING']);
@@ -136,7 +137,7 @@ class Core
 		$httpRequest->setAcceptLanguage(isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])?$_SERVER['HTTP_ACCEPT_LANGUAGE']:null);
 		$httpRequest->setRemoteAddress($_SERVER['REMOTE_ADDR']);
 		$httpRequest->setReferrer(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : null);
-		
+
 		return $httpRequest;
 	}
 

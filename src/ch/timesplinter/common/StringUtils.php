@@ -18,13 +18,13 @@ class StringUtils
 	 */
 	public static function between($str, $start, $end)
 	{
-        $posStart = strpos($str, $start) + strlen($start);
-        $posEnd = strrpos($str, $end, $posStart);
-        
+		$posStart = strpos($str, $start) + strlen($start);
+		$posEnd = strrpos($str, $end, $posStart);
+
 		if($posEnd === false)
-			return null;
-		
-        return substr($str, $posStart, $posEnd-$posStart);   
+			return substr($str, $posStart);
+
+		return substr($str, $posStart, $posEnd-$posStart);
     }
 
 	/**
