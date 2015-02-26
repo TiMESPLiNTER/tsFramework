@@ -1,7 +1,0 @@
-{
-	/*"mypath": {
-		"path": "${site_root}",
-		"mode": "namespace",
-		"class_suffix": [".class.php", ".interface.php"]
-	}*/
-}

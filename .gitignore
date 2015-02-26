@@ -1,5 +1,2 @@
-/.idea/*
-tsfw_src/cache/*
-tsfw_src/logs/*
-/site.bak
-/nbproject/*
+/.idea
+/vendor
