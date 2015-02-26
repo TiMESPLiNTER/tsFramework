@@ -6,8 +6,6 @@ use ch\timesplinter\core\FrameworkAutoloader;
 
 error_reporting(E_ALL);
 
-require '../vendor/autoload.php';
-
 // Default timezone patch
 $defaultTimezone = 'Greenwich';
 $iniTimezone = ini_get('date.timezone');
