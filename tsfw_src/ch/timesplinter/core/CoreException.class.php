@@ -3,14 +3,10 @@
 namespace ch\timesplinter\core;
 
 /**
- * Class CoreException
- * @package ch\timesplinter\core
- *
  * @author Pascal Muenst <dev@timesplinter.ch>
- * @copyright Copyright (c) 2013, TiMESPLiNTER Webdevelopment
+ * @copyright Copyright (c) 2013, Pascal Muenst
  */
-class CoreException extends FrameworkException {
+class CoreException extends FrameworkException
+{
 
 }
-
-/* EOF */

@@ -1,36 +1,36 @@
 <?php
+
 namespace ch\timesplinter\core;
 
 use ch\timesplinter\common\StringUtils;
-use ch\timesplinter\core\Core;
-use ch\timesplinter\core\HttpRequest;
 
 /**
- * Description of LocaleHandler
- * @package ch\timesplinter\core
- *
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright (c) TiMESPLiNTER Webdevelopment
  */
-class LocaleHandler {
+class LocaleHandler
+{
 	/** @var Core $core */
 	private $core;
 	private $locale;
 	private $timezone;
 
-	private $currentTextDomain;
+	private $currentTextdomain;
 	
-	public function __construct(Core $core) {
+	public function __construct(Core $core)
+	{
 		$this->core = $core;
 		$this->locale = null;
-		$this->currentTextDomain = null;
+
+		$this->currentTextdomain = null;
 	}
 
 	/**
 	 *
 	 * @param HttpRequest $httpRequest
 	 */
-	public function localize(HttpRequest $httpRequest) {
+	public function localize(HttpRequest $httpRequest)
+	{
 		/** @var Domain */
 		$domainLocale = $this->core->getCurrentDomain()->localization;
 
@@ -38,7 +38,7 @@ class LocaleHandler {
 
 		// Try to set browser locale or fix domain locale
 		$settedLocale = $this->setLocale(array_keys($locales));
-
+		
 		// Try to set fallback locale if browser or fix locale not worked
 		$this->locale = ($settedLocale !== false)?$settedLocale:$this->setLocale(array($this->core->getSettings()->defaults->localization));
 
@@ -47,7 +47,8 @@ class LocaleHandler {
 		date_default_timezone_set($this->timezone);
 	}
 
-	private function setLocale($locales) {
+	private function setLocale($locales)
+	{
 		foreach($locales as $l) {
 			if(!isset($this->core->getSettings()->locales->$l))
 				continue;
@@ -61,7 +62,8 @@ class LocaleHandler {
 		return false;
 	}
 	
-	public function detectBrowserLocalization($acceptedLangs) {
+	public function detectBrowserLocalization($acceptedLangs)
+	{
 		$langs = array();
 
 		foreach($acceptedLangs as $lang => $prio) {
@@ -80,41 +82,49 @@ class LocaleHandler {
 		bindtextdomain($textdomain, $location);
 	}
 
-	public function gettext($message, $textdomain = null) {
-		if($textdomain !== null && $this->currentTextDomain !== $textdomain)
-			$this->currentTextDomain = textdomain($textdomain);
+	public function gettext($message, $textdomain = null)
+	{
+		if($textdomain !== null && $this->currentTextdomain !== $textdomain)
+			$this->currentTextdomain = textdomain($textdomain);
 
 		return gettext($message);
 	}
 
-	public function ngettext($msgid1, $msgid2, $n, $textdomain = null) {
-		if($textdomain !== null && $this->currentTextDomain !== $textdomain)
-			$this->currentTextDomain = textdomain($textdomain);
+	public function ngettext($msgid1, $msgid2, $n, $textdomain = null)
+	{
+		if($textdomain !== null && $this->currentTextdomain !== $textdomain)
+			$this->currentTextdomain = textdomain($textdomain);
 
 		return ngettext($msgid1, $msgid2, $n);
 	}
 
-	public function getLocale() {
+	public function getLocale()
+	{
 		return $this->locale;
 	}
 	
-	public function getCountry() {
+	public function getCountry()
+	{
 		return substr($this->locale, 3);
 	}
 	
-	public function getLanguage() {
+	public function getLanguage()
+	{
 		return substr($this->locale, 0, 2);
 	}
 
-	public function getDateTimeFormat() {
+	public function getDateTimeFormat()
+	{
 		return $this->core->getSettings()->locales->{$this->locale}->datetime_format;
 	}
 
-	public function getDateFormat() {
+	public function getDateFormat()
+	{
 		return $this->core->getSettings()->locales->{$this->locale}->date_format;
 	}
 
-	public function getTimeFormat() {
+	public function getTimeFormat()
+	{
 		return $this->core->getSettings()->locales->{$this->locale}->time_format;
 	}
 }

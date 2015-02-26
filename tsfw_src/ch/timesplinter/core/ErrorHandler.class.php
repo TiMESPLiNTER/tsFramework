@@ -2,30 +2,32 @@
 
 namespace ch\timesplinter\core;
 
+use ch\timesplinter\core\Core;
+use ch\timesplinter\controller\StaticPageController;
 use \Exception;
+use Guzzle\Http\Exception\HttpException;
 
 /**
- * Description of ErrorHandler
- * @package ch\timesplinter\core
- *
  * @author Pascal Muenst <dev@timesplinter.ch>
- * @copyright Copyright (c) 2013, TiMESPLiNTER
+ * @copyright Copyright (c) 2013, TiMESPLiNTER Webdevelopment
  */
-class ErrorHandler {
+class ErrorHandler
+{
 	private $core;
 	
-	public function __construct(Core $core) {
+	public function __construct(Core $core)
+	{
 		$this->core = $core;
 	}
 	
-	public function register() {
+	public function register()
+	{
 		set_error_handler(array($this, 'handlePHPError'));
 		set_exception_handler(array($this, 'handleException'));
-		register_shutdown_function(array($this, 'handleFatalError'));
 	}
 	
 	/**
-	 * Coverts thrown PHP error into an exception
+	 * Catches all the PHP errors and convert them into a PHP exception
 	 * @param int $error_number
 	 * @param string $error
 	 * @param string $error_file
@@ -35,28 +37,22 @@ class ErrorHandler {
 	public function handlePHPError($error_number, $error, $error_file, $error_line)
 	{
 		// error was suppressed with the @-operator
-		if(0 === error_reporting())
+		if (0 === error_reporting()) 
 			return false;
 		
 		throw new PHPException($error_number, $error, $error_file, $error_line);
 	}
-
-	public function handleFatalError() {
-		$error = error_get_last();
-
-		if ($error['type'] !== E_ERROR)
-			return;
-
-		throw new PHPException($error['type'], $error['message'], $error['file'], $error['line']);
-	}
-
+	
 	/**
 	 * Default stub for print an exception
 	 * @param Exception $e
 	 */
-	public function handleException(Exception $e) {
-		if(isset($this->core->getSettings()->errorhandling->controller) === true) {
-			$controller = FrameworkUtils::stringToClassName($this->core->getSettings()->errorhandling->controller);
+	public function handleException(Exception $e)
+	{
+        $environment = $this->core->getCurrentDomain()->environment;
+		
+		if(isset($this->core->getSettings()->errorhandling->controller->$environment) === true) {
+			$controller = FrameworkUtils::stringToClassName($this->core->getSettings()->errorhandling->controller->$environment);
 
 			$pc = new $controller->className($this->core, $this->core->getHttpRequest(), new Route());
 
@@ -64,7 +60,6 @@ class ErrorHandler {
 		} else {
 			$content = null;
 
-			$environment = $this->core->getCurrentDomain()->environment;
 			$httpErrorCode = ($e instanceof HttpException)?$e->getCode():500;
 			$exceptionStr = null;
 

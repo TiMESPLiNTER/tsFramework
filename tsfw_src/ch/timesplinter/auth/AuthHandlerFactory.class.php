@@ -1,16 +1,15 @@
 <?php
-
 namespace ch\timesplinter\auth;
 
 use ch\timesplinter\core\SessionHandler;
 use ch\timesplinter\db\DB;
 
 /**
- * Class AuthHandlerFactory
- * @package ch\timesplinter\auth
+ * Description of AuthHandlerFactory
  *
- * @author Pascal Muenst <dev@timesplinter.ch>
- * @copyright Copyright (c) 2012, TiMESPLiNTER Webdevelopment
+ * @author Pascal Münst (Actra AG)
+ * @copyright
+ * @version 1.0.0
  */
 class AuthHandlerFactory {
 	private static $instance = null;
@@ -33,4 +32,4 @@ class AuthHandlerFactory {
 	}
 }
 
-/* EOF */
+?>

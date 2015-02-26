@@ -3,7 +3,7 @@ namespace ch\timesplinter\template;
 
 use ch\timesplinter\common\StringUtils;
 use ch\timesplinter\core\FrameworkLoggerFactory;
-use ch\timesplinter\logger\LoggerFactory;
+use ch\timesplinter\htmlparser\CDataSectionNode;
 use ch\timesplinter\htmlparser\HtmlDoc;
 use ch\timesplinter\htmlparser\ElementNode;
 use ch\timesplinter\htmlparser\TextNode;
@@ -17,41 +17,40 @@ use \Exception;
  * @copyright Copyright (c) 2012, METANET AG, www.metanet.ch
  * @version 1.0
  */
-class TemplateEngine {
-
-	const CACHE_SUBFIX = '.cache';
-
+class TemplateEngine
+{
 	/** @var HtmlDoc */
-	private $htmlDoc;
-	private $tplNsPrefix;
-	private $dataPool;
-	private $dataTable;
-	private $customTags;
-//	private $callbackMethods;
+	protected $htmlDoc;
+	protected $tplNsPrefix;
+	protected $dataPool;
+	protected $dataTable;
+	protected $customTags;
 
-	private $cached;
+	protected $cached;
 
-	/** @var TemplateCache */
-	private $templateCache;
-	private $currentTemplateFile;
+	/** @var TemplateCacheStrategy */
+	protected $templateCacheInterface;
+	protected $currentTemplateFile;
 
 	/** @var TemplateTag */
-	private $lastTplTag;
-	private $logger;
+	protected $lastTplTag;
+	protected $logger;
 
-	private $getterMethodPrefixes;
+	protected $getterMethodPrefixes;
 
 	/**
 	 * 
-	 * @param TemplateCache $tplCache The template cache object
+	 * @param TemplateCacheStrategy $tplCacheInterface The template cache object
 	 * @param string $tplNsPrefix The prefix for custom tags in the template file
 	 * @param array $customTags Additional custom tags to be loaded
+	 * 
 	 * @return TemplateEngine A template engine instance to render files
 	 */
-	public function __construct(TemplateCache $tplCache, $tplNsPrefix, array $customTags = array()) {
+	public function __construct(TemplateCacheStrategy $tplCacheInterface, $tplNsPrefix, array $customTags = array())
+	{
 		$this->logger = FrameworkLoggerFactory::getLogger($this);
 
-		$this->templateCache = $tplCache;
+		$this->templateCacheInterface = $tplCacheInterface;
 		$this->tplNsPrefix = $tplNsPrefix;
 		$this->customTags = array_merge($this->getDefaultCustomTags(), $customTags);
 
@@ -61,63 +60,57 @@ class TemplateEngine {
 		$this->getterMethodPrefixes = array('get', 'is', 'has');
 	}
 
-	private function getDefaultCustomTags() {
+	protected function getDefaultCustomTags()
+	{
 		return array(
 			'text' => 'ch\timesplinter\customtags\TextTag',
-			'print' => 'ch\timesplinter\customtags\PrintTag',
 			'checkboxOptions' => 'ch\timesplinter\customtags\CheckboxOptionsTag',
 			'checkbox' => 'ch\timesplinter\customtags\CheckboxTag',
 			'date' => 'ch\timesplinter\customtags\DateTag',
 			'else' => 'ch\timesplinter\customtags\ElseTag',
-			'forgroup' => 'ch\timesplinter\customtags\ForgroupTag',
 			'for' => 'ch\timesplinter\customtags\ForTag',
 			'if' => 'ch\timesplinter\customtags\IfTag',
-			'inUsergroup' => 'ch\timesplinter\customtags\InUsergroupTag',
-			'lang' => 'ch\timesplinter\customtags\LangTag',
+			'elseif' => 'ch\timesplinter\customtags\ElseifTag',
 			'loadSubTpl' => 'ch\timesplinter\customtags\LoadSubTplTag',
 			'options' => 'ch\timesplinter\customtags\OptionsTag',
 			'option' => 'ch\timesplinter\customtags\OptionTag',
 			'radioOptions' => 'ch\timesplinter\customtags\RadioOptionsTag',
 			'radio' => 'ch\timesplinter\customtags\RadioTag',
-			'subNavi' => 'ch\timesplinter\customtags\SubNaviTag',
-			'subSite' => 'ch\timesplinter\customtags\SubSiteTag'
 		);
 	}
 
-	private function load() {
+	protected function load()
+	{
 		$this->lastTplTag = null;
-
 		$this->htmlDoc->parse();
-
+		
 		$nodeList = $this->htmlDoc->getNodeTree()->childNodes;
 
 		if(count($nodeList) === 0)
-			throw new TemplateEngineException('That\'s no valid template-file');
+			throw new TemplateEngineException('Invalid template-file: ' . $this->currentTemplateFile);
 
 		try {
 			$this->copyNodes($nodeList);
-		} catch(DOMException $e) {
-			throw new TemplateEngineException('Error while processing the template file: ' . $e->getMessage());
+		} catch(\DOMException $e) {
+			throw new TemplateEngineException('Error while processing the template file ' . $this->currentTemplateFile . ': ' . $e->getMessage());
 		}
 	}
 	
-	private function copyNodes($nodeList) {
-		
-		
+	protected function copyNodes($nodeList)
+	{
 		foreach($nodeList as $node) {
 			// Parse inline tags if activated
 			if($node instanceof ElementNode === true) {
-
 				$attrs = $node->attributes;
 				$countAttrs = count($attrs);
 
 				if($countAttrs > 0) {
-					for($i = 0; $i < $countAttrs; $i++)
-						$attrs[$i]->value = $this->replInlineTag($attrs[$i]->value);
+					for($i = 0; $i < $countAttrs; ++$i)
+						$attrs[$i]->value = $this->replaceInlineTag($attrs[$i]->value);
 				}
 			} else {
 				if($node instanceof TextNode || /*$node instanceof CommentNode ||*/ $node instanceof CDataSectionNode)
-					$node->content = $this->replInlineTag($node->content);
+					$node->content = $this->replaceInlineTag($node->content);
 				
 				continue;
 			}
@@ -140,23 +133,25 @@ class TemplateEngine {
 			$tagInstance = new $tagClassName;
 
 			if($tagInstance instanceof TemplateTag === false) {
-				$this->templateCache->setSaveOnDestruct(false);
-				throw new TemplateEngineException('The class "' . $tagClassName . '" does not implement the abstract class "TemplateTag" and is so not recognized as an illegal class for a custom tag."');
+				$this->templateCacheInterface->setSaveOnDestruct(false);
+				throw new TemplateEngineException('The class "' . $tagClassName . '" does not implement the abstract class "TemplateTag" and is so recognized as an illegal class for a custom tag."');
 			}
-
+			
+			/** @var TagNode $tagInstance */
+			
 			try {
 				$tagInstance->replaceNode($this, $node);
 			} catch(TemplateEngineException $e) {
-				$this->templateCache->setSaveOnDestruct(false);
+				$this->templateCacheInterface->setSaveOnDestruct(false);
 				throw $e;
 			}
 
 			$this->lastTplTag = $tagInstance;
 		}
-		//exit;
 	}
 
-	private function replInlineTag($value) {
+	protected function replaceInlineTag($value)
+	{
 		$inlineTags = null;
 		
 		preg_match_all('@\{' . $this->tplNsPrefix . ':(.+?)(?:\\s+(\\w+=\'.+?\'))?\\s*\}@', $value, $inlineTags, PREG_SET_ORDER);
@@ -175,13 +170,15 @@ class TemplateEngine {
 			$tagInstance = new $tagClassName;
 
 			if($tagInstance instanceof TemplateTag === false) {
-				$this->templateCache->setSaveOnDestruct(false);
+				$this->templateCacheInterface->setSaveOnDestruct(false);
 				throw new TemplateEngineException('The class "' . $tagClassName . '" does not implement the abstract class "TemplateTag" and is so not recognized as an illegal class for a custom tag."');
 			}
 
 			if($tagInstance instanceof TagInline === false)
 				throw new TemplateEngineException('CustomTag "' . $tagClassName . '" is not allowed to use inline.');
 
+			/** @var TagInline $tagInstance */
+			
 			// Params
 			$params = $parsedParams = array();
 
@@ -197,7 +194,7 @@ class TemplateEngine {
 				$repl = $tagInstance->replaceInline($this, $params);
 				$value = str_replace($inlineTags[$j][0], $repl, $value);
 			} catch(TemplateEngineException $e) {
-				$this->templateCache->setSaveOnDestruct(false);
+				$this->templateCacheInterface->setSaveOnDestruct(false);
 				throw $e;
 			}
 		}
@@ -210,13 +207,12 @@ class TemplateEngine {
 	 * @param string $tplFile The path to the template file to parse
 	 * @return string The parsed template
 	 */
-	public function parse($tplFile) {
-		$this->cached = $this->isTplFileCached($tplFile);
-		
-		// PARSE IT NEW: No NodeList given? Okay! I'll load defaults for you
-		if($this->cached !== null)
+	public function parse($tplFile)
+	{
+		if(($this->cached = $this->isTplFileCached($tplFile)) !== null)
 			return $this->cached;
 		
+		// PARSE IT NEW: No NodeList given? Okay! I'll load defaults for you
 		return $this->cache($tplFile);
 	}
 
@@ -226,25 +222,25 @@ class TemplateEngine {
 	 * @throws TemplateEngineException
 	 * @return boolean Is file cached or not
 	 */
-	private function isTplFileCached($filePath) {
+	private function isTplFileCached($filePath)
+	{
 		if(stream_resolve_include_path($filePath) === false)
 			throw new TemplateEngineException('Could not find template file: ' . $filePath);
 
 		/** @var TemplateCacheEntry */
-		$tplCacheEntry = $this->templateCache->getCachedTplFile($filePath);
-
+		$tplCacheEntry = $this->templateCacheInterface->getCachedTplFile($filePath);
+		
 		if($tplCacheEntry === null)
 			return null;
 
-		$changeTime = @filemtime($filePath);
-		$changeTimeReal = ($changeTime !== false) ? $changeTime : @filectime($filePath);
-
-		if($tplCacheEntry->size !== @filesize($filePath) || $tplCacheEntry->changeTime !== $changeTimeReal) {
-			$this->templateCache->getCachedTplFile($filePath)->size = -1;
+		if(($changeTime = @filemtime($filePath)) === false)
+			$changeTime = @filectime($filePath);
+		
+		if(($tplCacheEntry->size >= 0 && $tplCacheEntry->size !== @filesize($filePath)) || $tplCacheEntry->changeTime < $changeTime) {
 			return null;
 		}
 
-		return $tplCacheEntry->ID;
+		return $tplCacheEntry;
 	}
 
 	/**
@@ -253,17 +249,20 @@ class TemplateEngine {
 	 * @param $tplFile
 	 * @param array $tplVars
 	 * @throws \Exception
-	 * @return type
+	 * @return string
 	 */
-	public function getResultAsHtml($tplFile, $tplVars = array()) {
+	public function getResultAsHtml($tplFile, $tplVars = array())
+	{
 		$this->currentTemplateFile = $tplFile;
 		$this->dataPool = new ArrayObject($tplVars);
-		$this->dataTable = new ArrayObject();
-		$cacheID = $this->parse($tplFile);
+		
+		$templateCacheEntry = $this->parse($tplFile);
 
 		try {
 			ob_start();
-			require $this->templateCache->getCachePath() . $cacheID . '.cache';
+			
+			require $this->templateCacheInterface->getCachePath() . $templateCacheEntry->path;
+			
 			return ob_get_clean();
 		} catch(Exception $e) {
 			// Throw away the whole template code till now
@@ -274,95 +273,74 @@ class TemplateEngine {
 		}
 	}
 
-	private function cache($tplFile) {
+	protected function cache($tplFile)
+	{
 		$cacheFileName = null;
 		
 		if(stream_resolve_include_path($tplFile) === false)
 			throw new TemplateEngineException('Template file \'' . $tplFile . '\' does not exists');
 		
 		/** @var TemplateCacheEntry */
-		$cacheEntry = $this->templateCache->getCachedTplFile($tplFile);
-		$fileSize = @filesize($tplFile);
-
-		$changeTime = @filemtime($tplFile);
-		$changeTimeReal = ($changeTime !== false) ? $changeTime : @filectime($tplFile);
+		$currentCacheEntry = $this->templateCacheInterface->getCachedTplFile($tplFile);
 		
 		// Render tpl
 		$content = file_get_contents($tplFile);
 		$this->htmlDoc = new HtmlDoc($content, $this->tplNsPrefix);
-		$this->htmlDoc->addSelfClosingTag('tst:text');
-		$this->htmlDoc->addSelfClosingTag('tst:lang');
-		$this->htmlDoc->addSelfClosingTag('tst:loadSubTpl');
-		$this->htmlDoc->addSelfClosingTag('tst:checkbox');
 
+		foreach($this->customTags as $customTag) {
+			if(in_array('ch\timesplinter\template\TagNode', class_implements($customTag)) === false || $customTag::isSelfClosing() === false)
+				continue;
+			
+			/** @var TagNode $customTag */
+			$this->htmlDoc->addSelfClosingTag($this->tplNsPrefix . ':' . $customTag::getName());
+		}
+		
 		$this->load();
 
-		$htmlToReturn = $this->htmlDoc->getHtml();
-		$this->templateCache->setSaveOnDestruct(false);
-		
-		$cacheId = null;
+		$compiledTemplateContent = $this->htmlDoc->getHtml();
+		$this->templateCacheInterface->setSaveOnDestruct(false);
 
-		if($cacheEntry === null) {
-			$cacheId = uniqid();
-			$this->templateCache->addCachedTplFile($tplFile, $cacheId, $fileSize, $changeTimeReal);
-		} else {
-			$cacheId = $cacheEntry->ID;
-			$this->templateCache->addCachedTplFile($tplFile, $cacheId, $fileSize, $changeTimeReal);
-		}
-
-		$cacheFileName = $this->templateCache->getCachePath() . $cacheId . self::CACHE_SUBFIX;
-		
-		if(stream_resolve_include_path($cacheFileName) === true && is_writable($cacheFileName) === false)
-			throw new TemplateEngineException('Cache file is not writeable: ' . $cacheFileName);
-
-		$fp = @fopen($cacheFileName, 'w');
-
-		if($fp !== false) {
-			fwrite($fp, $htmlToReturn);
-			fclose($fp);
-
-			$this->templateCache->setSaveOnDestruct(true);
-		} else {
-			$this->logger->error('Could not cache template-file: ' . $cacheFileName);
-		}
-
-		$this->logger->debug('Tpl-File (re-)cached: ' . $tplFile . ' -> ' . $cacheId);
-		
-		return $cacheId;
+		return $this->templateCacheInterface->addCachedTplFile($tplFile, $currentCacheEntry, $compiledTemplateContent);
 	}
 
 	/**
-	 *
 	 * @return HtmlDoc
 	 */
-	public function getDomReader() {
+	public function getDomReader()
+	{
 		return $this->htmlDoc;
 	}
 
 	/**
 	 * Checks if a template node is followed by another template tag with a
 	 * specific tagname.
-	 * @param type $tagNode The template tag
-	 * @param type $tagName The tagname of the following template tag
-	 * @return type
+	 * 
+	 * @param ElementNode $tagNode The template tag
+	 * @param string|array $tagName The tagname(s) of the following template tag(s)
+	 * 
+	 * @return bool
 	 */
-	public function isFollowedBy($tagNode, $tagName) {
+	public function isFollowedBy($tagNode, $tagName)
+	{
 		$nextSibling = $tagNode->getNextSibling();
 
-		if($nextSibling !== null && $nextSibling->namespace === $this->getTplNsPrefix() && $nextSibling->tagName === $tagName)
-			return true;
-
-		return false;
+		$res = !($nextSibling === null || $nextSibling->namespace !== $this->getTplNsPrefix() || in_array($nextSibling->tagName, (array)$tagName) === false);
+		//var_dump($tagName, $res);
+		
+		return $res;
 	}
 
 	/**
-	 * Register a value to make it accessable for the engine
+	 * Register a value to make it accessible for the engine
+	 * 
 	 * @param string $key
 	 * @param mixed $value
 	 * @param boolean $overwrite
+	 * 
 	 * @throws TemplateEngineException
 	 */
-	public function addData($key, $value, $overwrite = false) {
+	public function addData($key, $value, $overwrite = false)
+	{
 		if($this->dataPool->offsetExists($key) === true && $overwrite === false) {
 			$this->logger->debug('current data print', array($this->dataPool));
 			throw new TemplateEngineException("Data with the key '" . $key . "' is already registered");
@@ -371,7 +349,8 @@ class TemplateEngine {
 		$this->dataPool->offsetSet($key, $value);
 	}
 
-	public function unsetData($key) {
+	public function unsetData($key)
+	{
 		if($this->dataPool->offsetExists($key) === false)
 			return;
 
@@ -380,10 +359,13 @@ class TemplateEngine {
 
 	/**
 	 * Returns a registered data entry with the given key
+	 * 
 	 * @param string $key The key of the data element
+	 * 
 	 * @return mixed The value for that key or the key itselfs
 	 */
-	public function getData($key) {
+	public function getData($key)
+	{
 		if($this->dataPool->offsetExists($key) === false)
 			return null;
 
@@ -399,41 +381,56 @@ class TemplateEngine {
 			$this->dataPool->offsetSet($key, $val);
 	}
 
-	public function getAllData() {
+	public function getAllData()
+	{
 		return $this->dataPool;
 	}
 
-	public function getTplNsPrefix() {
+	public function getTplNsPrefix()
+	{
 		return $this->tplNsPrefix;
 	}
 
-	public function getTemplateCache() {
-		return $this->templateCache;
+	public function getTemplateCacheInterface()
+	{
+		return $this->templateCacheInterface;
 	}
 
 	/**
 	 * Returns the latest template tag found by the engine
+	 * 
 	 * @return TemplateTag
 	 */
-	public function getLastTplTag() {
+	public function getLastTplTag()
+	{
 		return $this->lastTplTag;
 	}
 
 	/**
 	 * @return string The template file path which gets parsed at the moment
 	 */
-	public function getCurrentTemplateFile() {
+	public function getCurrentTemplateFile()
+	{
 		return $this->currentTemplateFile;
 	}
-	
-	public static function checkRequiredAttrs($contextTag, $attrs) {
-		foreach($attrs as $a) {
+
+	/**
+	 * @param ElementNode $contextTag
+	 * @param string|array $attrs
+	 *
+	 * @return bool
+	 * 
+	 * @throws TemplateEngineException
+	 */
+	public function checkRequiredAttrs($contextTag, $attrs)
+	{
+		foreach((array)$attrs as $a) {
 			$val = $contextTag->getAttribute($a)->value;
 			
 			if($val !== null)
 				continue;
 			
-			throw new TemplateEngineException('Could not parse the template: Missing attribute \'' . $a .'\' for custom tag \'' . $contextTag->tagName . '\' on line ' . $contextTag->line);
+			throw new TemplateEngineException('Could not parse the template: Missing attribute \'' . $a .'\' for custom tag \'' . $contextTag->tagName . '\' in ' .  $this->currentTemplateFile . ' on line ' . $contextTag->line);
 		}
 
 		return true;
@@ -445,7 +442,8 @@ class TemplateEngine {
 	 * @return string
 	 * @throws TemplateEngineException
 	 */
-	public function getSelectorAsPHPStr($selectorStr, $echo = false) {
+	public function getSelectorAsPHPStr($selectorStr, $echo = false)
+	{
 		if(StringUtils::startsWith($selectorStr, '${') === true)
 			return $selectorStr;
 
@@ -474,11 +472,12 @@ class TemplateEngine {
 						:$part);
 
 					continue;
-				}
-
-				$varData = call_user_func(array($varData, 'get' . ucfirst($part)));
-				$varSelector .= '->get' . ucfirst($part) . '()';
-
+				} elseif(is_callable(array($varData, 'get' . ucfirst($part))) === true) {
+                    $varData = call_user_func(array($varData, 'get' . ucfirst($part)));
+                    $varSelector .= '->get' . ucfirst($part) . '()';
+                } else {
+                    throw new TemplateEngineException('Could not handle selector part "' . $part . '". Not a class property nor a class method');
+                }
 			} elseif(is_array($varData) === true) {
 				if(array_key_exists($part, $varData) === false)
 					throw new TemplateEngineException('Array key "' . $part . '" does not exist in array "' . $currentSel . '"');
@@ -502,64 +501,15 @@ class TemplateEngine {
 		return ($echo)?'<?php echo ' . $varSelector . '; ?>':$varSelector;
 	}
 
-	/**
-	 * @param $selectorStr
-	 * @return mixed
-	 * @throws TemplateEngineException
-	 */
-	/*private function getSelectorValue($selectorStr) {
-		$selParts = explode('.', $selectorStr);
-		$firstPart = array_shift($selParts);
-		$currentSel = $firstPart;
-
-		if($this->dataPool->offsetExists($firstPart) === false)
-			throw new TemplateEngineException('The data with offset "' . $currentSel . '" does not exist.');
-
-		$varData = $this->dataPool->offsetGet($firstPart);
-
-		foreach($selParts as $part) {
-			$newSelector = $currentSel . '.' . $part;
-
-			// Try to find value in hashmap, thats faster then parse again
-			if($this->dataTable->offsetExists($newSelector)) {
-				$varData = $this->dataTable->offsetGet($newSelector);
-				$currentSel = $newSelector;
-
-				continue;
-			}
-
-			if(is_object($varData) === true) {
-				$getProperty = new \ReflectionProperty($varData, $part);
-
-				$varData = ($getProperty->isPrivate() || $getProperty->isProtected())
-					?call_user_func(array($varData, 'get' . ucfirst($part)))
-					:$varData->$part;
-
-			} elseif(is_array($varData) === true) {
-				if(array_key_exists($part, $varData))
-					throw new TemplateEngineException('Array key "' . $part . '" does not exist in array "' . $currentSel . '"');
-
-				$varData = $varData[$part];
-			} else {
-				throw new TemplateEngineException('The data with offset "' . $currentSel . '" is not an object nor an array.');
-			}
-
-			$currentSel = $newSelector;
-
-			$this->dataTable->offsetSet($currentSel, $varData);
-		}
-
-		return $varData;
-	}*/
-
-	private function getSelectorValue($selectorStr, $returnNull = false) {
+	protected function getSelectorValue($selectorStr, $returnNull = false)
+	{
 		$selParts = explode('.', $selectorStr);
 		$firstPart = array_shift($selParts);
 		$currentSel = $firstPart;
 
 		if($this->dataPool->offsetExists($firstPart) === false) {
 			if($returnNull === false)
-				throw new TemplateEngineException('The data with offset "' . $currentSel . '" does not exist.');
+				throw new TemplateEngineException('The data with offset "' . $currentSel . '" does not exist for template file ' . $this->currentTemplateFile);
 
 			return null;
 		}
@@ -584,7 +534,7 @@ class TemplateEngine {
 					if($getProperty->isPublic() === true) {
 						$varData = $varData->$part;
 					} else {
-						/*$getterMethodName = null;
+						$getterMethodName = null;
 
 						foreach($this->getterMethodPrefixes as $mp) {
 							$getterMethodName = $mp . ucfirst($part);
@@ -597,9 +547,6 @@ class TemplateEngine {
 
 						if($getterMethodName === null)
 							throw new TemplateEngineException('Could not access private property "' . $part . '". Please provide a getter method');
-							*/
-						if(($getterMethodName = $this->doesGetterMethodExists($varData, $part)) === false)
-							throw new TemplateEngineException('Could not access private property "' . $part . '". Please provide a getter method');
 
 						$varData = call_user_func(array($varData, $getterMethodName));
 					}
@@ -608,9 +555,7 @@ class TemplateEngine {
 						?call_user_func(array($varData, 'get' . ucfirst($part)))
 						:$varData->$part;*/
 				} elseif(method_exists($varData, $part) === true) {
-					$varData = call_user_func(array($varData, $part)); //uc_first()
-				} elseif(($getterMethodName = $this->doesGetterMethodExists($varData, $part)) !== false) {
-					$varData = call_user_func(array($varData, $getterMethodName)); //uc_first()
+					$varData = call_user_func(array($varData, ucfirst($part)));
 				} else {
 					throw new TemplateEngineException('Don\'t know how to handle selector part "' . $part . '"');
 				}
@@ -635,21 +580,6 @@ class TemplateEngine {
 		}
 
 		return $varData;
-	}
-
-	private function doesGetterMethodExists($context, $part) {
-		$getterMethodName = null;
-
-		foreach($this->getterMethodPrefixes as $mp) {
-			$getterMethodName = $mp . ucfirst($part);
-
-			if(method_exists($context, $getterMethodName) === true && is_callable(array($context, $getterMethodName)) === true)
-				return $getterMethodName;
-
-			$getterMethodName = null;
-		}
-
-		return false;
 	}
 }
 

@@ -19,8 +19,9 @@ use ch\timesplinter\logger\TSLogger;
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2012 TiMESPLiNTER Webdevelopment
  */
-class StaticPageController extends PageController implements HandleHttpError {
-	protected  $logger;
+class StaticPageController extends PageController implements HandleHttpError
+{
+	protected $logger;
 	protected $headers;
 
 	/**
@@ -28,7 +29,8 @@ class StaticPageController extends PageController implements HandleHttpError {
 	 * @param HttpRequest $httpRequest The current HTTP request instance
 	 * @param Route $route The matched route instance
 	 */
-	public function __construct(Core $core, HttpRequest $httpRequest, Route $route) {
+	public function __construct(Core $core, HttpRequest $httpRequest, Route $route)
+	{
 		parent::__construct($core, $httpRequest, $route);
 
 		$this->logger = FrameworkLoggerFactory::getLogger($this);
@@ -43,7 +45,8 @@ class StaticPageController extends PageController implements HandleHttpError {
 	 * @throws \UnexpectedValueException
 	 * @return \HttpResponse The response object with content, headers, HTTP status code, etc.
 	 */
-	public function getPage() {
+	public function getPage()
+	{
 		$pageData = $this->core->getSettings()->pagedata;
 		$routeID = $this->route->id;
 
@@ -64,12 +67,12 @@ class StaticPageController extends PageController implements HandleHttpError {
 	}
 
 	/**
-	 * @param \Exception $e The thrown expection
-	 * @param int $httpStatusCode The HTTP status code for the response (403, 404, 500, etc.)
+	 * @param HttpException $e The thrown exception
 	 * @return HttpResponse The error page response
 	 * @throws \ch\timesplinter\core\HttpException
 	 */
-	public function displayHttpError(\Exception $e, $httpStatusCode) {
+	public function displayHttpError(HttpException $e)
+	{
 		try {
 			$html = $this->view->render('error.html', array(
 				'error' => $e,
@@ -82,7 +85,7 @@ class StaticPageController extends PageController implements HandleHttpError {
 			throw new HttpException($e->getMessage(), 500);
 		}
 
-		return new HttpResponse($httpStatusCode, $html, $this->headers);
+		return new HttpResponse($e->getCode(), $html, $this->headers);
 	}
 }
 

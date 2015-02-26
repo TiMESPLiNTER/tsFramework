@@ -2,9 +2,9 @@
 namespace ch\timesplinter\core;
 
 /**
- * Class Observable
  * @author Pascal Münst
  * @copyright (c) 2012, Pascal Münst
+ * @version 1.0
  */
 abstract class Observable {
     protected $observers;
@@ -17,13 +17,12 @@ abstract class Observable {
         $this->observers = array();
 		$this->changed = false;
     }
-
-	/**
-	 * Calls the update() function using the reference to each
-	 * registered observer - used by children of Observable
-	 * @param $arg
-	 * @return void
-	 */
+ 
+    /**
+    * Calls the update() function using the reference to each
+    * registered observer - used by children of Observable
+    * @return void
+    */ 
     public function notifyObservers($arg) {
         if($this->changed === false)
 			return;
@@ -34,12 +33,11 @@ abstract class Observable {
             $this->observers[$i]->update($this, $arg);
         }
     }
-
-	/**
-	 * Register the reference to an object object
-	 * @param $observer
-	 * @return void
-	 */
+ 
+    /**
+    * Register the reference to an object object
+    * @return void
+    */ 
     public function addObserver(&$observer) {
         $this->observers[] = &$observer;
     }

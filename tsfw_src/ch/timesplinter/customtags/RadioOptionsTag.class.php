@@ -9,24 +9,24 @@ use ch\timesplinter\template\TemplateEngine;
 use ch\timesplinter\template\TemplateTag;
 
 /**
- * Class RadioOptionsTag
- * @package ch\timesplinter\customtags
+ *
+ *
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2012, TiMESPLiNTER Webdevelopment
  */
-class RadioOptionsTag extends TemplateTag implements TagNode {
-	public function __construct() {
-		parent::__construct('radioOptions', false);
-	}
-
-	public function replaceNode(TemplateEngine $tplEngine, ElementNode $node) {
+class RadioOptionsTag extends TemplateTag implements TagNode
+{
+	public function replaceNode(TemplateEngine $tplEngine, ElementNode $node)
+	{
 		// DATA
-		TemplateEngine::checkRequiredAttrs($node, array('options', 'selected'));
+		$tplEngine->checkRequiredAttrs($node, array('options', 'checked'));
 
-		//$compareArr = $tplEngine->getDataFromSelector($node->getAttribute('checked')->value);
+		$compareArr = $tplEngine->getSelectorAsPHPStr($node->getAttribute('checked')->value);
 		$dataKey = $node->getAttribute('options')->value;
 		$fldName = $node->getAttribute('name')->value;
 
 		$textContent = '<?php echo "<ul>";  foreach($this->getDataFromSelector(\'' . $dataKey . '\') as $key => $val) {
-			$checked = ($key == $this->getDataFromSelector(\'' . $node->getAttribute('selected')->value . '\'))?\' checked\':null;
+			$checked = in_array($key, ((array)' . $compareArr . '))?\' checked\':null;
 			echo \'<li><label><input type="radio" value="\'.$key.\'" name="' . $fldName . '"\'.$checked.\'> \'.$val.\'</label></li>\' . "\n";
 		} echo "</ul>"; ?>';
 
@@ -35,6 +35,30 @@ class RadioOptionsTag extends TemplateTag implements TagNode {
 
 		$node->parentNode->insertBefore($newNode, $node);
 		$node->parentNode->removeNode($node);
+	}
+
+	/**
+	 * @return string
+	 */
+	public static function getName()
+	{
+		return 'radioOptions';
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function isElseCompatible()
+	{
+		return false;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function isSelfClosing()
+	{
+		return true;
 	}
 }
 

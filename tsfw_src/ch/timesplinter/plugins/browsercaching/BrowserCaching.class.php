@@ -6,13 +6,14 @@ use ch\timesplinter\core\FrameworkPlugin;
 use ch\timesplinter\core\HttpResponse;
 
 /**
- * Description of ETag
- *
- * @author pascal91
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) TiMESPLiNTER Webdevelopment
  */
-class BrowserCaching extends FrameworkPlugin {
+class BrowserCaching extends FrameworkPlugin
+{
 	/** @Override */
-	public function afterResponseBuilt() {
+	public function afterResponseBuilt()
+	{
 		$pluginSettings = $this->core->getSettings()->{'plugin.browsercaching'};
 		$httpResponse = $this->core->getHttpResponse();
 		

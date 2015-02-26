@@ -11,9 +11,10 @@ use \ch\timesplinter\core\HttpResponse;
  *
  * @author pascal91
  */
-class Robots extends FrameworkPlugin {
-	//put your code here
-	public function afterRequestBuilt() {
+class Robots extends FrameworkPlugin
+{
+	public function afterRequestBuilt()
+	{
 		$pluginSettings = $this->core->getSettings()->{'plugin.robots'};
 		
 		//if(isset($pluginSettings->environments->))
@@ -26,11 +27,10 @@ class Robots extends FrameworkPlugin {
 		$robotsRoute->pattern = '/robots.txt';
 		
 		$routes->__robots = $robotsRoute;
-		
-		//var_dump($this->core->getSettings()->core->routes); exit;
 	}
 	
-	public function displayRobots() {
+	public function displayRobots()
+	{
 		/*User-agent: *
 		Disallow: */
 		return new HttpResponse(200, 'noindex,nofollow', array(

@@ -62,7 +62,7 @@ abstract class Logger {
 			'From: error@' . $_SERVER['SERVER_NAME']
 		);
 
-		error_log('[' . $level . '] ' . $msg . PHP_EOL . PHP_EOL . 'For more information view the log', 1,
+		error_log('[' . $level . '] ' . $msg, 1,
 			$this->mailAddress,
 			implode(PHP_EOL, $headers)
 		);
@@ -74,8 +74,17 @@ abstract class Logger {
 	 * @param Exception $e
 	 */
 	public function error($msg, Exception $e = null) {
-		if($e !== null)
-			$msg .= "\r\n\t" . get_class($e) . ': (' . $e->getCode() . ') "' . $e->getMessage() . "\"\r\n\tthrown in file: " . $e->getFile() . ' (Line: ' . $e->getLine() . ')' . "\r\n\n\t" . str_replace("\n", "\n\t", $e->getTraceAsString());
+		if($e !== null) {
+			$msg .= PHP_EOL . get_class($e) . ': (' . $e->getCode() . ') "' . $e->getMessage() . '"' . PHP_EOL;
+			$msg .= 'thrown in file: ' . $e->getFile() . ' (Line: ' . $e->getLine() . ')' . PHP_EOL . PHP_EOL;
+			$msg .= $e->getTraceAsString();
+		}
+
+		$msg .= PHP_EOL . PHP_EOL . '$_SERVER = ' . print_r($_SERVER, true);
+		$msg .= PHP_EOL . PHP_EOL . '$_GET = ' . print_r($_GET, true);
+		$msg .= PHP_EOL . PHP_EOL . '$_POST = ' . print_r($_POST, true);
+		$msg .= PHP_EOL . PHP_EOL . '$_FILES = ' . print_r($_FILES, true);
+		$msg .= PHP_EOL . PHP_EOL . '$_COOKIE = ' . print_r($_COOKIE, true);
 
 		$this->mailMessage(self::LEVEL_ERROR, $msg);
 

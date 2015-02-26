@@ -9,7 +9,8 @@ namespace ch\timesplinter\htmlparser;
  * @copyright Copyright (c) 2012, TiMESPLiNTER Webdevelopment
  * @version 1.0.0
  */
-class HtmlDoc {
+class HtmlDoc
+{
 	private $htmlContent;
 	private $contentPos;
 	private $nodeTree;
@@ -20,7 +21,8 @@ class HtmlDoc {
 
 	//private $logger;
 	
-	public function __construct($htmlContent = null, $namespace = null) {
+	public function __construct($htmlContent = null, $namespace = null)
+	{
 		//$this->logger = LoggerFactory::getEnvLogger($this);
 		$this->currentLine = 1; // Start at line 1 not 0, we are no nerds ;-)
 		
@@ -53,16 +55,17 @@ class HtmlDoc {
 		}
 	}
 
-	private function findNextNode() {
+	protected function findNextNode()
+	{
 		$oldPendingNode = $this->pendingNode;
 		$oldContentPos = $this->contentPos;
-		$pattern = $res = null;
+		$res = null;
 
 		if($this->namespace !== null) {
 			//$pattern = '/(?:<!--.+?-->|<!\[CDATA\[.+?\]\]>|<(\/)?(' . $this->namespace . '\:[\w]+?)(?:\\s+(.+?))?(\/)?\\s*(?<![-\?])>)/ims';
-			$pattern = '/(?:<!--.+?-->|<!\[CDATA\[.+?\]\]>|<(\/)?(' . $this->namespace . '\:\w+?)((?:\s+[^=]+="[^"]+")*?)?(\s*\/)?\s*>)/ims';
+			$pattern = '/(?:<!--.+?-->|<!\[CDATA\[.+?\]\]>|<(\/)?(' . $this->namespace . '\:\w+?)((?:\s+[^=]+="[^"]*")*?)?(\s*\/)?\s*>)/ims';
 		} else {
-			$pattern = '/(?:<!--.+?-->|<!\[CDATA\[.+?\]\]>|<(\/)?(\w+?)((?:\s+[^=]+="[^"]+")*?)?(\s*\/)?\s*>)/ims';
+			$pattern = '/(?:<!--.+?-->|<!\[CDATA\[.+?\]\]>|<(\/)?(\w+?)((?:\s+[^=]+="[^"]*")*?)?(\s*\/)?\s*>)/ims';
 		}
 		
 		preg_match($pattern, $this->htmlContent, $res, PREG_OFFSET_CAPTURE, $this->contentPos);
@@ -116,7 +119,9 @@ class HtmlDoc {
 
 			// </...> (close only)
 			if(array_key_exists(1, $res) && $res[1][1] !== -1) {
-				$this->pendingNode->closed = true;
+				if($this->pendingNode instanceof ElementNode)
+					$this->pendingNode->closed = true;
+				
 				$this->pendingNode = ($oldPendingNode !== null) ? $oldPendingNode->parentNode : null;
 				
 				/**
@@ -148,7 +153,7 @@ class HtmlDoc {
 
 			// <img ... /> (open and close)
 			if((array_key_exists(4, $res) && $res[4][0] === '/') || (array_key_exists(3, $res) && $res[3][0] === '/') || in_array($res[2][0], $this->selfClosingTags)) {
-				$newNode->tagType = ElementNode::TAG_SELFCLOSING;
+				$newNode->tagType = ElementNode::TAG_SELF_CLOSING;
 				
 				//$this->logger->debug('<' . $res[2][0] . ' />');
 			} else {
@@ -258,7 +263,7 @@ class HtmlDoc {
 			}
 			$attrStr = (count($attrs) > 0) ? ' ' . implode(' ', $attrs) : '';
 			
-			$html .= '<' . $tagStr . $attrStr . $node->tagExtension . (($node->tagType === ElementNode::TAG_SELFCLOSING)?' /':'') . '>' . $node->content;
+			$html .= '<' . $tagStr . $attrStr . $node->tagExtension . (($node->tagType === ElementNode::TAG_SELF_CLOSING)?' /':'') . '>' . $node->content;
 
 
 			if(($node->tagType === ElementNode::TAG_OPEN && $node->closed === true) || $node->tagType === ElementNode::TAG_CLOSE)

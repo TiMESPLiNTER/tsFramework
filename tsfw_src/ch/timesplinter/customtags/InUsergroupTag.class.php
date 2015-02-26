@@ -13,19 +13,14 @@ use
 ;
 
 /**
- * InUsergroup
- *
- * @author				entwicklung@metanet.ch
- * @copyright	Copyright (c) 2012, METANET AG, www.metanet.ch
- * @version			1
+ * @author Pascal Muenst <entwicklung@metanet.ch>
+ * @copyright Copyright (c) 2012, METANET AG, www.metanet.ch
  */
-class InUsergroupTag extends TemplateTag implements TagNode {
-	public function __construct() {
-		parent::__construct('InUsergroupTag', true);
-	}
-
-	public function replaceNode(TemplateEngine $tplEngine, ElementNode $tagNode) {
-		TemplateEngine::checkRequiredAttrs($tagNode, array('groups'));
+class InUsergroupTag extends TemplateTag implements TagNode
+{
+	public function replaceNode(TemplateEngine $tplEngine, ElementNode $tagNode)
+	{
+		$tplEngine->checkRequiredAttrs($tagNode, array('groups'));
 		
 		$requiredUG = array_map('trim', explode(',', $tagNode->getAttribute('groups')->value));
 
@@ -41,20 +36,45 @@ class InUsergroupTag extends TemplateTag implements TagNode {
 		$tagNode->parentNode->replaceNode($tagNode, $textNode);
 	}
 
-	public static function checkUGs($usergroups, TemplateEngine $tplEngine) {
+	public static function checkUGs($userGroups, TemplateEngine $tplEngine)
+	{
 		/** @var $auth AuthHandlerDB */
 		$auth = $tplEngine->getData('_auth');
 		
 		if($auth === null)
 			throw new TemplateEngineException('No auth object accessable');
 		
-		foreach($usergroups as $ug) {
-			if($auth->hasRightgroup($ug) === true)
+		foreach($userGroups as $ug) {
+			if($auth->hasRightGroup($ug) === true)
 				return true;
 		}
 
 		return false;
 	}
+
+	/**
+	 * @return string
+	 */
+	public static function getName()
+	{
+		return 'InUsergroup';
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function isElseCompatible()
+	{
+		return true;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function isSelfClosing()
+	{
+		return false;
+	}
 }
 
-?>
+/* EOF */

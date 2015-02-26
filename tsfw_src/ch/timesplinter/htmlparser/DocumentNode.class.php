@@ -8,16 +8,16 @@ namespace ch\timesplinter\htmlparser;
  * @copyright Copyright (c) 2012, TiMESPLiNTER Webdevelopment
  * @version 1.0.0
  */
-class DocumentNode extends HtmlNode {
-
+class DocumentNode extends HtmlNode
+{
 	public $childNodes;
 
-	public function __construct(HtmlDoc $htmlDocument) {
+	public function __construct(HtmlDoc $htmlDocument)
+	{
 		parent::__construct(HtmlNode::DOCUMENT_NODE, $htmlDocument);
 
 		$this->childNodes = array();
 	}
-
 }
 
 /* EOF */

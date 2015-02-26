@@ -1,21 +1,23 @@
 <?php
+
 namespace ch\timesplinter\common;
 
 /**
  * Some useful functions for string operations
- * @package ch\timesplinter\common
- *
+ * 
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2013 by TiMESPLiNTER Webdevelopment
  */
-class StringUtils {
+class StringUtils
+{
 	/**
 	 * @param string $str
 	 * @param string $start
 	 * @param string $end
 	 * @return null|string
 	 */
-	public static function between($str, $start, $end) {
+	public static function between($str, $start, $end)
+	{
         $posStart = strpos($str, $start) + strlen($start);
         $posEnd = strrpos($str, $end, $posStart);
         
@@ -30,7 +32,8 @@ class StringUtils {
 	 * @param string $before
 	 * @return string
 	 */
-	public static function beforeFirst($str, $before) {
+	public static function beforeFirst($str, $before)
+	{
         $posUntil = strpos($str, $before);
         
         if($posUntil === false)
@@ -44,7 +47,8 @@ class StringUtils {
 	 * @param string $before
 	 * @return string
 	 */
-	public static function beforeLast($str, $before) {
+	public static function beforeLast($str, $before)
+	{
         $posUntil = strrpos($str, $before);
         
         if($posUntil === false)
@@ -58,7 +62,8 @@ class StringUtils {
 	 * @param string $after
 	 * @return null|string
 	 */
-	public static function afterLast($str, $after) {
+	public static function afterLast($str, $after)
+	{
         $posFrom = strrpos($str, $after);
         
         if($posFrom === false)
@@ -72,7 +77,8 @@ class StringUtils {
 	 * @param string $after
 	 * @return null|string
 	 */
-	public static function afterFirst($str, $after) {
+	public static function afterFirst($str, $after)
+	{
         $posFrom = strpos($str, $after);
         
         if($posFrom === false)
@@ -83,7 +89,8 @@ class StringUtils {
         return ($afterStr !== false)?$afterStr:'';
     }
 
-	public static function insertBeforeLast($str, $beforeLast, $newStr) {
+	public static function insertBeforeLast($str, $beforeLast, $newStr)
+	{
 		return self::beforeLast($str, $beforeLast) . $newStr . $beforeLast . self::afterLast($str, $beforeLast);
 	}
 
@@ -92,7 +99,8 @@ class StringUtils {
 	 * @param string $startStr
 	 * @return bool
 	 */
-	public static function startsWith($str, $startStr) {
+	public static function startsWith($str, $startStr)
+	{
 		return (strpos($str, $startStr) === 0);
 	}
 
@@ -101,7 +109,8 @@ class StringUtils {
 	 * @param string $endStr
 	 * @return bool
 	 */
-	public static function endsWith($str, $endStr) {
+	public static function endsWith($str, $endStr)
+	{
 		$endStrlen = strlen($endStr);
 		
 		return (strrpos($str, $endStr)+$endStrlen === strlen($str));
@@ -112,7 +121,8 @@ class StringUtils {
 	 * @param string $token The tokens to split the string
 	 * @return array The splitted parts
 	 */
-	public static function tokenize($str, $token) {
+	public static function tokenize($str, $token)
+	{
 		$tokenArr = array();
 		$tokStr = strtok($str, $token);
 
@@ -130,7 +140,8 @@ class StringUtils {
 	 * @param string $str
 	 * @return array
 	 */
-	public static function explode($tokens, $str) {
+	public static function explode($tokens, $str)
+	{
 		$strToExplode = $str;
 		$explodeStr = $tokens;
 
@@ -145,49 +156,61 @@ class StringUtils {
 	/**
 	 * @param string $str The string to urlify
 	 * @param int $maxLength The max length of the urlified string. 0 is no length limit.
-	 * @param string $printableCharReplacement Replacement char for incompatible printable chars
+	 * @param string $encoding The encoding used for string transformations
+	 *
 	 * @return string The urlified string
 	 */
-	public static function urlify($str, $maxLength = 0, $printableCharReplacement = '-') {
+	public static function urlify($str, $maxLength = 0, $encoding = 'UTF-8')
+	{
 		$charMap = array(
-			'!' => null, '"' => null,
-			'#' => $printableCharReplacement . 'no' . $printableCharReplacement,
-			'$' => $printableCharReplacement . 'dollar' . $printableCharReplacement,
-			'%' => $printableCharReplacement . 'percentage' . $printableCharReplacement,
-			'&' => $printableCharReplacement . 'and'. $printableCharReplacement,
-			'\'' => null,
-			'(' => $printableCharReplacement,
-			')' => $printableCharReplacement,
-			'*' => null,
-			'+' => $printableCharReplacement . 'plus' . $printableCharReplacement,
-			',' => null, '/' => $printableCharReplacement,
-			':' => $printableCharReplacement,
-			';' => $printableCharReplacement,
-			'<' => null,
-			'=' => $printableCharReplacement . 'equals' . $printableCharReplacement,
-			'>' => null, '?' => null,
-			'@' => $printableCharReplacement . 'at' . $printableCharReplacement,
-			'[' => $printableCharReplacement,
-			']' => $printableCharReplacement,
-			'\\' => null, '^' => null, '`' => null,
-			'{' => $printableCharReplacement,
-			'}' => $printableCharReplacement,
-			'|' => $printableCharReplacement,
-			'~' => $printableCharReplacement,
-			"\t" => null, "\n" => null, "\r" => null
+			' ' => '-', '.' => '', ':' => '', ',' => '', '?' => '', '!' => '', '´' => '', '"' => '',
+			'(' => '', ')' => '', '[' => '', ']' => '', '{' => '', '}' => '', '\'' => '',
+
+			// German
+			'ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue',
+
+			// Francais
+			'é' => 'e', 'è' => 'e', 'ê' => 'e', 'à' => 'a', 'â' => 'a', 'ç' => 'c', 'ï' => '', 'î' => '',
+
+			// Espanol
+			'ñ' => 'n', 'ó' => 'o', 'ú' => 'u', '¿' => '', '¡' => ''
 		);
 
-		$asciiStr = iconv('ASCII', 'UTF-8', iconv('UTF-8', 'ASCII//TRANSLIT', trim($str)));
-
-		$urlifiedStr = str_replace(array_keys($charMap), $charMap, $asciiStr);
+		$urlifiedStr = strtr(mb_strtolower(trim($str), $encoding), $charMap);
 
 		// Replace multiple dashes
-		$urlifiedStr = preg_replace('/[' . $printableCharReplacement . ']{2,}/', $printableCharReplacement, $urlifiedStr);
+		$urlifiedStr = preg_replace('/[-]{2,}/', '-', $urlifiedStr);
 
 		if($maxLength === 0)
 			return $urlifiedStr;
 
 		return substr($urlifiedStr, 0, $maxLength);
+	}
+
+	/**
+	 * @param int $length The length of the random string
+	 * @param string|null $charMask An optional character mask. Default mask contains 0-9A-Za-z
+	 * @return string The random generated string
+	 */
+	public static function getRandomStr($length, $charMask = null)
+	{
+		if($charMask === null) {
+			$alphaCap = range('A', 'Z');
+			$alpha = range('a', 'z');
+			$numeric = range(0, 9);
+			
+			$charMask = implode(array_merge($alphaCap, $alpha, $numeric));
+		}
+		
+		$charMaskLength = strlen($charMask);
+		
+		$randomStr = '';
+		
+		for($i = 0; $i < $length; ++$i) {
+			$randomStr .= $charMask{rand(0, $charMaskLength-1)};
+		}
+			
+		return $randomStr;
 	}
 }
 

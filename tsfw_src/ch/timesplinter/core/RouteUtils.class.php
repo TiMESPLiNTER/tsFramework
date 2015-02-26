@@ -1,19 +1,19 @@
 <?php
+
 namespace ch\timesplinter\core;
 
-use \SimpleXMLElement;
 use \stdClass;
-use \ch\timesplinter\core\HttpRequest;
 
 /**
- * Description of RouteUtils
- *
- * @author pascal91
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2014 by TiMESPLiNTER Webdevelopment
  */
-class RouteUtils {
-	public static function matchRoutesAgainstPath(stdClass $routes, HttpRequest $httpRequest) {
+class RouteUtils
+{
+	public static function matchRoutesAgainstPath(stdClass $routes, HttpRequest $httpRequest)
+	{
 		$routeEntries = array();
-		
+
 		foreach($routes as $routeID => $r) {
 			$routeObj = self::createRouteObject($routeID, $r);
 
@@ -31,11 +31,12 @@ class RouteUtils {
 
 		if(count($routeEntries) === 0)
 			return null;
-		
+
 		return $routeEntries;
 	}
-	
-	private static function createRouteObject($routeID, stdClass $routeEntry) {
+
+	protected static function createRouteObject($routeID, stdClass $routeEntry)
+	{
 		$route = new Route;
 
 		$route->sslRequired = isset($routeEntry->sslRequired)?$routeEntry->sslRequired:false;
@@ -57,11 +58,12 @@ class RouteUtils {
 
 		$route->pattern = '@^' . $routeEntry->pattern . '$@';
 		$route->id = $routeID;
-		
+
 		return $route;
 	}
 
-	public static function getFirstRouteWhichHasMethod($routes, $method) {
+	protected static function getFirstRouteWhichHasMethod($routes, $method)
+	{
 		foreach($routes as $r) {
 			if(isset($r->methods[$method]) === true)
 				return $r;

@@ -1,6 +1,8 @@
 <?php
+
 namespace ch\timesplinter\customtags;
 
+use ch\timesplinter\template\TemplateEngineException;
 use 
 	ch\timesplinter\template\TemplateTag,
 	ch\timesplinter\htmlparser\TextNode,
@@ -10,18 +12,13 @@ use
 ;
 
 /**
- * LoadSubTplTag
- *
  * @author Pascal Münst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2012, METANET AG, www.metanet.ch
- * @version 1.0
  */
-class LoadSubTplTag extends TemplateTag implements TagNode {
-	public function __construct() {
-		parent::__construct('LoadSubTpl',false);
-	}
-
-	public function replaceNode(TemplateEngine $tplEngine, ElementNode $node) {
+class LoadSubTplTag extends TemplateTag implements TagNode
+{
+	public function replaceNode(TemplateEngine $tplEngine, ElementNode $node)
+	{
 		$dataKey = $node->getAttribute('tplfile')->value;
 
 		$tplFile = null;
@@ -54,6 +51,29 @@ class LoadSubTplTag extends TemplateTag implements TagNode {
 		echo $tplEngine->getResultAsHtml($tplPathStr . $file, $tplEngine->getAllData());
 	}
 
+	/**
+	 * @return string
+	 */
+	public static function getName()
+	{
+		return 'loadSubTpl';
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function isElseCompatible()
+	{
+		return false;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function isSelfClosing()
+	{
+		return true;
+	}
 }
 
 /* EOF */

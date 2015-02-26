@@ -18,9 +18,11 @@ abstract class FrameworkController {
 	protected $httpRequest;
 	/** @var Route */
 	protected $route;
+	/** @var null|\stdClass */
 	protected $currentDomain;
 	
-	public function __construct(Core $core, HttpRequest $httpRequest, Route $route) {
+	public function __construct(Core $core, HttpRequest $httpRequest, Route $route)
+	{
 		$this->core = $core;
 		$this->httpRequest = $httpRequest;
 		$this->route = $route;
@@ -29,30 +31,34 @@ abstract class FrameworkController {
 	}
 
 	/**
-	 * @return \ch\timesplinter\core\Core
+	 * @return Core
 	 */
-	public function getCore() {
+	public function getCore()
+	{
 		return $this->core;
 	}
 
 	/**
-	 * @return \ch\timesplinter\core\HttpRequest
+	 * @return HttpRequest
 	 */
-	public function getHttpRequest() {
+	public function getHttpRequest()
+	{
 		return $this->httpRequest;
 	}
 
 	/**
-	 * @return \ch\timesplinter\core\Route
+	 * @return Route
 	 */
-	public function getRoute() {
+	public function getRoute()
+	{
 		return $this->route;
 	}
 
 	/**
-	 * @return null|string
+	 * @return null|\stdClass
 	 */
-	public function getCurrentDomain() {
+	public function getCurrentDomain() 
+	{
 		return $this->currentDomain;
 	}
 }

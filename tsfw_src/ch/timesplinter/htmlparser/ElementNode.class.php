@@ -11,7 +11,7 @@ namespace ch\timesplinter\htmlparser;
 class ElementNode extends HtmlNode {
 	const TAG_OPEN = 1;
 	const TAG_CLOSE = 2;
-	const TAG_SELFCLOSING = 3;
+	const TAG_SELF_CLOSING = 3;
 
 	public $childNodes;
 	public $tagType;
@@ -22,7 +22,8 @@ class ElementNode extends HtmlNode {
 	public $tagExtension;
 	public $closed;
 
-	public function __construct(HtmlDoc $htmlDocument) {
+	public function __construct(HtmlDoc $htmlDocument)
+	{
 		parent::__construct(HtmlNode::ELEMENT_NODE, $htmlDocument);
 		
 		$this->namespace = null;
@@ -38,30 +39,40 @@ class ElementNode extends HtmlNode {
 	/**
 	 * 
 	 * @param string $key
-	 * @return \HtmlAttribute
+	 * @return HtmlAttribute
 	 */
-	public function getAttribute($key) {
+	public function getAttribute($key)
+	{
 		if(isset($this->attributesNamed[$key]) === false)
 			return new HtmlAttribute($key, null);
 		
 		return $this->attributesNamed[$key];
 	}
 
-	public function addAttribute(HtmlAttribute $attr) {
+	public function addAttribute(HtmlAttribute $attr)
+	{
 		$this->attributes[] = $attr;
 		$this->attributesNamed[$attr->key] = $attr;
 	}
 
-	public function doesAttributeExist($key) {
+	public function doesAttributeExist($key)
+	{
 		return isset($this->attributesNamed[$key]);
 	}
 	
-	public function removeAttribute($key) {
+	public function removeAttribute($key)
+	{
 		if(isset($this->attributesNamed[$key]) === true)
 			unset($this->attributesNamed[$key]);
 	}
-	
-	public function getInnerHtml($entryNode = null) {
+
+	/**
+	 * @param ElementNode|null $entryNode
+	 *
+	 * @return string
+	 */
+	public function getInnerHtml($entryNode = null)
+	{
 		$html = '';
 		$nodeList = null;
 
@@ -89,18 +100,17 @@ class ElementNode extends HtmlNode {
 			$attrStr = (count($attrs) > 0) ? ' ' . implode(' ', $attrs) : '';
 
 			if($node instanceof ElementNode === true) {
-				$html .= '<' . $tagStr . $attrStr . $node->tagExtension . (($node->tagType === ElementNode::TAG_SELFCLOSING) ? ' /' : '') . '>' . $node->content;
+				$html .= '<' . $tagStr . $attrStr . $node->tagExtension . (($node->tagType === ElementNode::TAG_SELF_CLOSING) ? ' /' : '') . '>' . $node->content;
 			} else {
 				$html .= $node->content;
 			}
 
 			if($node->tagType === ElementNode::TAG_OPEN)
-				$html .= self::getInnerHtml($node) . '</' . $tagStr . '>';
+				$html .= $this->getInnerHtml($node) . '</' . $tagStr . '>';
 		}
 
 		return $html;
 	}
-
 }
 
-?>
+/* EOF */

@@ -1,11 +1,10 @@
 <?php
+
 namespace ch\timesplinter\core;
 
 use \DateTime;
 
 /**
- * Description of HttpRequest
- *
  * @author Pascal Münst <dev@timesplinter.ch>
  */
 class HttpRequest {
@@ -27,7 +26,9 @@ class HttpRequest {
 	private $requestTime;
 	private $languages;
 	private $userAgent;
+	private $referrer;
 	private $remoteAddress;
+	private $acceptLanguage;
 
 	private $requestVars;
 	private $cookies;
@@ -132,6 +133,34 @@ class HttpRequest {
 	}
 
 	/**
+	 * @return string|null
+	 */
+	public function getReferrer() {
+		return $this->referrer;
+	}
+
+	/**
+	 * @param string|null $referrer
+	 */
+	public function setReferrer($referrer) {
+		$this->referrer = $referrer;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getAcceptLanguage() {
+		return $this->acceptLanguage;
+	}
+
+	/**
+	 * @param string $acceptLanguage
+	 */
+	public function setAcceptLanguage($acceptLanguage) {
+		$this->acceptLanguage = $acceptLanguage;
+	}
+
+	/**
 	 * Set the default function(s) and / or callback(s) to sanitize values from getVar()
 	 * @param string|array $defaultSanitizers The function(s) and / or callback(s)
 	 */
@@ -154,13 +183,13 @@ class HttpRequest {
 
 		if($this->defaultSanitizers !== null)
 			return $this->sanitize($this->requestVars[$name], $this->defaultSanitizers);
-
+		
 		return $this->requestVars[$name];
 	}
 
 	/**
 	 * Returns the value of a cookie with key $name
-	 * @param $name The name of the cookie
+	 * @param string $name The name of the cookie
 	 * @param string|array|null $sanitizers Function names or valid callbacks to filter the input value
 	 * @return mixed|null Returns the value of the cookie or null if it does not exist
 	 */
@@ -172,11 +201,12 @@ class HttpRequest {
 	}
 
 	/**
-	 * Returns the informations about a file
+	 * Returns the information about a file
 	 * @param string $name The name of the file field
 	 * @return array|null Returns the information about the file or null if it does not exist
 	 */
-	public function getFile($name) {
+	public function getFile($name)
+	{
 		if(isset($_FILES[$name]) === false)
 			return null;
 
@@ -190,7 +220,8 @@ class HttpRequest {
 	 * @param string $name The name of the file field
 	 * @return array Returns an array with the information about the files
 	 */
-	public function getFiles($name) {
+	public function getFiles($name)
+	{
 		$filesArr = $this->getFile($name);
 
 		$files = array();

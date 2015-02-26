@@ -1,12 +1,10 @@
 <?php
+
 namespace ch\timesplinter\htmlparser;
 
 /**
- * HtmlNode
- *
- * @author				entwicklung@metanet.ch
- * @copyright	Copyright (c) 2012, METANET AG, www.metanet.ch
- * @version			1
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2012, TiMESPLiNTER Webdevelopment
  */
 abstract class HtmlNode {
 
@@ -25,6 +23,7 @@ abstract class HtmlNode {
 
 	public $nodeType;
 	public $line;
+	public $childNodes;
 	
 	/** @var HtmlNode */
 	public $parentNode;
@@ -33,7 +32,8 @@ abstract class HtmlNode {
 	/** @var HtmlDoc */
 	private $htmlDoc;
 
-	public function __construct($nodeType, HtmlDoc $htmlDoc) {
+	public function __construct($nodeType, HtmlDoc $htmlDoc)
+	{
 		$this->htmlDoc = $htmlDoc;
 
 		$this->parentNode = null;
@@ -61,14 +61,17 @@ abstract class HtmlNode {
 
 	/**
 	 * Replaces a node with another one
+	 *
 	 * @param HtmlNode $nodeToReplace The node to replace
 	 * @param HtmlNode $replacementNode The replacement node for the original one
+	 *
+	 * @throws \Exception
 	 */
 	public function replaceNode(HtmlNode $nodeToReplace, HtmlNode $replacementNode) {
-		$pos = self::findNodePosition($nodeToReplace);
+		$pos = $this->findNodePosition($nodeToReplace);
 
 		if($pos === null)
-			throw new Exception('Nix gut... Node for replacement nicht gefunden.');
+			throw new \Exception('Nix gut... Node for replacement nicht gefunden.');
 
 		$this->childNodes[$pos] = $replacementNode;
 	}
@@ -81,7 +84,7 @@ abstract class HtmlNode {
 	 * be inserted
 	 */
 	public function insertBefore($nodesToInsert, HtmlNode $beforeNode) {
-		$pos = self::findNodePosition($beforeNode);
+		$pos = $this->findNodePosition($beforeNode);
 
 		if(!is_array($nodesToInsert))
 			$nodesToInsert = array($nodesToInsert);
@@ -104,8 +107,10 @@ abstract class HtmlNode {
 
 	/**
 	 * Removes a node from the child nodes
+	 * 
 	 * @param HtmlNode $nodeToRemove
-	 * @return type
+	 * 
+	 * @return void
 	 */
 	public function removeNode(HtmlNode $nodeToRemove) {
 		$countChilds = count($this->childNodes);
@@ -125,15 +130,17 @@ abstract class HtmlNode {
 	 * Adds a child node to the list
 	 * @param HtmlNode $childNode
 	 */
-	public function addChildNode(HtmlNode $childNode) {
+	public function addChildNode(HtmlNode $childNode)
+	{
 		$this->childNodes[] = $childNode;
 	}
 
 	/**
 	 * Returns the next sibling
-	 * @return HtmlNode The next sibling or NULL if no next sibling exists
+	 * @return ElementNode|null The next sibling or NULL if no next sibling exists
 	 */
-	public function getNextSibling() {
+	public function getNextSibling()
+	{
 		$cNodes = $this->parentNode->childNodes;
 		$cNodesCount = count($cNodes);
 

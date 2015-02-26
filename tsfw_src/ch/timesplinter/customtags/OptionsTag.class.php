@@ -14,14 +14,11 @@ use ch\timesplinter\htmlparser\TextNode;
  * @copyright Copyright (c) 2012, METANET AG, www.metanet.ch
  * @version 1.0.0
  */
-class OptionsTag extends TemplateTag implements TagNode {
-
-	public function __construct() {
-		parent::__construct('options', false);
-	}
-
-	public function replaceNode(TemplateEngine $tplEngine, ElementNode $node) {
-		TemplateEngine::checkRequiredAttrs($node, array('options'));
+class OptionsTag extends TemplateTag implements TagNode
+{
+	public function replaceNode(TemplateEngine $tplEngine, ElementNode $node)
+	{
+		$tplEngine->checkRequiredAttrs($node, array('options'));
 
 		// DATA
 		$compareValue = ($node->getAttribute('selected')->value !== null)?$node->getAttribute('selected')->value:null;
@@ -46,6 +43,30 @@ class OptionsTag extends TemplateTag implements TagNode {
 
 		$node->parentNode->insertBefore($newNode, $node);
 		$node->parentNode->removeNode($node);
+	}
+
+	/**
+	 * @return string
+	 */
+	public static function getName()
+	{
+		return 'options';
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function isElseCompatible()
+	{
+		return false;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function isSelfClosing()
+	{
+		return true;
 	}
 }
 

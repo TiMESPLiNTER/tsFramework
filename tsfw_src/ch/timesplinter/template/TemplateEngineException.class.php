@@ -10,8 +10,10 @@ use \Exception;
  * @copyright Copyright (c) 2012, METANET AG, www.metanet.ch
  * @version 1.0
  */
-class TemplateEngineException extends Exception {
-	public function __construct($message, $code = 0, $previous = null) {
+class TemplateEngineException extends Exception
+{
+	public function __construct($message, $code = 0, $previous = null)
+	{
 		parent::__construct($message, $code, $previous);
 	}
 }

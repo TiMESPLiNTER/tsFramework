@@ -2,10 +2,10 @@
 
 namespace ch\timesplinter\core;
 
-use \stdClass;
 use ch\timesplinter\common\JsonUtils;
 
-class Settings {
+class Settings
+{
 	private $settings;
 	private $settingsPath;
     private $replace;
@@ -15,9 +15,10 @@ class Settings {
 	private $cachedFileTime;
 	private $resourcesChecked;
 	
-	public function __construct($settingsPath, $cachePath, array $replace = array()) {
+	public function __construct($settingsPath, $cachePath, array $replace = array())
+	{
 		$this->settingsPath = $settingsPath;
-		$this->settings = new stdClass;
+		$this->settings = new \stdClass();
         $this->replace = array();
 		$this->resourcesChecked = array();
 
@@ -30,7 +31,8 @@ class Settings {
         }
 	}
 
-	private function loadSettingsFromCache() {
+	private function loadSettingsFromCache()
+	{
 		if(file_exists($this->cacheFile) === false)
 			return;
 
@@ -50,7 +52,8 @@ class Settings {
 		$this->cachedSettingsFiles = $cachedData['files'];
 	}
 
-	private function loadSettingsFromFile($file) {
+	private function loadSettingsFromFile($file)
+	{
 		$filePath = $this->settingsPath . $file;
 		
 		if(file_exists($filePath) === false)
@@ -92,12 +95,13 @@ class Settings {
 		return $settingsObj;
 	}
 
-    private function interpolateObj(stdClass $settingsObj, array $replace = array()) {
+    private function interpolateObj(stdClass $settingsObj, array $replace = array())
+    {
         if(count($replace) === 0)
             return;
 
         foreach($settingsObj as $k => $v) {
-            if(is_object($settingsObj->$k) && $settingsObj->$k instanceof stdClass)
+            if(is_object($settingsObj->$k) && $settingsObj->$k instanceof \stdClass)
                 $this->interpolateObj($settingsObj->$k, $replace);
             elseif(is_array($settingsObj->$k))
                 $this->interpolateArray($settingsObj->$k, $replace);
@@ -106,12 +110,13 @@ class Settings {
         }
     }
 
-    private function interpolateArray(array $settingsArray, array $replace = array()) {
+    private function interpolateArray(array $settingsArray, array $replace = array())
+    {
         if(count($replace) === 0)
             return;
 
         foreach($settingsArray as $k => $v) {
-            if(is_object($settingsArray[$k]) && $settingsArray[$k] instanceof stdClass)
+            if(is_object($settingsArray[$k]) && $settingsArray[$k] instanceof \stdClass)
                 $this->interpolateObj($settingsArray[$k], $replace);
             elseif(is_array($settingsArray[$k]))
                 $this->interpolateArray($settingsArray[$k], $replace);
@@ -120,7 +125,8 @@ class Settings {
         }
     }
 
-	public function __get($property) {
+	public function __get($property)
+	{
 		/* property not exist OR cache file is older than the json file here */
 		if(!isset($this->settings->$property) || filemtime($this->settingsPath . $property . '.json') > $this->cachedFileTime) {
 			$this->settings->$property = $this->loadSettingsFromFile($property . '.json');
@@ -131,7 +137,7 @@ class Settings {
 			$this->resourcesChecked[] = $property;
 
 			foreach($this->settings->$property->{'@resources'} as $rsc) {
-				if(filemtime($this->settingsPath . $rsc) > $this->cachedFileTime) {
+				if(filemtime($this->settingsPath . $rsc) > $this->cachedFiletime) {
 					$this->settings->$property = $this->loadSettingsFromFile($property . '.json');
 					$this->cacheChanged = true;
 
@@ -143,7 +149,8 @@ class Settings {
 		return $this->settings->$property;
 	}
 
-	public function __destruct() {
+	public function __destruct()
+	{
 		if($this->cacheChanged === false)
 			return;
 

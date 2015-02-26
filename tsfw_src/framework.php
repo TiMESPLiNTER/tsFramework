@@ -1,20 +1,22 @@
 <?php
 
-error_reporting(E_ALL);
-
 use ch\timesplinter\core\Core;
 use ch\timesplinter\autoloader\Autoloader;
 use ch\timesplinter\core\FrameworkAutoloader;
 
+error_reporting(E_ALL);
+
+// Default timezone patch
+$defaultTimezone = 'Greenwich';
+$iniTimezone = ini_get('date.timezone');
+
+if(is_string($iniTimezone) === true && strlen($iniTimezone) > 0)
+	$defaultTimezone = $iniTimezone;
+
+date_default_timezone_set($defaultTimezone);
+
 // Framework specific constants
 define('REQUEST_TIME', $_SERVER['REQUEST_TIME']+microtime());
-/*define('FW_DIR', dirname(__FILE__) . DIRECTORY_SEPARATOR);
-define('MODULES_DIR', 'modules' . DIRECTORY_SEPARATOR);*/
-
-// Site specific constants
-/*define('SITE_ROOT', $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . 'site' . DIRECTORY_SEPARATOR, true);
-define('CACHE_DIR' , SITE_ROOT . 'cache' . DIRECTORY_SEPARATOR);
-define('SETTINGS_DIR' , SITE_ROOT . 'settings' . DIRECTORY_SEPARATOR);*/
 
 $fwRoot = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 $siteRoot = $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . 'site' . DIRECTORY_SEPARATOR;

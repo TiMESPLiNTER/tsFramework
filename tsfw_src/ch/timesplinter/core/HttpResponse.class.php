@@ -1,13 +1,13 @@
 <?php
+
 namespace ch\timesplinter\core;
 
 /**
- * Class HttpResponse
- *
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright (c) 2012, TiMESPLiNTER Webdevelopment
  */
-class HttpResponse {
+class HttpResponse
+{
 	private static $STATUS_CODES = array(
 		// 1xx - Informations
 		 100 => 'Continue'
@@ -89,10 +89,11 @@ class HttpResponse {
 	 * @param array $headers
 	 * @param boolean $stream
 	 * @param mixed $streamContext
-	 * @internal param int $httpResponseCode
+	 * 
 	 * @return HttpResponse
 	 */
-	public function __construct($httpStatusCode = 200, $content = null, $headers = array('Content-Type' => 'text/html; charset=UTF-8'), $stream = false, $streamContext = null) {
+	public function __construct($httpStatusCode = 200, $content = null, $headers = array('Content-Type' => 'text/html; charset=UTF-8'), $stream = false, $streamContext = null)
+	{
 		$this->httpStatusCode = $httpStatusCode;
 		$this->headers = $headers;
 		$this->cookies = array();
@@ -101,61 +102,77 @@ class HttpResponse {
 		$this->streamContext = $streamContext;
 	}
 	
-	public function getHeaders() {
+	public function getHeaders()
+	{
 		return $this->headers;
 	}
 	
-	public function addHeader($key, $value) {
+	public function addHeader($key, $value)
+	{
 		$this->headers[$key] = $value;
 	}
 	
-	public function setHeaders($headers) {
+	public function setHeaders($headers)
+	{
 		$this->headers = $headers;
 	}
 
-	public function removeHeader($key) {
+	public function removeHeader($key)
+	{
 		header_remove($key);
 	}
 
-	public function removeAllHeaders() {
+	public function removeAllHeaders()
+	{
 		header_remove();
 	}
 
-	public function addCookie(Cookie $cookie) {
+	public function addCookie(Cookie $cookie)
+	{
 		$this->cookies[$cookie->getName()] = $cookie;
 	}
 
-	public function setCookies(array $cookies) {
+	/**
+	 * @param Cookie[] $cookies
+	 */
+	public function setCookies(array $cookies)
+	{
 		$this->cookies = array();
 
 		foreach($cookies as $cookie)
 			$this->cookies[$cookie->getName()] = $cookie;
 	}
 
-	public function removeCookie($name) {
+	public function removeCookie($name)
+	{
 		if(array_key_exists($name, $_COOKIE) === true)
 			unset($_COOKIE[$name]);
 
 		$this->addCookie(new Cookie($name, null, time()-3600));
 	}
 	
-	public function getContent() {
+	public function getContent()
+	{
 		return $this->content;
 	}
 	
-	public function setContent($content) {
+	public function setContent($content)
+	{
 		$this->content = $content;
 	}
 	
-	public function getHttpStatusCode() {
+	public function getHttpStatusCode()
+	{
 		return $this->httpStatusCode;
 	}
 	
-	public function setHttpResponseCode($httpStatusCode) {
+	public function setHttpResponseCode($httpStatusCode)
+	{
 		$this->httpStatusCode = $httpStatusCode;
 	}
 	
-	public function send() {
+	public function send()
+	{
 		header($this->getHttpStatusHeader($this->httpStatusCode));
 
 		foreach($this->headers as $key => $value) {
@@ -187,12 +204,19 @@ class HttpResponse {
 			readfile($this->content, false, $this->streamContext);
 		}
 	}
+	
+	public function isStream()
+	{
+		return $this->stream;
+	}
 
-	public static function getHttpStatusString($statusCode) {
+	public static function getHttpStatusString($statusCode)
+	{
 		return (isset(self::$STATUS_CODES[$statusCode])?' ' . self::$STATUS_CODES[$statusCode]:null);
 	}
 
-	private function getHttpStatusHeader($statusCode) {
+	private function getHttpStatusHeader($statusCode)
+	{
 		return 'HTTP/1.1 ' . $statusCode . $this::getHttpStatusString($statusCode);
 	}
 }

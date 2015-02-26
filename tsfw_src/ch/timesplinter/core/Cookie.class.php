@@ -3,13 +3,11 @@
 namespace ch\timesplinter\core;
 
 /**
- * Class Cookie
- * @package ch\timesplinter\core
- *
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2013, TiMESPLiNTER Webdevelopment
  */
-class Cookie {
+class Cookie
+{
 	private $name;
 	private $value;
 	private $expire;
@@ -18,7 +16,8 @@ class Cookie {
 	private $secure;
 	private $httpOnly;
 
-	public function __construct($name, $value, $expire = 0, $path = null, $domain = null, $secure = false, $httpOnly = false) {
+	public function __construct($name, $value, $expire = 0, $path = null, $domain = null, $secure = false, $httpOnly = false)
+	{
 		$this->name = $name;
 		$this->value = $value;
 		$this->expire = $expire;
@@ -31,98 +30,112 @@ class Cookie {
 	/**
 	 * @param string|null $domain
 	 */
-	public function setDomain($domain) {
+	public function setDomain($domain)
+	{
 		$this->domain = $domain;
 	}
 
 	/**
 	 * @return string|null
 	 */
-	public function getDomain() {
+	public function getDomain()
+	{
 		return $this->domain;
 	}
 
 	/**
 	 * @param int $expire
 	 */
-	public function setExpire($expire) {
+	public function setExpire($expire)
+	{
 		$this->expire = $expire;
 	}
 
 	/**
 	 * @return int
 	 */
-	public function getExpire() {
+	public function getExpire()
+	{
 		return $this->expire;
 	}
 
 	/**
 	 * @param boolean $httpOnly
 	 */
-	public function setHttpOnly($httpOnly) {
+	public function setHttpOnly($httpOnly)
+	{
 		$this->httpOnly = $httpOnly;
 	}
 
 	/**
 	 * @return boolean
 	 */
-	public function getHttpOnly() {
+	public function getHttpOnly()
+	{
 		return $this->httpOnly;
 	}
 
 	/**
 	 * @param string $name
 	 */
-	public function setName($name) {
+	public function setName($name)
+	{
 		$this->name = $name;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getName() {
+	public function getName()
+	{
 		return $this->name;
 	}
 
 	/**
 	 * @param string|null $path
 	 */
-	public function setPath($path) {
+	public function setPath($path)
+	{
 		$this->path = $path;
 	}
 
 	/**
 	 * @return string|null
 	 */
-	public function getPath() {
+	public function getPath()
+	{
 		return $this->path;
 	}
 
 	/**
 	 * @param boolean $secure
 	 */
-	public function setSecure($secure) {
+	public function setSecure($secure)
+	{
 		$this->secure = $secure;
 	}
 
 	/**
 	 * @return boolean
 	 */
-	public function getSecure() {
+	public function getSecure()
+	{
 		return $this->secure;
 	}
 
 	/**
 	 * @param mixed $value The value of the cookie
 	 */
-	public function setValue($value) {
+	public function setValue($value)
+	{
 		$this->value = $value;
 	}
 
 	/**
 	 * @return mixed The value of the cookie
 	 */
-	public function getValue() {
+	public function getValue()
+	{
 		return $this->value;
 	}
 }

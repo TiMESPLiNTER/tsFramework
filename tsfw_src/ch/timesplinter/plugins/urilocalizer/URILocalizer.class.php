@@ -15,8 +15,10 @@ use ch\timesplinter\core\RouteUtils;
  * @copyright Copyright (c) 2013, Pascal Muenst
  * @version 1.0.0
  */
-class URILocalizer extends FrameworkPlugin {
-    public function afterRequestBuilt() {
+class URILocalizer extends FrameworkPlugin
+{
+    public function afterRequestBuilt()
+    {
         $httpRequest = $this->core->getHttpRequest();
 
         $host = $httpRequest->getHost();

@@ -11,24 +11,20 @@ use ch\timesplinter\htmlparser\TextNode;
 /**
  * @author Pascal Münst
  * @copyright Copyright (c) 2012, Pascal Münst
- * @version 1.0
  */
-class CheckboxOptionsTag extends TemplateTag implements TagNode {
-
-	public function __construct() {
-		parent::__construct('checkboxOptions', false);
-	}
-
-	public function replaceNode(TemplateEngine $tplEngine, ElementNode $node) {
+class CheckboxOptionsTag extends TemplateTag implements TagNode
+{
+	public function replaceNode(TemplateEngine $tplEngine, ElementNode $node)
+	{
 		// DATA
-		TemplateEngine::checkRequiredAttrs($node, array('options', 'checked'));
+		$tplEngine->checkRequiredAttrs($node, array('options', 'checked'));
 
-		//$compareArr = $tplEngine->getDataFromSelector($node->getAttribute('checked')->value);
+		$compareArr = $tplEngine->getSelectorAsPHPStr($node->getAttribute('checked')->value);
 		$dataKey = $node->getAttribute('options')->value;
 		$fldName = $node->getAttribute('name')->value . '[]';
 
 		$textContent = '<?php echo "<ul>";  foreach($this->getDataFromSelector(\'' . $dataKey . '\') as $key => $val) {
-			$checked = in_array($key, $this->getDataFromSelector(\'' . $node->getAttribute('checked')->value . '\'))?\' checked\':null;
+			$checked = in_array($key, ((array)' . $compareArr . '))?\' checked\':null;
 			echo \'<li><label><input type="checkbox" value="\'.$key.\'" name="' . $fldName . '"\'.$checked.\'> \'.$val.\'</label></li>\' . "\n";
 		} echo "</ul>"; ?>';
 
@@ -37,6 +33,30 @@ class CheckboxOptionsTag extends TemplateTag implements TagNode {
 
 		$node->parentNode->insertBefore($newNode, $node);
 		$node->parentNode->removeNode($node);
+	}
+
+	/**
+	 * @return string
+	 */
+	public static function getName()
+	{
+		return 'checkboxOptions';
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function isElseCompatible()
+	{
+		return false;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function isSelfClosing()
+	{
+		return true;
 	}
 }
 

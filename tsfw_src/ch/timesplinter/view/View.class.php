@@ -9,13 +9,15 @@ use ch\timesplinter\controller\FrameworkController;
  * @copyright Copyright (c) 2014, TiMESPLiNTER Webdevelopment
  * @version 1.0.0
  */
-abstract class View {
+abstract class View
+{
 	protected $controller;
-
-	public function __construct(FrameworkController $controller) {
+	
+	public function __construct(FrameworkController $controller)
+	{
 		$this->controller = $controller;
 	}
-
+	
 	abstract public function render($tplFile, array $tplVars);
 }
 

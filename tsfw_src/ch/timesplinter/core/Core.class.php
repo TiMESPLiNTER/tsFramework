@@ -16,7 +16,8 @@ use ch\timesplinter\core\FrameworkLogger;
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright 2012, TiMESPLiNTER Webdevelopment
  */
-class Core {
+class Core
+{
 	const CACHE_DIR = 'cache';
 
 	private $logger;
@@ -32,9 +33,9 @@ class Core {
 	private $errorHandler;
 	private $pluginManager;
 
-	/** @var \HttpRequest */
+	/** @var HttpRequest */
 	private $httpRequest;
-	/** @var \HttpResponse */
+	/** @var HttpResponse */
 	private $httpResponse;
 	/** @var Route */
 	private $route;
@@ -45,7 +46,8 @@ class Core {
 	private $siteRoot;
 	private $siteCacheDir;
 
-	public function __construct($fwRoot, $siteRoot) {
+	public function __construct($fwRoot, $siteRoot)
+	{
 		$this->fwRoot = $fwRoot;
 		$this->siteRoot = $siteRoot;
 		$this->siteCacheDir = $siteRoot . 'cache' . DIRECTORY_SEPARATOR;
@@ -81,13 +83,16 @@ class Core {
 
 
 		$this->localeHandler = new LocaleHandler($this);
-		$this->sessionHandler = new SessionHandler();
+		$this->sessionHandler = new SessionHandler($this);
 		$this->logger = FrameworkLoggerFactory::getLogger($this);
 
-		$autoloaders = spl_autoload_functions();
-
-		call_user_func_array(array($autoloaders[0][0], 'addPathsFromSettings'), array($this->settings->autoloader));
-
+		foreach(spl_autoload_functions() as $autoloader) {
+			if($autoloader[0] instanceof FrameworkAutoloader === false)
+				continue;
+			
+			call_user_func_array(array($autoloader[0], 'addPathsFromSettings'), array($this->settings->autoloader));
+		}
+		
 		$this->pluginManager = new PluginManager($this);
 		$this->pluginManager->loadPlugins($this->settings->core->plugins);
 	}
@@ -96,7 +101,8 @@ class Core {
 	 * Creates a HttpRequest object for the current request
 	 * @return HttpRequest
 	 */
-	private function createHttpRequest() {
+	protected function createHttpRequest()
+	{
 		$protocol = (isset($_SERVER['HTTPS']) === true && $_SERVER['HTTPS'] === 'on') ? HttpRequest::PROTOCOL_HTTPS : HttpRequest::PROTOCOL_HTTP;
 		$uri = StringUtils::startsWith($_SERVER['REQUEST_URI'], '/index.php')?StringUtils::afterFirst($_SERVER['REQUEST_URI'], '/index.php'):$_SERVER['REQUEST_URI'];
 		//var_dump($uri); exit;
@@ -127,12 +133,15 @@ class Core {
 		$httpRequest->setRequestMethod($_SERVER['REQUEST_METHOD']);
 		$httpRequest->setUserAgent(isset($_SERVER['HTTP_USER_AGENT'])?$_SERVER['HTTP_USER_AGENT']:null);
 		$httpRequest->setLanguages($languages);
+		$httpRequest->setAcceptLanguage(isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])?$_SERVER['HTTP_ACCEPT_LANGUAGE']:null);
 		$httpRequest->setRemoteAddress($_SERVER['REMOTE_ADDR']);
-
+		$httpRequest->setReferrer(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : null);
+		
 		return $httpRequest;
 	}
 
-	public function handleRequest() {
+	public function handleRequest()
+	{
 		$this->sessionHandler->start();
 
 		$this->pluginManager->invokePluginHook('beforeRequestBuilt');
@@ -165,17 +174,21 @@ class Core {
 		return $this->httpResponse;
 	}
 
-	public function sendResponse() {
+	public function sendResponse()
+	{
 		$this->httpResponse = $this->handleRequest();
 
 		$this->pluginManager->invokePluginHook('beforeResponseSent');
 
-		ob_start();
-		ob_implicit_flush(false);
+		if($this->httpResponse->isStream() === false) {
+			ob_start();
+			ob_implicit_flush(false);
+		}
 
 		$this->httpResponse->send();
-
-		ob_end_flush();
+		
+		if($this->httpResponse->isStream() === false)
+			ob_end_flush();
 
 		$this->pluginManager->invokePluginHook('afterResponseSent');
 
@@ -189,7 +202,8 @@ class Core {
 	 * @throws HttpException|\Exception
 	 * @return \HttpResponse The response of the controller method
 	 */
-	public function processPage($routes) {
+	public function processPage($routes)
+	{
 		$httpRequestMethod = $this->httpRequest->getRequestMethod();
 
 		$this->route = RouteUtils::getFirstRouteWhichHasMethod($routes, $httpRequestMethod);
@@ -233,7 +247,8 @@ class Core {
 		return $response;
 	}
 
-	private function getEnvironmentFromRequest(HttpRequest $httpRequest) {
+	protected function getEnvironmentFromRequest(HttpRequest $httpRequest)
+	{
 		if(($di = DomainUtils::getDomainInfo($this->settings->core->domains, $httpRequest->getHost())) === null) {
 			return isset($this->settings->defaults->environment)?$this->settings->defaults->environment:null;
 		}
@@ -245,11 +260,13 @@ class Core {
 	 *
 	 * @return HttpResponse
 	 */
-	public function getHttpResponse() {
+	public function getHttpResponse()
+	{
 		return $this->httpResponse;
 	}
 
-	public function setHttpResponse(HttpResponse $httpResponse) {
+	public function setHttpResponse(HttpResponse $httpResponse)
+	{
 		$this->httpResponse = $httpResponse;
 	}
 
@@ -257,14 +274,16 @@ class Core {
 	 *
 	 * @return HttpRequest
 	 */
-	public function getHttpRequest() {
+	public function getHttpRequest()
+	{
 		return $this->httpRequest;
 	}
 
 	/**
 	 * @return \ch\timesplinter\core\Route
 	 */
-	public function getRoute() {
+	public function getRoute()
+	{
 		return $this->route;
 	}
 
@@ -272,15 +291,17 @@ class Core {
 	 *
 	 * @return Settings
 	 */
-	public function getSettings() {
+	public function getSettings()
+	{
 		return $this->settings;
 	}
 
 	/**
 	 * Returns the current domain in which the framework is operating
-	 * @return string|null The current domain or null if no domain matched
+	 * @return \stdClass|null The current domain or null if no domain matched
 	 */
-	public function getCurrentDomain() {
+	public function getCurrentDomain()
+	{
 		return $this->currentDomain;
 	}
 
@@ -288,26 +309,31 @@ class Core {
 	 *
 	 * @return RequestHandler
 	 */
-	public function getRequestHandler() {
+	public function getRequestHandler()
+	{
 		return $this->requestHandler;
 	}
 
     /**
      * @return LocaleHandler
      */
-    public function getLocaleHandler() {
+    public function getLocaleHandler()
+    {
 		return $this->localeHandler;
 	}
 
-	public function getSessionHandler() {
+	public function getSessionHandler()
+	{
 		return $this->sessionHandler;
 	}
 
-	public function getErrorHandler() {
+	public function getErrorHandler()
+	{
 		return $this->errorHandler;
 	}
 
-	public function getPluginManager() {
+	public function getPluginManager()
+	{
 		return $this->pluginManager;
 	}
 
@@ -315,7 +341,8 @@ class Core {
 	 * Returnts the path to the root directory of the framework
 	 * @return string The framework root path
 	 */
-	public function getFwRoot()	{
+	public function getFwRoot()
+	{
 		return $this->fwRoot;
 	}
 
@@ -323,11 +350,13 @@ class Core {
 	 * Returns the path to the root directory of the site
 	 * @return string The site root path
 	 */
-	public function getSiteRoot() {
+	public function getSiteRoot()
+	{
 		return $this->siteRoot;
 	}
 
-	public function getSiteCacheDir() {
+	public function getSiteCacheDir()
+	{
 		return $this->siteCacheDir;
 	}
 }

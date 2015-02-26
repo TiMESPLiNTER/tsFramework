@@ -1,15 +1,40 @@
 <?php
 
-namespace ch\timesplinter\common;
-
 /**
  * Some useful functions for array operations
- * @package ch\timesplinter\common
- *
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2013, TiMESPLiNTER Webdevelopment
+ * @version 1.0.0
  */
+
+namespace ch\timesplinter\common;
+
+
 class ArrayUtils {
+	/**
+	 * @parama rray ... arrays to sum
+	 * @return array
+	 * @throws \InvalidArgumentException
+	 */
+	public static function arraySum() {
+		$args = func_get_args();
+		$basicArray = array_pop($args);
+
+		foreach($args as $array) {
+			if(is_array($array) === false)
+				throw new \InvalidArgumentException('Expected array for parameter');
+
+			foreach($array as $k => $v) {
+				if(array_key_exists($k, $basicArray) === true)
+					$basicArray[$k] += $v;
+			    else
+				    $basicArray[$k] = $v;
+			}
+		}
+
+		return $basicArray;
+	}
+
 	public static function getLevelFromArray($array, $levelFrom, $levelCount = 1) {
 		$newArray = array();
 
@@ -133,6 +158,38 @@ class ArrayUtils {
 		}
 
 		return $resultArray;
+	}
+
+	/**
+	 * Checks if every entry is empty in the array
+	 * @param array $array The array to check
+	 * @param mixed $emptyValue Specify which value should be treated as empty. Null for a check against the empty()
+	 * builtin function
+	 * @return bool True if every entry in the array is empty else false
+	 */
+	public static function isEveryEntryEmpty(array $array, $emptyValue = null) {
+		foreach($array as $element) {
+			if(($emptyValue === null && !empty($element) === true) || $emptyValue != $element)
+				return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks if no entry is empty in the array
+	 * @param array $array The array to check
+	 * @param mixed $emptyValue Specify which value should be treated as empty. Null for a check against the empty()
+	 * builtin function
+	 * @return bool True if no entry in the array is empty else false
+	 */
+	public static function isNoEntryEmpty(array $array, $emptyValue = null) {
+		foreach($array as $element) {
+			if(($emptyValue === null && empty($element) === true) || $emptyValue === $element)
+				return false;
+		}
+
+		return true;
 	}
 }
 

@@ -3,11 +3,11 @@
 namespace ch\timesplinter\autoloader;
 
 /**
- * Automatically loads requested classes if they exist in classes (sub-)directory
- * @package ch\timesplinter\autoloader
+ * automatically loads requested classes if they exist in classes (sub-)directory
  *
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2012, TiMESPLiNTER
+ * @version	1.0.0
  */
 class Autoloader {
 	const MODE_UNDERSCORE = 'underscore';
@@ -18,11 +18,9 @@ class Autoloader {
 	private $cacheFile;
 
 	private $loadPaths;
-	private $usedPackages;
 
 	public function __construct($cacheFilePath = null) {
 		$this->loadPaths = array();
-		$this->usedPackages = array();
 		$this->cachedClasses = array();
 		$this->cachedClassesChanged = false;
 		$this->cacheFile = $cacheFilePath;
@@ -50,7 +48,7 @@ class Autoloader {
 
 	/**
 	 * Checks if a class is cached and returns the cached filepath. If not false is returned.
-	 * @param $className The classname to check if it's cached
+	 * @param string $className The classname to check if it's cached
 	 * @return bool|string The cached filepath or false
 	 */
 	private function isCached($className) {
@@ -71,10 +69,9 @@ class Autoloader {
 	 * Autoloads a class from the cache file or the file system
 	 * @param $class_name string Name of the class to be loaded
 	 * @throws AutoloaderException
-	 * @throws \Exception
 	 * @return bool
 	 */
-	private function doAutoload($class_name) {
+	public function doAutoload($class_name) {
 		/*if(class_exists($class_name, false) === true)
 			return;*/
 
@@ -82,8 +79,6 @@ class Autoloader {
 			require $includePath;
 			return true;
 		}
-
-		$searchedPaths = array();
 
 		foreach($this->loadPaths as $id => $pathOptions) {
 			$delimiter = null;
@@ -109,20 +104,13 @@ class Autoloader {
 			foreach($pathOptions['class_suffix'] as $cs) {
 				$includePath = $path . $phpFilePath . $cs;
 
-				if(stream_resolve_include_path($includePath) === false) {
-					$searchedPaths[] = $includePath;
+				if(stream_resolve_include_path($includePath) === false)
 					continue;
-				}
 
 				$this->doInclude($includePath, $class_name);
-
 				return true;
 			}
 		}
-
-		//echo $classPath , '<br>';
-		//throw new AutoloaderException('Could not load class: ' . $class_name);
-		//throw new \Exception('Could not find class ' . $class_name . '. Searched in: ' . implode(", \n", $searchedPaths));
 
 		return false;
 	}

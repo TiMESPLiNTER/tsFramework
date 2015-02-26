@@ -26,7 +26,7 @@ class DBFactory {
 	 *
 	 * @param string $dbType
 	 * @param DBConnect $dbConnect
-	 * @return DB The DB object
+	 * @return DBMySQL The DB object
 	 * @throws DBException
 	 */
 	public static function getNewInstance($dbType, DBConnect $dbConnect) {

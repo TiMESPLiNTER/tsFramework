@@ -2,27 +2,21 @@
 
 namespace ch\timesplinter\customtags;
 
-use 
- ch\timesplinter\template\TemplateEngine
-,ch\timesplinter\template\TemplateTag
-,ch\timesplinter\template\TagNode
-,ch\timesplinter\htmlparser\ElementNode
-,ch\timesplinter\htmlparser\TextNode
-,ch\timesplinter\htmlparser\HtmlNode
-,ch\timesplinter\template\TemplateEngineException
-;
+use ch\timesplinter\htmlparser\ElementNode;
+use ch\timesplinter\template\TemplateEngine;
+use ch\timesplinter\template\TemplateTag;
+use ch\timesplinter\template\TagNode;
+use ch\timesplinter\htmlparser\TextNode;
+use ch\timesplinter\template\TemplateEngineException;
 
 /**
  * @author Pascal Münst <entwicklung@metanet.ch>
  * @copyright Copyright (c) 2012, METANET AG, www.metanet.ch
- * @version 1.0
  */
-class ElseTag extends TemplateTag implements TagNode {
-	public function __construct() {
-		parent::__construct('else', false);
-	}
-
-	public function replaceNode(TemplateEngine $tplEngine, ElementNode $tagNode) {
+class ElseTag extends TemplateTag implements TagNode
+{
+	public function replaceNode(TemplateEngine $tplEngine, ElementNode $tagNode)
+	{
 		$lastTplTag = $tplEngine->getLastTplTag();
 
 		if($lastTplTag === null)
@@ -31,9 +25,9 @@ class ElseTag extends TemplateTag implements TagNode {
 		/*if($lastTplTag->isElseable() === false)
 			throw new TemplateEngineException('The custom tag "' . get_class($lastTplTag) . '" can not be followed by an ElseTag');*/
 
-		$phpCode = '<?php } else { ?>';
+		$phpCode = '<?php else: ?>';
 		$phpCode .= $tagNode->getInnerHtml();
-		$phpCode .= '<?php } ?>';
+		$phpCode .= '<?php endif; ?>';
 
 		$textNode = new TextNode($tplEngine->getDomReader());
 		$textNode->content = $phpCode;
@@ -43,6 +37,29 @@ class ElseTag extends TemplateTag implements TagNode {
 		$tagNode->parentNode->removeNode($tagNode);
 	}
 
+	/**
+	 * @return string
+	 */
+	public static function getName()
+	{
+		return 'else';
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function isElseCompatible()
+	{
+		return false;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function isSelfClosing()
+	{
+		return false;
+	}
 }
 
 /* EOF */
