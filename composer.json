@@ -1,5 +1,5 @@
 {
-    "name": "timesplinter/tsFramework",
+    "name": "timesplinter/ts-framework",
     "type": "library",
     "description": "A very fast and simple to use framework written in PHP.",
     "keywords": ["framework", "tsfw", "tsFramework"],
