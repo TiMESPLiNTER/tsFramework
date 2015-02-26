@@ -137,7 +137,7 @@ class Settings
 			$this->resourcesChecked[] = $property;
 
 			foreach($this->settings->$property->{'@resources'} as $rsc) {
-				if(filemtime($this->settingsPath . $rsc) > $this->cachedFiletime) {
+				if(filemtime($this->settingsPath . $rsc) > $this->cachedFileTime) {
 					$this->settings->$property = $this->loadSettingsFromFile($property . '.json');
 					$this->cacheChanged = true;
 
