@@ -18,8 +18,8 @@ date_default_timezone_set($defaultTimezone);
 // Framework specific constants
 define('REQUEST_TIME', $_SERVER['REQUEST_TIME']+microtime());
 
-$fwRoot = dirname(__FILE__) . DIRECTORY_SEPARATOR;
-$siteRoot = $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . 'site' . DIRECTORY_SEPARATOR;
+$fwRoot = __DIR__ . DIRECTORY_SEPARATOR;
+$siteRoot = getcwd() . DIRECTORY_SEPARATOR . 'site' . DIRECTORY_SEPARATOR;
 
 $core = new Core($fwRoot, $siteRoot);
 

@@ -95,7 +95,7 @@ class Settings
 		return $settingsObj;
 	}
 
-    private function interpolateObj(stdClass $settingsObj, array $replace = array())
+    private function interpolateObj(\stdClass $settingsObj, array $replace = array())
     {
         if(count($replace) === 0)
             return;
