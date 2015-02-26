@@ -1,6 +1,6 @@
 <?php
 
-namespace ch\timesplinter\plugins\urilocalizer;
+namespace ch\timesplinter\plugins;
 
 use ch\timesplinter\common\StringUtils;
 use ch\timesplinter\core\FrameworkPlugin;

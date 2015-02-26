@@ -1,6 +1,6 @@
 <?php
 
-namespace ch\timesplinter\plugins\robots;
+namespace ch\timesplinter\plugins;
 
 use \ch\timesplinter\core\FrameworkPlugin;
 use \stdClass;

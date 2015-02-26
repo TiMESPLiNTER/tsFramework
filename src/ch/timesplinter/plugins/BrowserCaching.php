@@ -1,6 +1,6 @@
 <?php
 
-namespace ch\timesplinter\plugins\browsercaching;
+namespace ch\timesplinter\plugins;
 
 use ch\timesplinter\core\FrameworkPlugin;
 use ch\timesplinter\core\HttpResponse;
