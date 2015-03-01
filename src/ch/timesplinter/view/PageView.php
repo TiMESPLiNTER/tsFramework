@@ -13,6 +13,7 @@ use timesplinter\tsfw\template\TemplateEngine;
 class PageView extends View
 {
 	protected $activeHtmlIds;
+	protected $tplDir;
 	
 	public function __construct(PageController $controller)
 	{
@@ -20,14 +21,14 @@ class PageView extends View
 		
 		$this->activeHtmlIds = array();
 		$cacheDir = $this->controller->getCore()->getSiteRoot() . 'cache' . DIRECTORY_SEPARATOR . 'pages' . DIRECTORY_SEPARATOR . $this->controller->getCurrentDomain()->template . DIRECTORY_SEPARATOR;
-		$tplCache = new DirectoryTemplateCache($cacheDir, 'cache.template');
+		$this->tplDir = $this->controller->getCore()->getSiteRoot() . 'templates' . DIRECTORY_SEPARATOR . $this->controller->getCurrentDomain()->template . DIRECTORY_SEPARATOR;
+		$tplCache = new DirectoryTemplateCache($cacheDir, $this->tplDir);
 		$this->tplEngine = new TemplateEngine($tplCache, 'tst');
 	}
 	
 	public function render($tplFile, array $tplVars)
 	{
-		$tplDir = $this->controller->getCore()->getSiteRoot() . 'templates' . DIRECTORY_SEPARATOR . $this->controller->getCurrentDomain()->template . DIRECTORY_SEPARATOR;
-		$templateFile = $tplDir . 'template.html';
+		$templateFile = $this->tplDir . 'template.html';
 		$tplFilePath = 'pages' . DIRECTORY_SEPARATOR . $tplFile;
 		$tplVars['this'] = $tplFilePath;
 		$tplVars['_site'] = ($this->controller->getRoute() !== null)?(string)$this->controller->getRoute()->id:null;
