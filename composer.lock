@@ -57,12 +57,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/TiMESPLiNTER/tsfw-template.git",
-                "reference": "e11a91b9902bba0632850aeb3a4689b52622e87e"
+                "reference": "78667a3094b061337d27b1439901202f739eee1a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/TiMESPLiNTER/tsfw-template/zipball/e11a91b9902bba0632850aeb3a4689b52622e87e",
-                "reference": "e11a91b9902bba0632850aeb3a4689b52622e87e",
+                "url": "https://api.github.com/repos/TiMESPLiNTER/tsfw-template/zipball/78667a3094b061337d27b1439901202f739eee1a",
+                "reference": "78667a3094b061337d27b1439901202f739eee1a",
                 "shasum": ""
             },
             "require": {
@@ -98,7 +98,7 @@
                 "template engine",
                 "tsfw"
             ],
-            "time": "2015-03-01 00:03:36"
+            "time": "2015-03-01 00:43:00"
         }
     ],
     "packages-dev": [
