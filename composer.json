@@ -22,7 +22,7 @@
 	"require": {
 		"php": ">=5.3.0",
 		"timesplinter/tsfw-common": "0.1.*",
-		"timesplinter/tsfw-template": "dev-master"
+		"timesplinter/tsfw-template": "1.0.*"
 	},
 	
     "require-dev": {
