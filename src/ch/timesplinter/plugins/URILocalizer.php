@@ -2,7 +2,7 @@
 
 namespace ch\timesplinter\plugins;
 
-use ch\timesplinter\common\StringUtils;
+use timesplinter\tsfw\common\StringUtils;
 use ch\timesplinter\core\FrameworkPlugin;
 use ch\timesplinter\core\RequestHandler;
 use ch\timesplinter\core\RouteUtils;

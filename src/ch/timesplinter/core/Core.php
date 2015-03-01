@@ -2,17 +2,9 @@
 
 namespace ch\timesplinter\core;
 
-use ch\timesplinter\common\StringUtils;
-use ch\timesplinter\logger\LoggerFactory;
-use ch\timesplinter\core\SessionHandler;
-use ch\timesplinter\core\Settings;
-use \DateTime;
-use ch\timesplinter\core\FrameworkLogger;
+use timesplinter\tsfw\common\StringUtils;
 
 /**
- * Class Core
- * @package ch\timesplinter\core
- *
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright 2012, TiMESPLiNTER Webdevelopment
  */
@@ -85,13 +77,6 @@ class Core
 		$this->localeHandler = new LocaleHandler($this);
 		$this->sessionHandler = new SessionHandler($this);
 		$this->logger = FrameworkLoggerFactory::getLogger($this);
-
-		foreach(spl_autoload_functions() as $autoloader) {
-			if($autoloader[0] instanceof FrameworkAutoloader === false)
-				continue;
-			
-			call_user_func_array(array($autoloader[0], 'addPathsFromSettings'), array($this->settings->autoloader));
-		}
 		
 		$this->pluginManager = new PluginManager($this);
 		$this->pluginManager->loadPlugins($this->settings->core->plugins);
@@ -118,7 +103,7 @@ class Core
 			$languages[$lrParts[0]] = isset($lrParts[1])?(float)StringUtils::afterFirst($lrParts[1], 'q='):1.0;
 		}
 
-		$requestTime = new DateTime();
+		$requestTime = new \DateTime();
 		$requestTime->setTimestamp($_SERVER['REQUEST_TIME']);
 
 		$httpRequest = new HttpRequest();

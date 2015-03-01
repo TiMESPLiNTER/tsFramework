@@ -2,7 +2,7 @@
 
 namespace ch\timesplinter\core;
 
-use ch\timesplinter\common\StringUtils;
+use timesplinter\tsfw\common\StringUtils;
 
 /**
  * @author Pascal Muenst <dev@timesplinter.ch>

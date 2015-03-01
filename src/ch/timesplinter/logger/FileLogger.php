@@ -1,7 +1,8 @@
 <?php
+
 namespace ch\timesplinter\logger;
 
-use ch\timesplinter\common\StringUtils;
+use timesplinter\tsfw\common\StringUtils;
 
 /**
  * a logger that logs messages into a specified file

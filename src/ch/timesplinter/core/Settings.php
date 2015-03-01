@@ -2,7 +2,7 @@
 
 namespace ch\timesplinter\core;
 
-use ch\timesplinter\common\JsonUtils;
+use timesplinter\tsfw\common\JsonUtils;
 
 class Settings
 {

@@ -8,12 +8,12 @@ namespace ch\timesplinter\core;
  */
 class PHPException extends FrameworkException
 {
-	public function __construct($number, $message, $file, $line)
+	public function __construct($number, $message, $tplFile, $tplLine)
 	{
 		parent::__construct($message, $number);
 
-		$this->file = $file;
-		$this->line = $line;
+		$this->file = $tplFile;
+		$this->line = $tplLine;
 	}
 
 	public function handleException(Core $core, HttpRequest $httpRequest)

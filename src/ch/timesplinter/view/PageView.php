@@ -3,8 +3,8 @@
 namespace ch\timesplinter\view;
 
 use ch\timesplinter\controller\PageController;
-use ch\timesplinter\template\DirectoryTemplateCache;
-use ch\timesplinter\template\TemplateEngine;
+use timesplinter\tsfw\template\DirectoryTemplateCache;
+use timesplinter\tsfw\template\TemplateEngine;
 
 /**
  * @author Pascal Muenst <dev@timesplinter.ch>
