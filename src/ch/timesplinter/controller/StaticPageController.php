@@ -12,6 +12,7 @@ use ch\timesplinter\core\HttpRequest;
 use ch\timesplinter\core\HttpResponse;
 use ch\timesplinter\core\Route;
 use ch\timesplinter\logger\TSLogger;
+use timesplinter\tsfw\common\StringUtils;
 
 /**
  * Description of StaticPageController
@@ -60,7 +61,8 @@ class StaticPageController extends PageController implements HandleHttpError
 			'siteTitle' => isset($pageData->$routeID->title)?$pageData->$routeID->title:null,
 			'runtime' => round(microtime(true) - REQUEST_TIME,3) ,
             'locale' => $this->core->getLocaleHandler()->getLocale(),
-            'timezone' => date_default_timezone_get()
+            'timezone' => date_default_timezone_get(),
+			'base_path' => StringUtils::afterFirst(getcwd(), $_SERVER['DOCUMENT_ROOT'])
 		));
 		
 		return new HttpResponse(200, $html, $this->headers);
@@ -79,7 +81,8 @@ class StaticPageController extends PageController implements HandleHttpError
 				'siteTitle' => 'Error '. $e->getCode(),
 				'runtime' => round(microtime(true) - REQUEST_TIME,3) ,
 				'locale' => $this->core->getLocaleHandler()->getLocale(),
-				'timezone' => date_default_timezone_get()
+				'timezone' => date_default_timezone_get(),
+				'base_path' => StringUtils::afterFirst(getcwd(), $_SERVER['DOCUMENT_ROOT'])
 			));
 		} catch(\Exception $e) {
 			throw new HttpException($e->getMessage(), 500);
