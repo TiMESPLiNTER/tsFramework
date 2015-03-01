@@ -2,11 +2,6 @@
 
 namespace ch\timesplinter\core;
 
-use ch\timesplinter\core\Core;
-use ch\timesplinter\controller\StaticPageController;
-use \Exception;
-use Guzzle\Http\Exception\HttpException;
-
 /**
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2013, TiMESPLiNTER Webdevelopment
@@ -25,13 +20,17 @@ class ErrorHandler
 		set_error_handler(array($this, 'handlePHPError'));
 		set_exception_handler(array($this, 'handleException'));
 	}
-	
+
 	/**
 	 * Catches all the PHP errors and convert them into a PHP exception
+	 *
 	 * @param int $error_number
 	 * @param string $error
 	 * @param string $error_file
 	 * @param int $error_line
+	 *
+	 * @return bool
+	 *
 	 * @throws PHPException
 	 */
 	public function handlePHPError($error_number, $error, $error_file, $error_line)
@@ -45,9 +44,10 @@ class ErrorHandler
 	
 	/**
 	 * Default stub for print an exception
-	 * @param Exception $e
+	 *
+	 * @param \Exception $e
 	 */
-	public function handleException(Exception $e)
+	public function handleException(\Exception $e)
 	{
         $environment = $this->core->getCurrentDomain()->environment;
 		
