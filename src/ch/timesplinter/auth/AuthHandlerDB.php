@@ -2,10 +2,9 @@
 
 namespace ch\timesplinter\auth;
 
-use ch\timesplinter\auth\AuthHandler;
-use ch\timesplinter\db\DBException;
+use timesplinter\tsfw\db\DBException;
 use ch\timesplinter\core\SessionHandler;
-use ch\timesplinter\db\DB;
+use timesplinter\tsfw\db\DB;
 
 /**
  * @author Pascal Münst <info@actra.ch>
