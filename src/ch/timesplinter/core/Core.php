@@ -216,15 +216,13 @@ class Core
 
 		try {
 			$response = call_user_func($responseCallback);
-		} catch(\Exception $e) {
+		} catch(HttpException $e) {
 			if(($controllerInstance instanceof HandleHttpError) === false)
 				throw $e;
 
-			$httpStatusCode = ($e instanceof HttpException)?$e->getCode():500;
-
 			/** @var HttpResponse $response */
-			$response = $controllerInstance->displayHttpError($e, $httpStatusCode);
-			$response->setHttpResponseCode($httpStatusCode);
+			$response = $controllerInstance->displayHttpError($e);
+			$response->setHttpResponseCode($e->getCode());
 		}
 
 		if(($response instanceof HttpResponse) === false)

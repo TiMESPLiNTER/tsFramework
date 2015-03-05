@@ -2,10 +2,8 @@
 
 namespace ch\timesplinter\auth;
 
-use ch\timesplinter\core\FrameworkLoggerFactory;
 use ch\timesplinter\core\SessionHandler;
 use ch\timesplinter\logger\Logger;
-use ch\timesplinter\logger\LoggerFactory;
 
 /**
  * @author Pascal Münst <info@actra.ch>
@@ -17,27 +15,24 @@ abstract class AuthHandler
 	protected $loggedIn;
 	protected $lastAction;
 	protected $loginPopo;
-	/** @var Logger */
-	protected $logger;
 	/** @var array */
 	protected $settings;
 
 	/** @var SessionHandler $sessionHandler */
 	protected $sessionHandler;
-	
+
 	public function __construct(SessionHandler $sessionHandler, array $settings = array())
 	{
 		$this->sessionHandler = $sessionHandler;
-		
+
 		$this->settings = $settings + array(
 			'session_max_idle_time' => 180,
 			'login_site' => '/login.html'
 		);
-		
-		$this->logger = FrameworkLoggerFactory::getLogger($this);
+
 		$this->loggedIn = isset($_SESSION['auth']['logged_in']) ? $_SESSION['auth']['logged_in'] : false;
 		$this->lastAction = isset($_SESSION['auth']['last_action']) ? $_SESSION['auth']['last_action'] : time();
-		
+
 		if($this->loggedIn === true && $this->settings['session_max_idle_time'] > 0 && $this->lastAction + $this->settings['session_max_idle_time'] <= time()) {
 			$this->logout();
 
@@ -45,7 +40,7 @@ abstract class AuthHandler
 			header('Location: ' . $this->settings['login_site'] . '?session_expired');
 			exit;
 		}
-		
+
 		$this->lastAction = time();
 	}
 
@@ -59,14 +54,14 @@ abstract class AuthHandler
 	 * @return bool
 	 */
 	public abstract function checkLogin($username, $password, $callbackOnSuccess = null);
-	
+
 	/**
 	 * Returns the login state of the current user
-	 * 
-	 * @return boolean 
+	 *
+	 * @return boolean
 	 */
 	public function isLoggedIn()
-	{		
+	{
 		return $this->loggedIn;
 	}
 
@@ -78,16 +73,7 @@ abstract class AuthHandler
 		$this->loginPopo = null;
 		$this->lastAction = null;
 	}
-	
-	/**
-	 * Checks if the current user is in the group $userGroup
-	 * 
-	 * @param string $userGroup
-	 * 
-	 * @return boolean 
-	 */
-	public abstract function hasRightGroup($userGroup);
-	
+
 	/**
 	 *
 	 * @return \stdClass
@@ -96,7 +82,7 @@ abstract class AuthHandler
 	{
 		return $this->loginPopo;
 	}
-	
+
 	public function __destruct()
 	{
 		$_SESSION['auth']['logged_in'] = $this->loggedIn;
