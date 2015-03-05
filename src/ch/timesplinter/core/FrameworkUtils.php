@@ -1,12 +1,13 @@
 <?php
+
 namespace ch\timesplinter\core;
 
 /**
- * Description of FrameworkUtils
- *
- * @author pascal91
+ * @author Pascal Muenst <dev@timesplinter.ch>
+ * @copyright Copyright (c) 2014 by TiMESPLiNTER Webdevelopment
  */
-class FrameworkUtils {
+class FrameworkUtils
+{
 	const OS_WINDOWS = 'win';
 	const OS_LINUX = 'lin';
 	const OS_DARWIN = 'dar';
@@ -16,8 +17,14 @@ class FrameworkUtils {
 	const OS_OPENBSD = 'ope';
 	const OS_HPUX = 'hp-';
 	const OS_SUNOS = 'sun';
-	
-	public static function isOS($os) {
+
+	/**
+	 * @param string $os
+	 *
+	 * @return bool
+	 */
+	public static function isOS($os)
+	{
 		$currOS = null;
 		
 		if(defined('PHP_OS') === true)
@@ -32,13 +39,15 @@ class FrameworkUtils {
 	}
 
 	/**
-	 * @param $str The full qualified namespace
-	 * @param string $seperator
+	 * @param string $str The full qualified namespace
 	 * @param bool $methodIncluded
+	 * @param string $separator
+	 * 
 	 * @return \stdClass Contains two properties: $className - The class name, $methodName - The method name
 	 */
-	public static function stringToClassName($str, $methodIncluded = true, $seperator = ':') {
-        $classParts = explode($seperator, $str);
+	public static function stringToClassName($str, $methodIncluded = true, $separator = ':')
+	{
+        $classParts = explode($separator, $str);
 
         $returnValue = new \stdClass();
 
@@ -49,8 +58,14 @@ class FrameworkUtils {
 
         return $returnValue;
     }
-	
-	public static function preparePath($pathStr) {
+
+	/**
+	 * @param string $pathStr
+	 *
+	 * @return string
+	 */
+	public static function preparePath($pathStr)
+	{
 		return str_replace(array('/','\\'), array(DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR), $pathStr);
 	}
 }

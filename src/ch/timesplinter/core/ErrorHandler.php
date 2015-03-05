@@ -29,15 +29,13 @@ class ErrorHandler
 	 * @param string $error_file
 	 * @param int $error_line
 	 *
-	 * @return bool
-	 *
 	 * @throws PHPException
 	 */
 	public function handlePHPError($error_number, $error, $error_file, $error_line)
 	{
-		// error was suppressed with the @-operator
-		if (0 === error_reporting()) 
-			return false;
+		// respect the current error_reporting setting
+		if ((error_reporting() & $error_number) === false)
+			return;
 		
 		throw new PHPException($error_number, $error, $error_file, $error_line);
 	}
