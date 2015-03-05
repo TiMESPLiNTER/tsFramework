@@ -1,8 +1,7 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
-        "This file is @generated automatically"
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
     "hash": "42ab0abc25515287f0030721d71f82f9",
     "packages": [
@@ -54,16 +53,16 @@
         },
         {
             "name": "timesplinter/tsfw-template",
-            "version": "v1.0.1",
+            "version": "v1.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/TiMESPLiNTER/tsfw-template.git",
-                "reference": "711bd0f0f5da37f82973ae15da76c2f61444a937"
+                "reference": "f1ba6e7a7d8998ba095e7586adf9667eac1ecf68"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/TiMESPLiNTER/tsfw-template/zipball/711bd0f0f5da37f82973ae15da76c2f61444a937",
-                "reference": "711bd0f0f5da37f82973ae15da76c2f61444a937",
+                "url": "https://api.github.com/repos/TiMESPLiNTER/tsfw-template/zipball/f1ba6e7a7d8998ba095e7586adf9667eac1ecf68",
+                "reference": "f1ba6e7a7d8998ba095e7586adf9667eac1ecf68",
                 "shasum": ""
             },
             "require": {
@@ -99,7 +98,7 @@
                 "template engine",
                 "tsfw"
             ],
-            "time": "2015-03-02 08:17:11"
+            "time": "2015-03-05 19:15:34"
         }
     ],
     "packages-dev": [
@@ -901,8 +900,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": [],
-    "prefer-stable": false,
-    "prefer-lowest": false,
     "platform": {
         "php": ">=5.3.0"
     },
