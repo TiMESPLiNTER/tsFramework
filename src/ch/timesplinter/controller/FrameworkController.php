@@ -55,6 +55,14 @@ abstract class FrameworkController {
 	}
 
 	/**
+	 * @param Route $route
+	 */
+	public function setRoute(Route $route)
+	{
+		$this->route = $route;
+	}
+
+	/**
 	 * @return null|\stdClass
 	 */
 	public function getCurrentDomain() 

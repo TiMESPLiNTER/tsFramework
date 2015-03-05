@@ -71,6 +71,15 @@ class RouteUtils
 
 		return null;
 	}
+
+
+	public static function filterRoutesByMethod($routes, $method)
+	{
+		return array_filter($routes, function() use($method) {
+			/** @var Route $r */
+			return !(isset($r->methods[$method]) === true || isset($r->methods['*']) === true);
+		});
+	}
 }
 
 /* EOF */

@@ -2,6 +2,7 @@
 
 namespace ch\timesplinter\core;
 
+use ch\timesplinter\controller\FrameworkController;
 use timesplinter\tsfw\common\StringUtils;
 
 /**
@@ -192,43 +193,60 @@ class Core
 	{
 		$httpRequestMethod = $this->httpRequest->getRequestMethod();
 
-		$this->route = RouteUtils::getFirstRouteWhichHasMethod($routes, $httpRequestMethod);
+		$filteredRoutes = RouteUtils::filterRoutesByMethod($routes, $httpRequestMethod);
 
-		if($this->route === null)
+		if(count($filteredRoutes) === 0)
 			throw new HttpException('Method ' . $httpRequestMethod . ' is not allowed for this path. Use ' . implode(', ', array_keys($routes)) . ' instead', 405);
 
-		if($this->route->sslRequired === true && $this->httpRequest->getProtocol() !== HttpRequest::PROTOCOL_HTTPS)
+		/*if($this->route->sslRequired === true && $this->httpRequest->getProtocol() !== HttpRequest::PROTOCOL_HTTPS)
 			RequestHandler::redirect($this->httpRequest->getURL(HttpRequest::PROTOCOL_HTTPS));
 		elseif($this->route->sslForbidden === true && $this->httpRequest->getProtocol() !== HttpRequest::PROTOCOL_HTTP)
-			RequestHandler::redirect($this->httpRequest->getURL(HttpRequest::PROTOCOL_HTTP));
+			RequestHandler::redirect($this->httpRequest->getURL(HttpRequest::PROTOCOL_HTTP));*/
 
-		$response = null;
-		$routeMethod = $this->route->methods[$httpRequestMethod];
+		$lastResponse = null;
+		$controllerInstances = array();
 
-		if(class_exists($routeMethod->controllerClass) === false)
-			throw new CoreException('Could not find class: ' . $routeMethod->controllerClass);
+		foreach($filteredRoutes as $route) {
+			/** @var RouteMethod $routeMethod */
+			$routeMethod = null;
 
-		$controllerInstance = new $routeMethod->controllerClass($this, $this->httpRequest, $this->route);
-		$responseCallback = array($controllerInstance, $routeMethod->controllerMethod);
+			if(isset($route->methods[$httpRequestMethod]) === true)
+				$routeMethod = $route->methods[$httpRequestMethod];
+			elseif(isset($route->methods['*']) === true)
+				$routeMethod = $route->methods['*'];
 
-		if(is_callable($responseCallback, false) === false)
-			throw new CoreException('Could not call: ' . $routeMethod->controllerClass . '->' . $routeMethod->controllerMethod . '. This is no valid callback! Maybe you attempt to call a static method or you propably misspelled the "controller:method" name');
+			$controllerInstance = null;
 
-		try {
-			$response = call_user_func($responseCallback);
-		} catch(HttpException $e) {
-			if(($controllerInstance instanceof HandleHttpError) === false)
-				throw $e;
+			if(isset($controllerInstances[$routeMethod->controllerClass]) === false)
+				$controllerInstances[$routeMethod->controllerClass] = new $routeMethod->controllerClass($this, $this->httpRequest, $route);
 
-			/** @var HttpResponse $response */
-			$response = $controllerInstance->displayHttpError($e);
-			$response->setHttpResponseCode($e->getCode());
+			/** @var FrameworkController $controllerInstance */
+			$controllerInstance = $controllerInstances[$routeMethod->controllerClass];
+			$controllerInstance->setRoute($route);
+
+			$responseCallback = array($controllerInstance, $routeMethod->controllerMethod);
+
+			if(is_callable($responseCallback, false) === false)
+				throw new CoreException('Could not call: ' . $routeMethod->controllerClass . '->' . $routeMethod->controllerMethod . '. This is no valid callback! Maybe you attempt to call a static method or you propably misspelled the "controller:method" name');
+
+			try {
+				$response = call_user_func($responseCallback);
+			} catch(HttpException $e) {
+				if($controllerInstance instanceof HandleHttpError === false)
+					throw $e;
+
+				/** @var HandleHttpError $controllerInstance */
+				$lastResponse = $controllerInstance->displayHttpError($e);
+				break;
+			}
+
+			if($response !== null && $response instanceof HttpResponse === false)
+				throw new CoreException('Return value of the controller method "' . $routeMethod->controllerClass . '->' . $routeMethod->controllerMethod . '" is not an object of type HttpResponse but of ' . (is_object($response)?get_class($response):'a php native type'));
+
+			$lastResponse = $response;
 		}
 
-		if(($response instanceof HttpResponse) === false)
-			throw new CoreException('Return value of the controller method "' . $routeMethod->controllerClass . '->' . $routeMethod->controllerMethod . '" is not an object of type HttpResponse but of ' . (is_object($response)?get_class($response):'a php native type'));
-
-		return $response;
+		return $lastResponse;
 	}
 
 	protected function getEnvironmentFromRequest(HttpRequest $httpRequest)
