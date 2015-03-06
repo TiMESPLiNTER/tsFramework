@@ -89,7 +89,7 @@ class RouteUtils
 	public static function filterRoutesByMethod($routes, $method)
 	{
 		return array_filter($routes, function($route) use($method) {
-			return !(isset($route->methods[$method]) === true || isset($route->methods['*']) === true);
+			return !(isset($route->methods[$method]) === false && isset($route->methods['*']) === false);
 		});
 	}
 }
