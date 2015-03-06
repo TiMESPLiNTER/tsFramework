@@ -2,15 +2,18 @@
 
 namespace ch\timesplinter\core;
 
-use \stdClass;
-
 /**
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2014 by TiMESPLiNTER Webdevelopment
  */
 class RouteUtils
 {
-	public static function matchRoutesAgainstPath(stdClass $routes, HttpRequest $httpRequest)
+	/**
+	 * @param \stdClass $routes
+	 * @param HttpRequest $httpRequest
+	 * @return Route[]
+	 */
+	public static function matchRoutesAgainstPath(\stdClass $routes, HttpRequest $httpRequest)
 	{
 		$routeEntries = array();
 
@@ -29,15 +32,17 @@ class RouteUtils
 			$routeEntries[$routeObj->id] = $routeObj;
 		}
 
-		if(count($routeEntries) === 0)
-			return null;
-
 		return $routeEntries;
 	}
 
-	protected static function createRouteObject($routeID, stdClass $routeEntry)
+	/**
+	 * @param int $routeID
+	 * @param \stdClass $routeEntry
+	 * @return Route
+	 */
+	protected static function createRouteObject($routeID, \stdClass $routeEntry)
 	{
-		$route = new Route;
+		$route = new Route();
 
 		$route->sslRequired = isset($routeEntry->sslRequired)?$routeEntry->sslRequired:false;
 		$route->sslForbidden = isset($routeEntry->sslForbidden)?$routeEntry->sslForbidden:false;
@@ -46,22 +51,26 @@ class RouteUtils
 		foreach($routeEntry->methods as $method => $controller) {
 			$routeMethodTmp = new RouteMethod();
 
-			$ctrlParts = explode(':', $controller);
-			$methodName = array_pop($ctrlParts);
+			$controllerInfo = FrameworkUtils::stringToClassName($controller);
 
-			$routeMethodTmp->controllerClass = implode('\\', $ctrlParts);
-			$routeMethodTmp->controllerMethod = $methodName;
+			$routeMethodTmp->controllerClass = $controllerInfo->className;
+			$routeMethodTmp->controllerMethod = $controllerInfo->methodName;
 			$routeMethodTmp->method = $method;
 
 			$route->methods[$method] = $routeMethodTmp;
 		}
 
-		$route->pattern = '@^' . $routeEntry->pattern . '$@';
+		$route->pattern = '@^' . str_replace('@', '\@', $routeEntry->pattern) . '$@';
 		$route->id = $routeID;
 
 		return $route;
 	}
 
+	/**
+	 * @param Route[] $routes
+	 * @param string $method
+	 * @return Route|null
+	 */
 	public static function getFirstRouteWhichHasMethod($routes, $method)
 	{
 		foreach($routes as $r) {
@@ -72,12 +81,15 @@ class RouteUtils
 		return null;
 	}
 
-
+	/**
+	 * @param Route[] $routes
+	 * @param string $method
+	 * @return Route[]
+	 */
 	public static function filterRoutesByMethod($routes, $method)
 	{
-		return array_filter($routes, function() use($method) {
-			/** @var Route $r */
-			return !(isset($r->methods[$method]) === true || isset($r->methods['*']) === true);
+		return array_filter($routes, function($route) use($method) {
+			return !(isset($route->methods[$method]) === true || isset($route->methods['*']) === true);
 		});
 	}
 }

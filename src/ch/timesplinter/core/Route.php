@@ -23,6 +23,7 @@ class Route
 	public $sslRequired;
 	public $sslForbidden;
 	public $methods;
+	public $final;
 	
 	protected $params;
 	
@@ -36,11 +37,9 @@ class Route
 		return $this->params;
 	}
 	
-	public function getParam($key, $cleaned = true)
+	public function getParam($key)
 	{
-		if(isset($this->params[$key]) === true)
-			return ($cleaned === true)?strip_tags($this->params[$key]):$this->params[$key];
-		return null;
+		return isset($this->params[$key]) ? $this->params[$key] : null;
 	}
 	
 	public function setParams($params)
@@ -48,4 +47,5 @@ class Route
 		$this->params = $params;
 	}
 }
+
 /* EOF */

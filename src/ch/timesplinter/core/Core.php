@@ -185,9 +185,11 @@ class Core
 	/**
 	 *
 	 * @param array $routes
+	 *
+	 * @return HttpResponse The response of the controller method
+	 *
 	 * @throws CoreException
 	 * @throws HttpException|\Exception
-	 * @return \HttpResponse The response of the controller method
 	 */
 	public function processPage($routes)
 	{
@@ -198,15 +200,15 @@ class Core
 		if(count($filteredRoutes) === 0)
 			throw new HttpException('Method ' . $httpRequestMethod . ' is not allowed for this path. Use ' . implode(', ', array_keys($routes)) . ' instead', 405);
 
-		/*if($this->route->sslRequired === true && $this->httpRequest->getProtocol() !== HttpRequest::PROTOCOL_HTTPS)
-			RequestHandler::redirect($this->httpRequest->getURL(HttpRequest::PROTOCOL_HTTPS));
-		elseif($this->route->sslForbidden === true && $this->httpRequest->getProtocol() !== HttpRequest::PROTOCOL_HTTP)
-			RequestHandler::redirect($this->httpRequest->getURL(HttpRequest::PROTOCOL_HTTP));*/
-
 		$lastResponse = null;
 		$controllerInstances = array();
 
 		foreach($filteredRoutes as $route) {
+			if($route->sslRequired === true && $this->httpRequest->getProtocol() !== HttpRequest::PROTOCOL_HTTPS)
+				RequestHandler::redirect($this->httpRequest->getURL(HttpRequest::PROTOCOL_HTTPS));
+			elseif($route->sslForbidden === true && $this->httpRequest->getProtocol() !== HttpRequest::PROTOCOL_HTTP)
+				RequestHandler::redirect($this->httpRequest->getURL(HttpRequest::PROTOCOL_HTTP));
+
 			/** @var RouteMethod $routeMethod */
 			$routeMethod = null;
 
@@ -227,7 +229,7 @@ class Core
 			$responseCallback = array($controllerInstance, $routeMethod->controllerMethod);
 
 			if(is_callable($responseCallback, false) === false)
-				throw new CoreException('Could not call: ' . $routeMethod->controllerClass . '->' . $routeMethod->controllerMethod . '. This is no valid callback! Maybe you attempt to call a static method or you propably misspelled the "controller:method" name');
+				throw new CoreException('Could not call: ' . $routeMethod->controllerClass . '->' . $routeMethod->controllerMethod . '. This is no valid callback! Maybe you attempt to call a static method or you probably misspelled the "controller:method" name');
 
 			try {
 				$response = call_user_func($responseCallback);
@@ -241,9 +243,12 @@ class Core
 			}
 
 			if($response !== null && $response instanceof HttpResponse === false)
-				throw new CoreException('Return value of the controller method "' . $routeMethod->controllerClass . '->' . $routeMethod->controllerMethod . '" is not an object of type HttpResponse but of ' . (is_object($response)?get_class($response):'a php native type'));
+				throw new CoreException('Return value of the controller method "' . $routeMethod->controllerClass . '->' . $routeMethod->controllerMethod . '" is not an object of type HttpResponse but of ' . (is_object($response) ? get_class($response) : gettype($response)));
 
 			$lastResponse = $response;
+
+			if($route->final === true)
+				break;
 		}
 
 		return $lastResponse;
@@ -259,7 +264,6 @@ class Core
 	}
 
 	/**
-	 *
 	 * @return HttpResponse
 	 */
 	public function getHttpResponse()
