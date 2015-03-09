@@ -102,7 +102,7 @@ class AuthHandlerDB extends AuthHandler
 
 			// Reset wrong login counter and update lastlogin
 			$stmntUpdateLogin = $this->db->prepare("
-				UPDATE " . $this->settings['db_login_table'] . " SET wronglogins = 0 AND lastlogin = NOW() WHERE ID = ?
+				UPDATE " . $this->settings['db_login_table'] . " SET wronglogins = 0, lastlogin = NOW() WHERE ID = ?
 			");
 			$this->db->update($stmntUpdateLogin, array($loginData->ID));
 
