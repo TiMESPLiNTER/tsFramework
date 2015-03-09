@@ -281,6 +281,21 @@ class AuthHandlerDB extends AuthHandler
 		return (count($resTokenCheck) > 0);
 	}
 
+	public function resetPassword($userId, $password)
+	{
+		$stmntResetPassword = $this->db->prepare("
+			UPDATE " . $this->settings['db_login_table'] . " SET password = ?, salt = ?, token = NULL, wronglogins = 0 WHERE ID = ?
+		");
+
+		$salt = $this->generateSalt();
+
+		$resResetPassword = $this->db->update($stmntResetPassword, array(
+			$this->encryptPassword($password, $salt), $salt, $userId
+		));
+
+		return ($resResetPassword > 0);
+	}
+
 	public function getUserID()
 	{
 		return $this->userId;
