@@ -149,7 +149,7 @@ class Core
 
 		$matchedRoutes = RouteUtils::matchRoutesAgainstPath($this->settings->core->routes, $this->httpRequest);
 
-		if($matchedRoutes === null)
+		if(count($matchedRoutes) <= 0)
 			throw new HttpException('No route did match for: ' . $this->httpRequest->getPath(), 404);
 
 		$this->pluginManager->invokePluginHook('beforeResponseBuilt');
