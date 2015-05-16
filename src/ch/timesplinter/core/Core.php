@@ -45,40 +45,45 @@ class Core
 		$this->siteRoot = $siteRoot;
 		$this->siteCacheDir = $siteRoot . 'cache' . DIRECTORY_SEPARATOR;
 
-		$this->httpRequest = $this->createHttpRequest();
+		$replaceArray = array(
+			'fw_root' => $fwRoot,
+			'site_root' => $siteRoot,
+		);
+
+		if(php_sapi_name() !== 'cli') {
+			$this->httpRequest = $this->createHttpRequest();
+
+			$replaceArray['domain'] = $this->httpRequest->getHost();
+		}
 
 		$this->settings = new Settings(
 			$siteRoot . 'settings' . DIRECTORY_SEPARATOR,
 			$this->siteCacheDir,
-			array(
-				'fw_dir' => $fwRoot,
-				'site_root' => $siteRoot,
-				'domain' => $this->httpRequest->getHost()
-			)
+			$replaceArray
 		);
 
-		/*
-		 * TODO: if we request a file that doesn't exist from a domain that is not registered in settings of the fw
-		 * we can't do that so
-		 */
+		if(php_sapi_name() !== 'cli') {
+			$this->currentDomain = isset($this->settings->core->domains->{$this->httpRequest->getHost()})
+				?$this->settings->core->domains->{$this->httpRequest->getHost()}:$this->settings->defaults->domain;
 
-		$this->environment = $this->getEnvironmentFromRequest($this->httpRequest);
-		$this->currentDomain = isset($this->settings->core->domains->{$this->httpRequest->getHost()})
-			?$this->settings->core->domains->{$this->httpRequest->getHost()}:$this->settings->defaults->domain;
+			$this->environment = $this->getEnvironmentFromRequest($this->httpRequest);
+		} else {
+			$this->environment = 'cli';
+		}
 
 		if($this->environment === null)
 			RequestHandler::redirect($this->settings->defaults->domain);
 
 		FrameworkLoggerFactory::setDefaults($this->environment, $fwRoot, $siteRoot);
 
-        $this->errorHandler = new ErrorHandler($this);
-        $this->errorHandler->register();
+		$this->errorHandler = new ErrorHandler($this);
+		$this->errorHandler->register();
 
 
 		$this->localeHandler = new LocaleHandler($this);
 		$this->sessionHandler = new SessionHandler($this);
 		$this->logger = FrameworkLoggerFactory::getLogger($this);
-		
+
 		$this->pluginManager = new PluginManager($this);
 		$this->pluginManager->loadPlugins($this->settings->core->plugins);
 	}
@@ -91,7 +96,7 @@ class Core
 	{
 		$protocol = (isset($_SERVER['HTTPS']) === true && $_SERVER['HTTPS'] === 'on') ? HttpRequest::PROTOCOL_HTTPS : HttpRequest::PROTOCOL_HTTP;
 		$uri = StringUtils::startsWith($_SERVER['REQUEST_URI'], '/index.php')?StringUtils::afterFirst($_SERVER['REQUEST_URI'], '/index.php'):$_SERVER['REQUEST_URI'];
-		
+
 		$subFolder = StringUtils::afterFirst(getcwd(), $_SERVER['DOCUMENT_ROOT']);
 		$cleanPath = StringUtils::between($uri, $subFolder, '?');
 
@@ -135,9 +140,9 @@ class Core
 
 		$this->httpRequest = $this->createHttpRequest();
 
-        $this->pluginManager->invokePluginHook('afterRequestBuilt');
+		$this->pluginManager->invokePluginHook('afterRequestBuilt');
 
-        $this->localeHandler->localize($this->httpRequest);
+		$this->localeHandler->localize($this->httpRequest);
 
 		if($this->httpRequest->getPath() === '/') {
 			// Load the default page as "virtual" httpRequest for the base url (no uri)
@@ -173,7 +178,7 @@ class Core
 		}
 
 		$this->httpResponse->send();
-		
+
 		if($this->httpResponse->isStream() === false)
 			ob_end_flush();
 
@@ -320,11 +325,11 @@ class Core
 		return $this->requestHandler;
 	}
 
-    /**
-     * @return LocaleHandler
-     */
-    public function getLocaleHandler()
-    {
+	/**
+	 * @return LocaleHandler
+	 */
+	public function getLocaleHandler()
+	{
 		return $this->localeHandler;
 	}
 
@@ -344,7 +349,7 @@ class Core
 	}
 
 	/**
-	 * Returnts the path to the root directory of the framework
+	 * Returns the path to the root directory of the framework
 	 * @return string The framework root path
 	 */
 	public function getFwRoot()
@@ -364,6 +369,14 @@ class Core
 	public function getSiteCacheDir()
 	{
 		return $this->siteCacheDir;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getEnvironment()
+	{
+		return $this->environment;
 	}
 }
 
