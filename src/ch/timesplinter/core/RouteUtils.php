@@ -44,8 +44,9 @@ class RouteUtils
 	{
 		$route = new Route();
 
-		$route->sslRequired = isset($routeEntry->sslRequired)?$routeEntry->sslRequired:false;
-		$route->sslForbidden = isset($routeEntry->sslForbidden)?$routeEntry->sslForbidden:false;
+		$route->sslRequired = isset($routeEntry->sslRequired) ? $routeEntry->sslRequired : false;
+		$route->sslForbidden = isset($routeEntry->sslForbidden) ? $routeEntry->sslForbidden : false;
+		$route->final = isset($routeEntry->final) ? $routeEntry->final : false;
 		$route->methods = array();
 
 		foreach($routeEntry->methods as $method => $controller) {
