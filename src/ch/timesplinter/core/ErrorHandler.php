@@ -34,7 +34,7 @@ class ErrorHandler
 	public function handlePHPError($error_number, $error, $error_file, $error_line)
 	{
 		// respect the current error_reporting setting
-		if ((error_reporting() & $error_number) === false)
+		if((error_reporting() & $error_number) === 0)
 			return;
 		
 		throw new PHPException($error_number, $error, $error_file, $error_line);
